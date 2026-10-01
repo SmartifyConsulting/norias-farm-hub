@@ -57,19 +57,19 @@ function Team() {
     e.preventDefault();
     if (!name.trim()) return;
     const { data, error } = await supabase.rpc("create_farm", { _name: name.trim() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setActiveFarm(data as string); setName(""); await reload(); toast.success("Farm created — your new records now belong to it");
   };
   const accept = async (id: string) => {
     const { data, error } = await supabase.rpc("accept_farm_invite", { _invite: id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setActiveFarm(data as string); await reload(); await syncAll(); toast.success("You joined the farm");
   };
   const invite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!current || !email.includes("@")) return;
     const { error } = await supabase.from("farm_invites").insert({ farm_id: current.id, email: email.trim().toLowerCase(), role });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setEmail(""); loadFarm(); toast.success("Invite saved — they'll see it here after signing in with that email");
   };
   const manage = current && (current.role === "owner" || current.role === "manager");
