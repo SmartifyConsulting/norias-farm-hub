@@ -39,7 +39,7 @@ function MiniAppPage() {
 
   const input = "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
   return (
-    <Screen title={`${app.emoji} ${app.name}`}>
+    <Screen title={app.name}>
       <Link to="/apps" className="-mt-3 mb-4 inline-flex items-center text-sm text-muted-foreground"><ChevronLeft className="h-4 w-4" />App Store</Link>
       <form onSubmit={add} className="space-y-2 rounded-2xl border bg-card p-4">
         <input className={input} placeholder={app.titleLabel} value={title} onChange={(e) => setTitle(e.target.value)} />

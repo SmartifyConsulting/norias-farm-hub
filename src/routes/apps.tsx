@@ -20,7 +20,7 @@ function Apps() {
       <div className="space-y-3">
         {MINI_APPS.map((a) => (
           <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-3xl">{a.emoji}</span>
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary"><a.icon className="h-7 w-7" /></span>
             <div className="flex-1">
               <p className="font-semibold text-card-foreground">{a.name}</p>
               <p className="text-sm text-muted-foreground">{a.blurb}</p>

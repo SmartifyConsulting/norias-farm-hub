@@ -52,7 +52,7 @@ function Home() {
         <div className="grid grid-cols-3 gap-4 pt-2">
           {MINI_APPS.map((a) => (
             <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex flex-col items-center gap-1.5">
-              <span className="glass flex h-16 w-16 items-center justify-center rounded-2xl text-3xl">{a.emoji}</span>
+              <span className="glass flex h-16 w-16 items-center justify-center rounded-2xl text-foreground"><a.icon className="h-8 w-8" /></span>
               <span className="text-center text-xs font-semibold text-foreground drop-shadow">{a.name}</span>
             </Link>
           ))}

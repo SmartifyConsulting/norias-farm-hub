@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Warehouse, PawPrint, NotebookPen, Wheat, Map, Package, type LucideIcon } from "lucide-react";
 
 export type SyncStatus = "synced" | "pending" | "local";
 export type FarmRecord = {
@@ -14,6 +15,7 @@ export type MiniApp = {
   id: string;
   name: string;
   emoji: string;
+  icon: LucideIcon;
   blurb: string;
   titleLabel: string;
   detailLabel: string;
@@ -21,12 +23,12 @@ export type MiniApp = {
 };
 
 export const MINI_APPS: MiniApp[] = [
-  { id: "farm", name: "My Farm", emoji: "🏡", blurb: "Buildings, equipment & assets", titleLabel: "Asset", detailLabel: "Notes", qtyLabel: "Value" },
-  { id: "animals", name: "My Animals", emoji: "🐄", blurb: "Herd records & health", titleLabel: "Animal / tag", detailLabel: "Breed & health", qtyLabel: "Weight (kg)" },
-  { id: "diary", name: "Farm Diary", emoji: "📔", blurb: "Daily notes & tasks", titleLabel: "Entry", detailLabel: "What happened" },
-  { id: "harvest", name: "Harvest", emoji: "🌾", blurb: "Yields by crop & season", titleLabel: "Crop", detailLabel: "Field / notes", qtyLabel: "Yield (kg)" },
-  { id: "fields", name: "Field Mapping", emoji: "🗺️", blurb: "Plots, sizes & rotations", titleLabel: "Field name", detailLabel: "Crop / rotation", qtyLabel: "Area (ha)" },
-  { id: "stock", name: "Stock", emoji: "📦", blurb: "Feed, seed & supplies", titleLabel: "Item", detailLabel: "Location", qtyLabel: "Quantity" },
+  { id: "farm", name: "My Farm", emoji: "🏡", icon: Warehouse, blurb: "Buildings, equipment & assets", titleLabel: "Asset", detailLabel: "Notes", qtyLabel: "Value" },
+  { id: "animals", name: "My Animals", emoji: "🐄", icon: PawPrint, blurb: "Herd records & health", titleLabel: "Animal / tag", detailLabel: "Breed & health", qtyLabel: "Weight (kg)" },
+  { id: "diary", name: "Farm Diary", emoji: "📔", icon: NotebookPen, blurb: "Daily notes & tasks", titleLabel: "Entry", detailLabel: "What happened" },
+  { id: "harvest", name: "Harvest", emoji: "🌾", icon: Wheat, blurb: "Yields by crop & season", titleLabel: "Crop", detailLabel: "Field / notes", qtyLabel: "Yield (kg)" },
+  { id: "fields", name: "Field Mapping", emoji: "🗺️", icon: Map, blurb: "Plots, sizes & rotations", titleLabel: "Field name", detailLabel: "Crop / rotation", qtyLabel: "Area (ha)" },
+  { id: "stock", name: "Stock", emoji: "📦", icon: Package, blurb: "Feed, seed & supplies", titleLabel: "Item", detailLabel: "Location", qtyLabel: "Quantity" },
 ];
 
 const key = (app: string) => `farmerplus:${app}`;
