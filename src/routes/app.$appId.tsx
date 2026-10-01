@@ -5,6 +5,7 @@ import { Screen, SyncBadge } from "@/components/Dock";
 import { MINI_APPS, useOnline, useRecords, useSettings } from "@/lib/farm";
 import { markDeleted, syncAnimals } from "@/lib/animal-sync";
 import { useUser } from "@/lib/auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/$appId")({
   loader: ({ params }) => {
@@ -28,7 +29,11 @@ function MiniAppPage() {
   const [settings] = useSettings();
   const { user } = useUser();
   const cloud = app.id === "animals";
-  const kick = () => { if (cloud && user && online && settings.autoSync) syncAnimals(); };
+  const kick = async () => {
+    if (!(cloud && user && online && settings.autoSync)) return;
+    const r = await syncAnimals();
+    if (!r.ok) toast.error(`Couldn't sync yet — kept on this device (${r.error})`);
+  };
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [qty, setQty] = useState("");

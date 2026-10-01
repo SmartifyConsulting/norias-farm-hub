@@ -43,7 +43,11 @@ export function syncAnimals() {
       const { data, error } = await supabase.from("animal_records").select("*").order("recorded_at", { ascending: false });
       if (error) throw error;
       const merged: FarmRecord[] = (data ?? []).map((r) => ({ id: r.id, title: r.title, detail: r.detail, qty: r.qty, date: r.recorded_at, sync: "synced" }));
-      localStorage.setItem(KEY, JSON.stringify(merged));
+      // Keep anything added locally while this sync was running (not yet uploaded).
+      const serverIds = new Set(merged.map((r) => r.id));
+      const dead = new Set(read<string[]>(TOMB, []));
+      const fresh = read<FarmRecord[]>(KEY, []).filter((r) => r.sync !== "synced" && !serverIds.has(r.id) && !dead.has(r.id));
+      localStorage.setItem(KEY, JSON.stringify([...fresh, ...merged].filter((r) => !dead.has(r.id))));
       window.dispatchEvent(new Event("farmerplus:change"));
       return { ok: true };
     } catch (e) {
@@ -53,4 +57,8 @@ export function syncAnimals() {
     }
   })();
   return running;
+}
+
+export function unsyncedAnimalCount() {
+  return read<FarmRecord[]>(KEY, []).filter((r) => r.sync !== "synced").length + read<string[]>(TOMB, []).length;
 }
