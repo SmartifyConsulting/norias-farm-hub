@@ -12,4 +12,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Pre-bundle lazily discovered deps so a mid-session re-optimization can't load two React copies.
+    optimizeDeps: {
+      include: ["@radix-ui/react-avatar", "@radix-ui/react-dropdown-menu"],
+    },
+  },
 });
