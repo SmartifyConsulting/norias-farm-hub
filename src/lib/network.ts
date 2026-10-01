@@ -66,10 +66,10 @@ export const STAGES = ["Opportunity", "Assessment", "Decision", "Commitment", "A
 export type Stage = (typeof STAGES)[number];
 export type PipelineItem = {
   id: string; title: string; oppId?: string; participant?: string; stage: Stage;
-  decision?: "pursue" | "decline"; notes?: string; deadline?: string;
-  expected?: { volume?: number; revenue?: number; date?: string };
-  actual?: { volume?: number; revenue?: number; date?: string; reasons?: string; evidence?: string };
-  history: { stage: Stage; at: string; note?: string }[];
+  decision?: "pursue" | "decline" | undefined; notes?: string | undefined; deadline?: string | undefined;
+  expected?: { volume?: number | undefined; revenue?: number | undefined; date?: string | undefined } | undefined;
+  actual?: { volume?: number | undefined; revenue?: number | undefined; date?: string | undefined; reasons?: string | undefined; evidence?: string | undefined } | undefined;
+  history: { stage: Stage; at: string; note?: string | undefined }[];
 };
 export const usePipeline = () => useStore<PipelineItem[]>("farmerplus:pipeline", []);
 export function addToPipeline(p: Omit<PipelineItem, "id" | "stage" | "history">) {

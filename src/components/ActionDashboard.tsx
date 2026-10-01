@@ -28,13 +28,13 @@ export function ActionDashboard() {
   const atRisk = commitments.filter(() => openRisks.some((r) => r.severity === "High"));
   const outcomes = pipe.filter((p) => p.actual);
   const offers = cap.filter((c) => c.mode === "offer");
-  const spare = passport.availableCapacity?.value;
+  const spare = passport["availableCapacity"]?.value;
 
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
       <Panel title="Opportunities for you" to="/opportunities">
         {top.map(({ o, m }) => <p key={o.id} className="truncate"><b>{m.score}%</b> · {o.title}</p>)}
-        {!passport.crops && <Empty>Complete your passport for better matches.</Empty>}
+        {!passport["crops"] && <Empty>Complete your passport for better matches.</Empty>}
       </Panel>
       <Panel title="Actions required" to="/outcomes">
         {actions.length ? actions.map(({ o, m }) => <p key={o.id} className="truncate"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 text-warning-foreground" />{o.title}: {m.gaps[0]}</p>) : <Empty>Track an opportunity to see what's blocking it.</Empty>}

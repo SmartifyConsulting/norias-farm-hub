@@ -30,7 +30,7 @@ function CapacityPage() {
   const [kind, setKind] = useState<CapacityKind | "All">("All");
   const [mode, setMode] = useState<"offer" | "request">("offer");
   const [f, setF] = useState({ kind: "Equipment" as CapacityKind, title: "", location: "", rate: "", quantity: "", from: "", to: "" });
-  const loc = (passport.location && effectiveSource(passport.location) !== "expired" ? passport.location.value : "").toLowerCase();
+  const loc = (passport["location"] && effectiveSource(passport["location"]) !== "expired" ? passport["location"].value : "").toLowerCase();
 
   /** What the farm lacks, from the passport — used to rank capacity that fills real gaps. */
   const needs = useMemo(() => {
