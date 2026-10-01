@@ -10,6 +10,6 @@
 <!-- LOVABLE:END -->
 
 ## Architecture
-- Farm records live in browser localStorage via src/lib/farm.ts (offline-first, simulated sync badges) — no backend yet.
+- Records are local-first in localStorage (src/lib/farm.ts); animals also sync to the cloud table animal_records via src/lib/animal-sync.ts (push unsynced + tombstones, then pull) — other apps still simulated.
 - Mini-apps are config-driven (MINI_APPS) and rendered by one route /app/$appId — add apps by config, not new routes.
 - PWA is manifest-only (no service worker) — avoids stale caches in preview.
