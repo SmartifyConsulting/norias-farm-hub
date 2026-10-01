@@ -61,7 +61,9 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
 function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void }) {
   const nav = useNavigate();
   const [, setGuest] = useGuest();
-  const [name, setName] = useState("");
+  const [first, setFirst] = useState("");
+  const [last, setLast] = useState("");
+  const name = `${first.trim()} ${last.trim()}`.trim();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -80,7 +82,8 @@ function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
       toast.success("Signed in — syncing your animals");
       nav({ to: "/" });
     } else {
-      const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: name.trim() } } });
+      const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { display_name: name, first_name: first.trim(), last_name: last.trim() } } });
+      if (!error && name) { try { const v = JSON.parse(localStorage.getItem("farmerplus:settings") || "{}"); localStorage.setItem("farmerplus:settings", JSON.stringify({ ...v, owner: name })); } catch {} }
       setBusy(false);
       if (error) { setMsg(error.message); toast.error(error.message); return; }
       toast.success("Check your email to confirm your account");
@@ -101,9 +104,14 @@ function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
       <p className="pb-4 text-xs text-muted-foreground">Back up your animal records and sync them across devices.</p>
       <form onSubmit={submit} className="space-y-3">
         {mode === "signup" && (
-          <label className="block space-y-1 text-sm font-medium">Your name
-            <input className={input} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" maxLength={80} />
-          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block space-y-1 text-sm font-medium">First name
+              <input className={input} required value={first} onChange={(e) => setFirst(e.target.value)} autoComplete="given-name" maxLength={40} />
+            </label>
+            <label className="block space-y-1 text-sm font-medium">Last name
+              <input className={input} required value={last} onChange={(e) => setLast(e.target.value)} autoComplete="family-name" maxLength={40} />
+            </label>
+          </div>
         )}
         <label className="block space-y-1 text-sm font-medium">Email
           <input className={input} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />

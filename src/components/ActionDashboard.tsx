@@ -14,8 +14,24 @@ function Panel({ title, to, children }: { title: string; to: string; children: R
 }
 const Empty = ({ children }: { children: React.ReactNode }) => <p className="text-xs text-foreground/70">{children}</p>;
 
+/** Top opportunity matches only — used beside the apps on Home. */
+export function OpportunitiesPanel() {
+  const [passport] = usePassport();
+  const { opportunities } = useShared();
+  const top = opportunities.map((o) => ({ o, m: matchOpportunity(passport, o) })).sort((a, b) => b.m.score - a.m.score).slice(0, 4);
+  return (
+    <section className="soft-card border p-4">
+      <Link to="/opportunities" className="mb-2 flex items-center justify-between font-display text-base font-semibold">Opportunities for you<ArrowRight className="h-4 w-4" /></Link>
+      <div className="space-y-1.5 text-sm">
+        {top.map(({ o, m }) => <p key={o.id} className="truncate"><b className="text-earth-3">{m.score}%</b> · {o.title}</p>)}
+        {!passport["crops"] && <Empty>Complete your passport for better matches.</Empty>}
+      </div>
+    </section>
+  );
+}
+
 /** Decision-focused summary: every panel leads to an action. */
-export function ActionDashboard() {
+export function ActionDashboard({ hideOpportunities = false }: { hideOpportunities?: boolean }) {
   const [passport] = usePassport();
   const [pipe] = usePipeline();
   const [risks] = useRisks();
@@ -34,10 +50,10 @@ export function ActionDashboard() {
 
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-      <Panel title="Opportunities for you" to="/opportunities">
+      {!hideOpportunities && <Panel title="Opportunities for you" to="/opportunities">
         {top.map(({ o, m }) => <p key={o.id} className="truncate"><b>{m.score}%</b> · {o.title}</p>)}
         {!passport["crops"] && <Empty>Complete your passport for better matches.</Empty>}
-      </Panel>
+      </Panel>}
       <Panel title="Actions required" to="/outcomes">
         {actions.length ? actions.map(({ o, m }) => <p key={o.id} className="truncate"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 text-warning-foreground" />{o.title}: {m.gaps[0]}</p>) : <Empty>Track an opportunity to see what's blocking it.</Empty>}
       </Panel>

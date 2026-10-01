@@ -15,6 +15,9 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Dock, TopNav } from "../components/Dock";
 import { Toaster } from "@/components/ui/sonner";
 import { AutoSync } from "@/components/AutoSync";
+import { useProfileSync } from "@/lib/profile";
+
+function ProfileSync() { useProfileSync(); return null; }
 
 function NotFoundComponent() {
   return (
@@ -132,6 +135,7 @@ function RootComponent() {
       <Outlet />
       <Dock />
       <AutoSync />
+      <ProfileSync />
       <Toaster position="top-center" />
     </QueryClientProvider>
   );

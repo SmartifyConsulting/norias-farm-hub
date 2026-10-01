@@ -4,6 +4,7 @@ import { Home, LayoutGrid, Wallet, Settings, Search, Sprout, LogIn } from "lucid
 import { useGuest, useUser } from "@/lib/auth";
 import { MINI_APPS, useOnline } from "@/lib/farm";
 import { NotificationBell } from "@/components/NotificationBell";
+import { UserMenu } from "@/components/UserMenu";
 
 const items = [
   { to: "/", label: "Home", icon: Home },
@@ -86,7 +87,7 @@ export function TopNav() {
           </span>
           <NotificationBell className="hover:bg-primary-foreground/10" />
           {user ? (
-            <Link to="/settings" className="max-w-[12rem] truncate rounded-full bg-primary-foreground/10 px-3 py-1.5 text-xs font-semibold">{user.email}</Link>
+            <UserMenu />
           ) : (
             <Link to="/auth" className="flex items-center gap-1 rounded-full bg-primary-foreground px-3 py-1.5 text-xs font-semibold text-primary"><LogIn className="h-3.5 w-3.5" />Sign in</Link>
           )}
