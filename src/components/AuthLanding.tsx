@@ -18,8 +18,8 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
       <img src={bg} alt="" className="pointer-events-none fixed inset-y-0 left-0 hidden h-full w-1/2 object-cover lg:block" />
       <div className="pointer-events-none fixed inset-y-0 left-0 hidden w-1/2 bg-primary/55 lg:block" />
       <div className="pointer-events-none fixed inset-y-0 right-0 hidden w-1/2 bg-foreground lg:block" />
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 relative lg:flex-row lg:gap-24 lg:px-12">
-        <div className="flex w-full flex-1 flex-col items-center gap-2 text-primary-foreground">
+      <main className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 lg:max-w-none lg:flex-row lg:items-stretch lg:gap-0 lg:p-0">
+        <div className="flex w-full flex-1 flex-col items-center justify-center gap-2 text-primary-foreground lg:w-1/2 lg:px-12">
           <div className="mb-6 flex flex-col items-center gap-3">
             <span className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-foreground text-primary md:h-32 md:w-32">
               <Sprout className="h-12 w-12 md:h-16 md:w-16" />
@@ -44,7 +44,7 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
             <p className="text-xs text-primary-foreground/70">Records save on your device first and work offline. Signing in backs up your animal records privately to your own account.</p>
           </section>
         </div>
-        <div className="flex w-full max-w-xl flex-1 flex-col">
+        <div className="flex w-full max-w-xl flex-1 flex-col lg:w-1/2 lg:max-w-none lg:items-center lg:justify-center lg:px-12">
           <AuthCard key={mode} mode={mode} setMode={setMode} />
         </div>
       </main>
