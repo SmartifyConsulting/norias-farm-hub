@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
 import { MINI_APPS } from "@/lib/farm";
-import { appTone } from "@/lib/app-colors";
-import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat, Stethoscope, GraduationCap } from "lucide-react";
+import { appTone, TONE } from "@/lib/app-colors";
+import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, ShoppingBasket, Bot, Route as RouteIcon, ScanLine, Landmark, Stethoscope, GraduationCap } from "lucide-react";
 
 const INTEL = [
   { to: "/passport", name: "Capability Passport", blurb: "Land, infrastructure, certifications & supply record", icon: BadgeCheck },
@@ -10,12 +10,12 @@ const INTEL = [
   { to: "/simulator", name: "Decision Simulator", blurb: "Compare crops, costs and price or yield shocks", icon: Calculator },
   { to: "/capacity", name: "Shared Capacity", blurb: "Equipment, trucks, storage & labour near you", icon: Tractor },
   { to: "/risks", name: "Risk & Response", blurb: "Forecast and field risks with responses you approve", icon: CloudLightning },
-  { to: "/collective", name: "Collective", blurb: "Bulk buying and combined supply lots", icon: Users },
+  { to: "/collective", name: "Collective", blurb: "Bulk buying and combined supply lots", icon: ShoppingBasket },
   { to: "/outcomes", name: "Opportunity → Outcome", blurb: "Decide, commit, act and record what happened", icon: RouteIcon },
   { to: "/traceability", name: "Traceability", blurb: "Batch records from field to buyer", icon: ScanLine },
   { to: "/funding", name: "Funding Readiness", blurb: "What a lender or funder may ask for", icon: Landmark },
   { to: "/vet-check", name: "Animal Symptom Check", blurb: "Describe symptoms, add a photo, get care guidance", icon: Stethoscope },
-  { to: "/copilot", name: "Farm Copilot", blurb: "Ask questions about your farm data", icon: Wheat },
+  { to: "/copilot", name: "Farm Copilot", blurb: "Ask questions about your farm data", icon: Bot },
 ] as const;
 
 export const Route = createFileRoute("/apps")({
@@ -34,14 +34,14 @@ function Apps() {
   return (
     <Screen title="App Store">
       <Link to="/team" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-earth-10 text-background"><Users className="h-7 w-7" /></span>
+        <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(TONE.team)}`}><Users className="h-7 w-7" /></span>
         <div className="flex-1">
           <p className="font-semibold text-card-foreground">Farm Team</p>
           <p className="text-sm text-muted-foreground">Share your farm and give each person owner, manager, worker or viewer access</p>
         </div>
       </Link>
       <Link to="/farmschool" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-earth-1 text-background"><GraduationCap className="h-7 w-7" /></span>
+        <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(TONE.farmschool)}`}><GraduationCap className="h-7 w-7" /></span>
         <div className="flex-1">
           <p className="font-semibold text-card-foreground">FarmSchool</p>
           <p className="text-sm text-muted-foreground">Farming courses and your learning progress</p>
@@ -63,7 +63,7 @@ function Apps() {
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
         {INTEL.map((a, i) => (
           <Link key={a.to} to={a.to} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-            <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(i + 2)}`}><a.icon className="h-7 w-7" /></span>
+            <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(i + TONE.intel)}`}><a.icon className="h-7 w-7" /></span>
             <div className="flex-1">
               <p className="font-semibold text-card-foreground">{a.name}</p>
               <p className="text-sm text-muted-foreground">{a.blurb}</p>

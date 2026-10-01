@@ -10,7 +10,6 @@ const items = [
   { to: "/", label: "Home", icon: Home },
   { to: "/apps", label: "Apps", icon: LayoutGrid },
   { to: "/wallet", label: "Wallet", icon: Wallet },
-  { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 /** Navigation is hidden on the signed-out landing and the auth page (full-screen sign-in layout). */
@@ -89,7 +88,7 @@ export function TopNav() {
           {user ? (
             <UserMenu />
           ) : (
-            <Link to="/auth" className="flex items-center gap-1 rounded-full bg-primary-foreground px-3 py-1.5 text-xs font-semibold text-primary"><LogIn className="h-3.5 w-3.5" />Sign in</Link>
+            <><Link to="/settings" aria-label="Settings" className="rounded-full p-1.5 hover:bg-primary-foreground/10"><Settings className="h-4 w-4" /></Link><Link to="/auth" className="flex items-center gap-1 rounded-full bg-primary-foreground px-3 py-1.5 text-xs font-semibold text-primary"><LogIn className="h-3.5 w-3.5" />Sign in</Link></>
           )}
         </div>
       </div>
