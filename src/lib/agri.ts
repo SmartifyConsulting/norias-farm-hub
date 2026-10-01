@@ -175,4 +175,4 @@ export function simulate(s: Scenario) {
   return { tonnes, revenue, totalCost, capitalRequired, margin, marginPct: revenue ? (margin / revenue) * 100 : 0, breakEvenPrice, financing };
 }
 
-export const rand = (n: number) => `R${Math.round(n).toLocaleString("en-ZA")}`;
+export const rand = (n: number) => `R${String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
