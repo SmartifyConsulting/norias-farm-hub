@@ -88,6 +88,16 @@
   --color-brand-orange: var(--brand-orange);
   --color-brand-red: var(--brand-red);
   --color-brand-ink: var(--brand-ink);
+  --color-earth-1: var(--earth-1);
+  --color-earth-2: var(--earth-2);
+  --color-earth-3: var(--earth-3);
+  --color-earth-4: var(--earth-4);
+  --color-earth-5: var(--earth-5);
+  --color-earth-6: var(--earth-6);
+  --color-earth-7: var(--earth-7);
+  --color-earth-8: var(--earth-8);
+  --color-earth-9: var(--earth-9);
+  --color-earth-10: var(--earth-10);
 }
 
 :root {
@@ -96,6 +106,16 @@
   --brand-orange: #fd870a;
   --brand-red: #d21018;
   --brand-ink: #111111;
+  --earth-1: #45573e;
+  --earth-2: #c4bb75;
+  --earth-3: #8a5422;
+  --earth-4: #f5a50a;
+  --earth-5: #848f65;
+  --earth-6: #d0a346;
+  --earth-7: #575a0c;
+  --earth-8: #eee08a;
+  --earth-9: #a57400;
+  --earth-10: #1f3d2c;
   --radius: 1.25rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.16 0 0);
