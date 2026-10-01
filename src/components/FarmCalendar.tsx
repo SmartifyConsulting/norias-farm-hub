@@ -54,7 +54,7 @@ export function FarmCalendar({ events }: { events: CalEvent[] }) {
         <div className="grid grid-cols-7 gap-1 text-center text-[11px] text-muted-foreground">{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => <span key={d}>{d}</span>)}</div>
         <div className="mt-1 grid grid-cols-7 gap-1">
           {cells.map((d, i) => (
-            <div key={i} className={`min-h-14 rounded-lg p-1 text-[10px] ${d ? "bg-secondary/50" : ""} ${d === todayIso ? "ring-2 ring-primary" : ""}`}>
+            <div key={i} className={`min-h-14 rounded-lg p-1 text-[10px] ${d ? "bg-muted/40 border" : ""} ${d === todayIso ? "ring-2 ring-primary" : ""}`}>
               {d && <p className="font-semibold">{Number(d.slice(8))}</p>}
               {d && by(d).map((e) => <p key={e.id} title={`${e.kind}: ${e.label}`} className="truncate rounded bg-primary px-1 text-primary-foreground">{e.label}</p>)}
             </div>
