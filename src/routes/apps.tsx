@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
 import { MINI_APPS } from "@/lib/farm";
 import { appTone } from "@/lib/app-colors";
-import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat, Stethoscope } from "lucide-react";
+import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat, Stethoscope, GraduationCap } from "lucide-react";
 
 const INTEL = [
   { to: "/passport", name: "Capability Passport", blurb: "Land, infrastructure, certifications & supply record", icon: BadgeCheck },
