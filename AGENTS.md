@@ -15,3 +15,5 @@
 - PWA is manifest-only (no service worker) — avoids stale caches in preview.
 - Responsive: mobile glass dock (<md); md+ uses fixed TopNav header; pages use Screen (md:max-w-5xl lg:max-w-7xl, md:pt-24) — keeps mobile layout untouched.
 - Signed-out Home shows Heita-style AuthLanding unless the user picked "continue without an account" (localStorage farmerplus:guest).
+- AgriSphere features (capacity, risks, collective, pipeline/outcomes, traceability, role, notifications) are local-first in src/lib/network.ts via useStore (localStorage farmerplus:* keys + farmerplus:change event) — matches the existing offline-first model.
+- Farm Copilot streams through the /api/copilot server route; the browser sends its local farm data as context because records live on the device. Do not pass request.signal to the upstream fetch (stalls the stream in dev).

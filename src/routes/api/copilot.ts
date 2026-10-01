@@ -38,7 +38,6 @@ export const Route = createFileRoute("/api/copilot")({
             ],
           }),
         });
-        console.log("[copilot] upstream", upstream.status);
         if (!upstream.ok || !upstream.body) {
           const text = await upstream.text().catch(() => "");
           let msg = "The copilot is unavailable right now.";
