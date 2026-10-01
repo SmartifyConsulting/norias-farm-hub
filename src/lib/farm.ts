@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Warehouse, PawPrint, NotebookPen, Wheat, Map, Package, type LucideIcon } from "lucide-react";
+import { Warehouse, PawPrint, NotebookPen, Wheat, Map, Package, ListTodo, Sprout, Wrench, Stethoscope, Receipt, type LucideIcon } from "lucide-react";
 
 export type SyncStatus = "synced" | "pending" | "local";
 export type FarmRecord = {
@@ -31,6 +31,11 @@ export const MINI_APPS: MiniApp[] = [
   { id: "harvest", name: "Harvest", emoji: "🌾", icon: Wheat, blurb: "Yields by crop & season", titleLabel: "Crop", detailLabel: "Field / notes", qtyLabel: "Yield (kg)" },
   { id: "fields", name: "Field Mapping", emoji: "🗺️", icon: Map, blurb: "Plots, sizes & rotations", titleLabel: "Field name", detailLabel: "Crop / rotation", qtyLabel: "Area (ha)" },
   { id: "stock", name: "Stock", emoji: "📦", icon: Package, blurb: "Feed, seed & supplies", titleLabel: "Item", detailLabel: "Location", qtyLabel: "Quantity" },
+  { id: "tasks", name: "Tasks", emoji: "✅", icon: ListTodo, blurb: "Jobs, assignees & due dates", titleLabel: "Task", detailLabel: "Field / assignee / notes", qtyLabel: "Due date (YYYY-MM-DD)" },
+  { id: "crops", name: "Crop Cycles", emoji: "🌱", icon: Sprout, blurb: "Plantings from sowing to harvest", titleLabel: "Crop & field", detailLabel: "Variety / planting date / stage", qtyLabel: "Area (ha)" },
+  { id: "treatments", name: "Inputs & Sprays", emoji: "🧪", icon: Stethoscope, blurb: "Fertiliser, spray & vet treatments", titleLabel: "Product", detailLabel: "Field or animal / rate / withholding", qtyLabel: "Amount used" },
+  { id: "maintenance", name: "Maintenance", emoji: "🔧", icon: Wrench, blurb: "Equipment services & repairs", titleLabel: "Equipment", detailLabel: "Work done / next service", qtyLabel: "Cost (R)" },
+  { id: "finance", name: "Costs & Sales", emoji: "🧾", icon: Receipt, blurb: "Expenses and income by enterprise", titleLabel: "Item (cost or sale)", detailLabel: "Enterprise / buyer / supplier", qtyLabel: "Amount (R, minus for cost)" },
 ];
 
 const key = (app: string) => `farmerplus:${app}`;
