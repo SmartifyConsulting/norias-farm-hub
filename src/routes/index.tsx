@@ -52,8 +52,8 @@ function Home() {
       <img src={bg} alt="" width={1024} height={1792} className="fixed inset-y-0 left-0 -z-10 h-full w-full object-cover md:w-1/2" />
       <div className="fixed inset-y-0 left-0 -z-10 w-full bg-gradient-to-b from-background/10 via-transparent to-background/60 md:w-1/2" />
       <div className="fixed inset-y-0 right-0 -z-20 hidden w-1/2 bg-background md:block" />
-      <main className="mx-auto max-w-md space-y-4 px-4 pb-32 pt-10 md:grid md:max-w-5xl md:grid-cols-2 md:gap-6 md:space-y-0 md:px-6 md:pb-12 md:pt-24 lg:max-w-7xl lg:grid-cols-12">
-        <div className="space-y-4 lg:col-span-4">
+      <main className="mx-auto max-w-md space-y-4 px-4 pb-32 pt-10 md:ml-[50%] md:mr-0 md:w-1/2 md:max-w-none md:space-y-6 md:px-6 md:pb-12 md:pt-24">
+        <div className="space-y-4">
         <div className="glass rounded-3xl px-5 py-4">
           <div className="flex items-start justify-between">
             <div>
@@ -78,8 +78,8 @@ function Home() {
         </div>
         <Weather lat={s.lat} lon={s.lon} />
         </div>
-        <div className="space-y-4 md:col-span-2 lg:col-span-8 md:space-y-6">
-        <div className="grid grid-cols-3 gap-4 pt-2 md:content-start md:grid-cols-3 md:pt-0 lg:grid-cols-6">
+        <div className="space-y-4 md:space-y-6">
+        <div className="grid grid-cols-3 gap-4 pt-2 md:content-start md:grid-cols-3 md:pt-0 lg:grid-cols-4">
           {MINI_APPS.map((a) => (
             <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex flex-col items-center gap-1.5 md:glass md:rounded-3xl md:p-4">
               <span className="glass flex h-16 w-16 items-center justify-center rounded-2xl text-foreground"><a.icon className="h-8 w-8" /></span>
