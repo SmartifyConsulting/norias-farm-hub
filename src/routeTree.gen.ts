@@ -14,6 +14,7 @@ import { Route as AppsRouteImport } from './routes/apps'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CapacityRouteImport } from './routes/capacity'
 import { Route as CollectiveRouteImport } from './routes/collective'
+import { Route as CopilotRouteImport } from './routes/copilot'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FundingRouteImport } from './routes/funding'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
@@ -25,6 +26,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as TraceabilityRouteImport } from './routes/traceability'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as ApiCopilotRouteImport } from './routes/api/copilot'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -50,6 +52,11 @@ const CapacityRoute = CapacityRouteImport.update({
 const CollectiveRoute = CollectiveRouteImport.update({
   id: '/collective',
   path: '/collective',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CopilotRoute = CopilotRouteImport.update({
+  id: '/copilot',
+  path: '/copilot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -107,6 +114,11 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCopilotRoute = ApiCopilotRouteImport.update({
+  id: '/api/copilot',
+  path: '/api/copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAppIdRoute = AppAppIdRouteImport.update({
   id: '/app/$appId',
   path: '/app/$appId',
@@ -119,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
+  '/copilot': typeof CopilotRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
@@ -130,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/simulator': typeof SimulatorRoute
   '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRoutesByTo {
@@ -138,6 +152,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
+  '/copilot': typeof CopilotRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
@@ -149,6 +164,7 @@ export interface FileRoutesByTo {
   '/simulator': typeof SimulatorRoute
   '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRoutesById {
@@ -158,6 +174,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
+  '/copilot': typeof CopilotRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
@@ -169,6 +186,7 @@ export interface FileRoutesById {
   '/simulator': typeof SimulatorRoute
   '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRouteTypes {
@@ -179,6 +197,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capacity'
     | '/collective'
+    | '/copilot'
     | '/forgot-password'
     | '/funding'
     | '/opportunities'
@@ -190,6 +209,7 @@ export interface FileRouteTypes {
     | '/simulator'
     | '/traceability'
     | '/wallet'
+    | '/api/copilot'
     | '/app/$appId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,6 +218,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capacity'
     | '/collective'
+    | '/copilot'
     | '/forgot-password'
     | '/funding'
     | '/opportunities'
@@ -209,6 +230,7 @@ export interface FileRouteTypes {
     | '/simulator'
     | '/traceability'
     | '/wallet'
+    | '/api/copilot'
     | '/app/$appId'
   id:
     | '__root__'
@@ -217,6 +239,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capacity'
     | '/collective'
+    | '/copilot'
     | '/forgot-password'
     | '/funding'
     | '/opportunities'
@@ -228,6 +251,7 @@ export interface FileRouteTypes {
     | '/simulator'
     | '/traceability'
     | '/wallet'
+    | '/api/copilot'
     | '/app/$appId'
   fileRoutesById: FileRoutesById
 }
@@ -237,6 +261,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CapacityRoute: typeof CapacityRoute
   CollectiveRoute: typeof CollectiveRoute
+  CopilotRoute: typeof CopilotRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   FundingRoute: typeof FundingRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
@@ -248,6 +273,7 @@ export interface RootRouteChildren {
   SimulatorRoute: typeof SimulatorRoute
   TraceabilityRoute: typeof TraceabilityRoute
   WalletRoute: typeof WalletRoute
+  ApiCopilotRoute: typeof ApiCopilotRoute
   AppAppIdRoute: typeof AppAppIdRoute
 }
 
@@ -286,6 +312,13 @@ declare module '@tanstack/react-router' {
       path: '/collective'
       fullPath: '/collective'
       preLoaderRoute: typeof CollectiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/copilot': {
+      id: '/copilot'
+      path: '/copilot'
+      fullPath: '/copilot'
+      preLoaderRoute: typeof CopilotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -365,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/copilot': {
+      id: '/api/copilot'
+      path: '/api/copilot'
+      fullPath: '/api/copilot'
+      preLoaderRoute: typeof ApiCopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/$appId': {
       id: '/app/$appId'
       path: '/app/$appId'
@@ -381,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CapacityRoute: CapacityRoute,
   CollectiveRoute: CollectiveRoute,
+  CopilotRoute: CopilotRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   FundingRoute: FundingRoute,
   OpportunitiesRoute: OpportunitiesRoute,
@@ -392,6 +433,7 @@ const rootRouteChildren: RootRouteChildren = {
   SimulatorRoute: SimulatorRoute,
   TraceabilityRoute: TraceabilityRoute,
   WalletRoute: WalletRoute,
+  ApiCopilotRoute: ApiCopilotRoute,
   AppAppIdRoute: AppAppIdRoute,
 }
 export const routeTree = rootRouteImport
