@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Weather } from "@/components/Weather";
 import { toast } from "sonner";
-import { CloudUpload, Database, ListTodo, TriangleAlert, ChevronRight } from "lucide-react";
+import { CloudUpload, Database, CalendarClock, TriangleAlert, ChevronRight } from "lucide-react";
 import { MINI_APPS, allRecordCounts, syncAll, useOnline, useSettings } from "@/lib/farm";
 import { useGuest, useUser } from "@/lib/auth";
 import { AuthLanding } from "@/components/AuthLanding";
@@ -66,14 +66,14 @@ function Home() {
   if (!loading && !user && !guest) return <AuthLanding initial="signup" />;
 
   const stats = [
-    { label: "Records", value: counts.total, icon: Database, tone: appTone(0) },
+    { label: "Records", value: counts.total, icon: Database, tone: appTone(7) },
     { label: "Waiting to sync", value: counts.pending, icon: CloudUpload, tone: appTone(1) },
-    { label: "Due soon", value: tasksDue, icon: ListTodo, tone: appTone(2) },
-    { label: "Active risks", value: activeRisks, icon: TriangleAlert, tone: appTone(3) },
+    { label: "Due soon", value: tasksDue, icon: CalendarClock, tone: appTone(2) },
+    { label: "Active risks", value: activeRisks, icon: TriangleAlert, tone: appTone(5) },
   ];
   const AppTile = ({ a, i }: { a: (typeof MINI_APPS)[number]; i: number }) => (
-    <Link to="/app/$appId" params={{ appId: a.id }} className="flex flex-col items-center gap-1.5 rounded-2xl border bg-card p-2.5 transition hover:-translate-y-0.5 hover:shadow-md">
-      <span className={`flex h-12 w-12 items-center justify-center rounded-full ${appTone(i)}`}><a.icon className="h-6 w-6" /></span>
+    <Link to="/app/$appId" params={{ appId: a.id }} className="flex flex-col items-center justify-center gap-2 rounded-2xl border bg-card px-2 py-4 transition hover:-translate-y-0.5 hover:shadow-md">
+      <span className={`flex h-14 w-14 items-center justify-center rounded-full ${appTone(i)}`}><a.icon className="h-7 w-7" /></span>
       <span className="text-center text-xs font-semibold leading-tight">{a.name}</span>
     </Link>
   );
@@ -125,11 +125,8 @@ function Home() {
               <h2 className="font-display text-lg font-semibold">Your apps</h2>
               <Link to="/apps" className="text-sm font-semibold text-earth-1">See all</Link>
             </div>
-            <div className="grid grid-cols-3 gap-3 lg:grid-cols-6">
-              {first6.map((a, i) => <AppTile key={a.id} a={a} i={i} />)}
-            </div>
-            <div className="grid grid-cols-3 gap-3 lg:grid-cols-6">
-              {next6.map((a, i) => <AppTile key={a.id} a={a} i={i + 6} />)}
+            <div className="grid grid-cols-3 gap-3 md:grid-cols-4 md:gap-4 lg:grid-cols-4 xl:grid-cols-6">
+              {[...first6, ...next6].map((a, i) => <AppTile key={a.id} a={a} i={i} />)}
             </div>
           </div>
           <div className="space-y-4 md:col-span-5 lg:col-span-4">

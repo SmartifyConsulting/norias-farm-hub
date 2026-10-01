@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Warehouse, PawPrint, NotebookPen, Wheat, Map, Package, ListTodo, Sprout, Wrench, Stethoscope, Receipt, Syringe, type LucideIcon } from "lucide-react";
+import { Warehouse, PawPrint, NotebookPen, Wheat, Map, Package, ListTodo, Sprout, Wrench, FlaskConical, Receipt, Syringe, type LucideIcon } from "lucide-react";
 
 export type SyncStatus = "synced" | "pending" | "local";
 export type FarmRecord = {
@@ -48,7 +48,7 @@ export const MINI_APPS: MiniApp[] = [
   { id: "stock", name: "Stock", emoji: "📦", icon: Package, blurb: "Feed, seed & supplies", titleLabel: "Item", detailLabel: "Location", qtyLabel: "Quantity" },
   { id: "tasks", name: "Tasks", emoji: "✅", icon: ListTodo, blurb: "Jobs, assignees & due dates", titleLabel: "Task", detailLabel: "Field / assignee / notes", dates: ["Due date"], links: ["field", "crop"] },
   { id: "crops", name: "Crop Cycles", emoji: "🌱", icon: Sprout, blurb: "Plantings from sowing to harvest", titleLabel: "Crop & field", detailLabel: "Variety / stage", qtyLabel: "Area (ha)", dates: ["Planting date", "Harvest date"], links: ["field"] },
-  { id: "treatments", name: "Inputs & Sprays", emoji: "🧪", icon: Stethoscope, blurb: "Fertiliser, spray & vet treatments", titleLabel: "Product", detailLabel: "Field or animal / rate / withholding", qtyLabel: "Amount used", dates: ["Date"], links: ["field", "crop"] },
+  { id: "treatments", name: "Inputs & Sprays", emoji: "🧪", icon: FlaskConical, blurb: "Fertiliser, spray & vet treatments", titleLabel: "Product", detailLabel: "Field or animal / rate / withholding", qtyLabel: "Amount used", dates: ["Date"], links: ["field", "crop"] },
   { id: "maintenance", name: "Maintenance", emoji: "🔧", icon: Wrench, blurb: "Equipment services & repairs", titleLabel: "Equipment", detailLabel: "Work done / next service", qtyLabel: "Cost (R)", dates: ["Date"], links: ["field", "crop"] },
   { id: "finance", name: "Costs & Sales", emoji: "🧾", icon: Receipt, blurb: "Expenses and income by enterprise", titleLabel: "Item (cost or sale)", detailLabel: "Enterprise / buyer / supplier", qtyLabel: "Amount (R, minus for cost)", dates: ["Date"], links: ["field", "crop"] },
 ];
