@@ -42,7 +42,7 @@ export function syncAnimals() {
 
       const { data, error } = await supabase.from("animal_records").select("*").order("recorded_at", { ascending: false });
       if (error) throw error;
-      const merged: FarmRecord[] = (data ?? []).map((r) => ({ id: r.id, title: r.title, detail: r.detail, qty: r.qty, date: r.recorded_at, sync: "synced" }));
+      const merged: FarmRecord[] = (data ?? []).map((r) => ({ id: r.id, title: r.title, detail: r.detail, qty: r.qty, date: r.recorded_at, sync: "synced", syncedAt: new Date().toISOString() }));
       // Keep anything added locally while this sync was running (not yet uploaded).
       const serverIds = new Set(merged.map((r) => r.id));
       const dead = new Set(read<string[]>(TOMB, []));
@@ -51,7 +51,11 @@ export function syncAnimals() {
       window.dispatchEvent(new Event("farmerplus:change"));
       return { ok: true };
     } catch (e) {
-      return { ok: false, error: e instanceof Error ? e.message : "Sync failed" };
+      const msg = e instanceof Error ? e.message : (e as { message?: string })?.message ?? "Sync failed";
+      const local = read<FarmRecord[]>(KEY, []).map((r) => (r.sync !== "synced" ? { ...r, syncError: msg } : r));
+      localStorage.setItem(KEY, JSON.stringify(local));
+      window.dispatchEvent(new Event("farmerplus:change"));
+      return { ok: false, error: msg };
     } finally {
       running = null;
     }

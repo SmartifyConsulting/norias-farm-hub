@@ -9,6 +9,8 @@ export type FarmRecord = {
   qty?: string;
   date: string;
   sync: SyncStatus;
+  syncedAt?: string;
+  syncError?: string | undefined;
 };
 
 export type MiniApp = {
