@@ -101,7 +101,7 @@ function DemandBoard({ demand, setDemand }: { demand: Opportunity[]; setDemand: 
   const publish = (e: React.FormEvent) => {
     e.preventDefault();
     const vol = parseFloat(f.volume);
-    if (!f.crop.trim() || !vol || !f.location.trim()) return toast.error("Crop, volume and location are required");
+    if (!f.crop.trim() || !vol || !f.location.trim()) { toast.error("Crop, volume and location are required"); return; }
     const o: Opportunity = {
       id: crypto.randomUUID(), type: "Buyer demand", own: true, title: `${f.crop} demand`, description: f.terms || "Published future demand.",
       crop: f.crop.trim().toLowerCase(), location: f.location.trim(), requiredVolume: vol, quality: f.quality || undefined,

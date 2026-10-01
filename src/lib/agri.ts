@@ -65,16 +65,16 @@ export type Opportunity = {
   type: OppType;
   title: string;
   description: string;
-  crop?: string;
+  crop?: string | undefined;
   location: string;
   requiredVolume?: number;
-  quality?: string;
-  deliveryPeriod?: string;
-  frequency?: string;
-  deadline?: string;
-  value?: string;
-  certifications?: string[];
-  infrastructure?: ("irrigation" | "storage" | "coldStorage" | "packhouse" | "transport")[];
+  quality?: string | undefined;
+  deliveryPeriod?: string | undefined;
+  frequency?: string | undefined;
+  deadline?: string | undefined;
+  value?: string | undefined;
+  certifications?: string[] | undefined;
+  infrastructure?: ("irrigation" | "storage" | "coldStorage" | "packhouse" | "transport")[] | undefined;
   participant: string;
   status: "Open" | "Closing soon" | "Closed";
   /** Volume already pledged by other producers (sample data for gap analysis). */

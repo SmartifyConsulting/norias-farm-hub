@@ -7,7 +7,7 @@ const STYLE: Record<Provenance, [string, string]> = {
   expired: ["Expired", "bg-destructive/15 text-destructive"],
 };
 
-export function ProvenanceBadge({ source }: { source?: Provenance }) {
+export function ProvenanceBadge({ source }: { source?: Provenance | undefined }) {
   if (!source) return null;
   const [label, cls] = STYLE[source];
   return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${cls}`}>{label}</span>;

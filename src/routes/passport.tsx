@@ -23,11 +23,11 @@ function derived(): Record<string, string> {
   const fields = read("fields"), harvest = read("harvest");
   const out: Record<string, string> = {};
   const ha = fields.reduce((s, r) => s + (parseFloat(r.qty ?? "") || 0), 0);
-  if (ha) out.landInProduction = String(ha);
+  if (ha) out["landInProduction"] = String(ha);
   const kg = harvest.reduce((s, r) => s + (parseFloat(r.qty ?? "") || 0), 0);
-  if (kg) out.volumesSupplied = String(+(kg / 1000).toFixed(1));
+  if (kg) out["volumesSupplied"] = String(+(kg / 1000).toFixed(1));
   const crops = [...new Set(harvest.map((r) => r.title.trim()).filter(Boolean))];
-  if (crops.length) out.cropsSupplied = crops.join(", ");
+  if (crops.length) out["cropsSupplied"] = crops.join(", ");
   return out;
 }
 
