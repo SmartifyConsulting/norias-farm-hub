@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture
-- Records are local-first in localStorage (src/lib/farm.ts); animals also sync to the cloud table animal_records via src/lib/animal-sync.ts (push unsynced + tombstones, then pull) — other apps still simulated.
+- Records are local-first in localStorage; all mini-apps sync to animal_records (app column) and AgriSphere/wallet/settings stores sync as JSON docs to user_data via src/lib/animal-sync.ts (dirty-key tracking, tombstones per app).
 - Mini-apps are config-driven (MINI_APPS) and rendered by one route /app/$appId — add apps by config, not new routes.
 - PWA is manifest-only (no service worker) — avoids stale caches in preview.
 - Responsive: mobile glass dock (<md); md+ uses fixed TopNav header; pages use Screen (md:max-w-5xl lg:max-w-7xl, md:pt-24) — keeps mobile layout untouched.
