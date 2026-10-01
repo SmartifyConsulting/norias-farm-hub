@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       animal_records: {
         Row: {
+          animal_id: string
           app: string
+          completed: Json
           crop_id: string
           detail: string
           due_on: string | null
@@ -26,12 +28,15 @@ export type Database = {
           id: string
           qty: string
           recorded_at: string
+          repeat_days: number | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          animal_id?: string
           app?: string
+          completed?: Json
           crop_id?: string
           detail?: string
           due_on?: string | null
@@ -41,12 +46,15 @@ export type Database = {
           id: string
           qty?: string
           recorded_at?: string
+          repeat_days?: number | null
           title: string
           updated_at?: string
           user_id?: string
         }
         Update: {
+          animal_id?: string
           app?: string
+          completed?: Json
           crop_id?: string
           detail?: string
           due_on?: string | null
@@ -56,6 +64,7 @@ export type Database = {
           id?: string
           qty?: string
           recorded_at?: string
+          repeat_days?: number | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -137,6 +146,42 @@ export type Database = {
           },
         ]
       }
+      farmer_profiles: {
+        Row: {
+          bio: string
+          created_at: string
+          crops: string
+          farm_name: string
+          hectares: number | null
+          id: string
+          name: string
+          province: string
+          role: string
+        }
+        Insert: {
+          bio?: string
+          created_at?: string
+          crops?: string
+          farm_name?: string
+          hectares?: number | null
+          id?: string
+          name: string
+          province?: string
+          role?: string
+        }
+        Update: {
+          bio?: string
+          created_at?: string
+          crops?: string
+          farm_name?: string
+          hectares?: number | null
+          id?: string
+          name?: string
+          province?: string
+          role?: string
+        }
+        Relationships: []
+      }
       farms: {
         Row: {
           created_at: string
@@ -157,6 +202,41 @@ export type Database = {
           owner_id?: string
         }
         Relationships: []
+      }
+      shared_listings: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          kind: string
+          owner_id: string | null
+          profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          id: string
+          kind: string
+          owner_id?: string | null
+          profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          kind?: string
+          owner_id?: string | null
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_listings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "farmer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_data: {
         Row: {

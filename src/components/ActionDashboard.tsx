@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight } from "lucide-react";
-import { SAMPLE_OPPORTUNITIES, matchOpportunity, usePassport } from "@/lib/agri";
+import { useShared } from "@/lib/shared";
+import { matchOpportunity, usePassport } from "@/lib/agri";
 import { useCapacity, usePipeline, useRisks } from "@/lib/network";
 
 function Panel({ title, to, children }: { title: string; to: string; children: React.ReactNode }) {
@@ -19,6 +20,7 @@ export function ActionDashboard() {
   const [pipe] = usePipeline();
   const [risks] = useRisks();
   const [cap] = useCapacity();
+  const { opportunities: SAMPLE_OPPORTUNITIES } = useShared();
   const ranked = SAMPLE_OPPORTUNITIES.map((o) => ({ o, m: matchOpportunity(passport, o) })).sort((a, b) => b.m.score - a.m.score);
   const top = ranked.slice(0, 3);
   const tracked = new Set(pipe.map((p) => p.oppId));

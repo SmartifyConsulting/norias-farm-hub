@@ -46,6 +46,7 @@ function MiniAppPage() {
   const { canWrite, canDelete } = permissions(current?.role);
   const fields = useRecords("fields").records;
   const crops = useRecords("crops").records;
+  const animals = useRecords("animals").records;
 
   const add = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +68,7 @@ function MiniAppPage() {
         <input className={input} placeholder={app.titleLabel} value={title} onChange={(e) => setTitle(e.target.value)} />
         <input className={input} placeholder={app.detailLabel} value={detail} onChange={(e) => setDetail(e.target.value)} />
         {app.qtyLabel && <input className={input} placeholder={app.qtyLabel} value={qty} onChange={(e) => setQty(e.target.value)} />}
-        <ExtraInputs app={app} v={extra} set={setExtra} fields={fields} crops={crops} />
+        <ExtraInputs app={app} v={extra} set={setExtra} fields={fields} crops={crops} animals={animals} />
         {!canWrite && <p className="text-center text-xs text-muted-foreground">You have view-only access to {current?.name}.</p>}
         <button disabled={!canWrite} className="w-full disabled:opacity-50 rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">Add record</button>
         {cloud && !user && (
@@ -96,6 +97,7 @@ function MiniAppPage() {
             cloud={cloud}
             fields={fields}
             crops={crops}
+            animals={animals}
             canWrite={canWrite}
             canDelete={canDelete}
             onSave={(u) => {
@@ -113,11 +115,21 @@ function MiniAppPage() {
   );
 }
 
-type Extra = { due: string; end: string; fieldId: string; cropId: string };
-const EMPTY: Extra = { due: "", end: "", fieldId: "", cropId: "" };
-const clean = (e: Extra) => ({ due: e.due || undefined, end: e.end || undefined, fieldId: e.fieldId || undefined, cropId: e.cropId || undefined });
+type Extra = { due: string; end: string; fieldId: string; cropId: string; animalId: string; repeat: string };
+const EMPTY: Extra = { due: "", end: "", fieldId: "", cropId: "", animalId: "", repeat: "" };
+const clean = (e: Extra) => ({ due: e.due || undefined, end: e.end || undefined, fieldId: e.fieldId || undefined, cropId: e.cropId || undefined, animalId: e.animalId || undefined, repeatDays: e.repeat ? Number(e.repeat) : undefined });
+const REPEATS = [["", "Does not repeat"], ["7", "Weekly"], ["30", "Monthly"], ["91", "Every 3 months"], ["182", "Every 6 months"], ["365", "Yearly"]] as const;
+const addDays = (d: string, n: number) => { const x = new Date(d + "T00:00"); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
+const todayIso = () => new Date().toISOString().slice(0, 10);
+function dueStatus(r: FarmRecord) {
+  if (!r.due) return null;
+  const d = (new Date(r.due + "T00:00").getTime() - new Date(todayIso() + "T00:00").getTime()) / 864e5;
+  if (d < 0) return { label: `Overdue ${-d}d`, cls: "bg-destructive text-destructive-foreground" };
+  if (d <= 7) return { label: d === 0 ? "Due today" : `Due in ${d}d`, cls: "bg-accent text-accent-foreground" };
+  return { label: "Upcoming", cls: "bg-secondary text-secondary-foreground" };
+}
 
-function ExtraInputs({ app, v, set, fields, crops }: { app: MiniApp; v: Extra; set: (e: Extra) => void; fields: FarmRecord[]; crops: FarmRecord[] }) {
+function ExtraInputs({ app, v, set, fields, crops, animals = [] }: { app: MiniApp; v: Extra; set: (e: Extra) => void; fields: FarmRecord[]; crops: FarmRecord[]; animals?: FarmRecord[] }) {
   const input = "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
   return (
     <>
@@ -126,6 +138,17 @@ function ExtraInputs({ app, v, set, fields, crops }: { app: MiniApp; v: Extra; s
           <label className="text-xs text-muted-foreground">{app.dates[0]}<input type="date" className={input} value={v.due} onChange={(e) => set({ ...v, due: e.target.value })} /></label>
           {app.dates[1] && <label className="text-xs text-muted-foreground">{app.dates[1]}<input type="date" className={input} value={v.end} onChange={(e) => set({ ...v, end: e.target.value })} /></label>}
         </div>
+      )}
+      {app.links?.includes("animal") && (
+        <select aria-label="Animal" className={input} value={v.animalId} onChange={(e) => set({ ...v, animalId: e.target.value })}>
+          <option value="">{animals.length ? "Animal (or whole herd)" : "No animals yet — add some in My Animals"}</option>
+          {animals.map((a) => <option key={a.id} value={a.id}>{a.title}</option>)}
+        </select>
+      )}
+      {app.recurring && (
+        <select aria-label="Repeat" className={input} value={v.repeat} onChange={(e) => set({ ...v, repeat: e.target.value })}>
+          {REPEATS.map(([d, l]) => <option key={d} value={d}>{l}</option>)}
+        </select>
       )}
       {app.links?.includes("field") && (
         <select aria-label="Field" className={input} value={v.fieldId} onChange={(e) => set({ ...v, fieldId: e.target.value })}>
@@ -146,10 +169,18 @@ function ExtraInputs({ app, v, set, fields, crops }: { app: MiniApp; v: Extra; s
 const LINKED = ["tasks", "treatments", "maintenance", "finance"];
 const money = (q?: string) => { const n = parseFloat((q ?? "").replace(/[^0-9.-]/g, "")); return isNaN(n) ? 0 : n; };
 
-function RecordItem({ r, app, cloud, fields, crops, canWrite, canDelete, onSave, onDelete }: { r: FarmRecord; app: MiniApp; cloud: boolean; fields: FarmRecord[]; crops: FarmRecord[]; canWrite: boolean; canDelete: boolean; onSave: (u: Partial<FarmRecord>) => void; onDelete: () => void }) {
+function RecordItem({ r, app, cloud, fields, crops, animals, canWrite, canDelete, onSave, onDelete }: { r: FarmRecord; app: MiniApp; cloud: boolean; fields: FarmRecord[]; crops: FarmRecord[]; animals: FarmRecord[]; canWrite: boolean; canDelete: boolean; onSave: (u: Partial<FarmRecord>) => void; onDelete: () => void }) {
   const [editing, setEditing] = useState(false);
   const [f, setF] = useState({ title: r.title, detail: r.detail, qty: r.qty ?? "" });
-  const [x, setX] = useState<Extra>({ due: r.due ?? "", end: r.end ?? "", fieldId: r.fieldId ?? "", cropId: r.cropId ?? "" });
+  const [x, setX] = useState<Extra>({ due: r.due ?? "", end: r.end ?? "", fieldId: r.fieldId ?? "", cropId: r.cropId ?? "", animalId: r.animalId ?? "", repeat: r.repeatDays ? String(r.repeatDays) : "" });
+  const animal = animals.find((v) => v.id === r.animalId);
+  const status = app.recurring ? dueStatus(r) : null;
+  // Health items about this animal (shown on My Animals).
+  const health = app.id === "animals" ? read("health").filter((h) => h.animalId === r.id) : [];
+  const markDone = () => {
+    const done = [todayIso(), ...(r.completed ?? [])];
+    onSave({ completed: done, due: r.repeatDays ? addDays(r.due && r.due > todayIso() ? r.due : todayIso(), r.repeatDays) : undefined });
+  };
   const field = fields.find((v) => v.id === r.fieldId), crop = crops.find((v) => v.id === r.cropId);
   // Things linked to this field / crop cycle from the other apps.
   const linked = app.id === "fields" || app.id === "crops"
@@ -172,7 +203,7 @@ function RecordItem({ r, app, cloud, fields, crops, canWrite, canDelete, onSave,
           <input aria-label={app.titleLabel} className={input} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
           <input aria-label={app.detailLabel} className={input} placeholder={app.detailLabel} value={f.detail} onChange={(e) => setF({ ...f, detail: e.target.value })} />
           {app.qtyLabel && <input aria-label={app.qtyLabel} className={input} placeholder={app.qtyLabel} value={f.qty} onChange={(e) => setF({ ...f, qty: e.target.value })} />}
-          <ExtraInputs app={app} v={x} set={setX} fields={fields} crops={crops} />
+          <ExtraInputs app={app} v={x} set={setX} fields={fields} crops={crops} animals={animals} />
           <div className="grid grid-cols-2 gap-2">
             <button type="button" onClick={() => { setF({ title: r.title, detail: r.detail, qty: r.qty ?? "" }); setEditing(false); }} className="rounded-xl bg-secondary py-2 text-sm font-semibold text-secondary-foreground">Cancel</button>
             <button className="rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">Save changes</button>
@@ -186,6 +217,8 @@ function RecordItem({ r, app, cloud, fields, crops, canWrite, canDelete, onSave,
         <div className="flex items-center gap-2">
           <p className="font-semibold text-card-foreground">{r.title}</p>
           <SyncBadge status={r.sync} />
+          {status && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${status.cls}`}>{status.label}</span>}
+          {app.recurring && !r.due && (r.completed?.length ?? 0) > 0 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">Done</span>}
         </div>
         {r.detail && <p className="text-sm text-muted-foreground">{r.detail}</p>}
         <p className="mt-1 text-xs text-muted-foreground">
@@ -194,6 +227,15 @@ function RecordItem({ r, app, cloud, fields, crops, canWrite, canDelete, onSave,
           {r.due && <> · {app.dates?.[0]}: <b className="text-foreground">{r.due}</b></>}
           {r.end && <> · {app.dates?.[1]}: <b className="text-foreground">{r.end}</b></>}
         </p>
+        {animal && <p className="mt-1 text-xs text-primary">Animal: {animal.title}</p>}
+        {app.recurring && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {r.repeatDays ? `Repeats every ${r.repeatDays} days` : "One-off"}
+            {(r.completed?.length ?? 0) > 0 && <> · Done: {r.completed!.slice(0, 4).join(", ")}{r.completed!.length > 4 && "…"}</>}
+          </p>
+        )}
+        {app.recurring && canWrite && r.due && <button onClick={markDone} className="mt-2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">Mark done{r.repeatDays ? " & schedule next" : ""}</button>}
+        {health.length > 0 && <p className="mt-1 text-xs text-muted-foreground">Health: {health.map((h) => `${h.title}${h.due ? ` (next ${h.due})` : ""}`).join(" · ")}</p>}
         {(field || crop) && <p className="mt-1 flex items-center gap-1 text-xs text-primary"><Link2 className="h-3 w-3" />{[field?.title, crop?.title].filter(Boolean).join(" · ")}</p>}
         {linked.length > 0 && (
           <p className="mt-1 text-xs text-muted-foreground">

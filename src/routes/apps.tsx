@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
 import { MINI_APPS } from "@/lib/farm";
-import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat } from "lucide-react";
+import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat, Stethoscope } from "lucide-react";
 
 const INTEL = [
   { to: "/passport", name: "Capability Passport", blurb: "Land, infrastructure, certifications & supply record", icon: BadgeCheck },
@@ -13,6 +13,7 @@ const INTEL = [
   { to: "/outcomes", name: "Opportunity → Outcome", blurb: "Decide, commit, act and record what happened", icon: RouteIcon },
   { to: "/traceability", name: "Traceability", blurb: "Batch records from field to buyer", icon: ScanLine },
   { to: "/funding", name: "Funding Readiness", blurb: "What a lender or funder may ask for", icon: Landmark },
+  { to: "/vet-check", name: "Animal Symptom Check", blurb: "Describe symptoms, add a photo, get care guidance", icon: Stethoscope },
   { to: "/copilot", name: "Farm Copilot", blurb: "Ask questions about your farm data", icon: Wheat },
 ] as const;
 
