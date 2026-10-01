@@ -1,4 +1,5 @@
 import { matchOpportunity, SAMPLE_OPPORTUNITIES, usePassport } from "@/lib/agri";
+import { read as readRecords } from "@/lib/farm";
 import { useNotifyPrefs, usePipeline, useReadNotices, useRisks, type NotifyType } from "@/lib/network";
 
 export type Notice = { id: string; type: NotifyType; text: string; to: string };
@@ -24,6 +25,14 @@ export function useNotices() {
     if (p.stage === "Action" && p.expected?.date && days(p.expected.date) < 0) all.push({ id: `o-${p.id}`, type: "Outcome due for recording", text: `Record the outcome of ${p.title}`, to: "/outcomes" });
   }
   for (const [k, c] of Object.entries(passport)) { const d = days(c.expires); if (d <= 30) all.push({ id: `v-${k}`, type: "Verification expiring", text: `Evidence for "${k}" ${d < 0 ? "has expired" : "expires soon"}`, to: "/passport" }); }
+  for (const [app, kinds] of [["tasks", ["due"]], ["crops", ["planting", "harvest"]]] as const) {
+    for (const r of readRecords(app)) {
+      kinds.forEach((k, i) => {
+        const date = i === 0 ? r.due : r.end; const d = days(date ? date + "T23:59" : undefined);
+        if (d <= 3 && d > -7) all.push({ id: `d-${r.id}-${i}-${date}`, type: "Task or crop date due", text: `${r.title}: ${k} ${d < 0 ? "was" : ""} ${date}`, to: `/app/${app}` });
+      });
+    }
+  }
   const notices = all.filter((n) => prefs[n.type] !== false);
   const unread = notices.filter((n) => !read.includes(n.id));
   return { notices, unread, markAll: () => setRead(notices.map((n) => n.id)) };
