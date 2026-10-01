@@ -110,15 +110,22 @@ export function useOnline() {
   return online;
 }
 
+type FarmSettings = { farmName: string; owner: string; units: string; autoSync: boolean; lat: number; lon: number; placeName?: string };
 export function useSettings() {
-  const [s, setS] = useState({ farmName: "Green Acres", owner: "Farmer", units: "metric", autoSync: true, lat: 51.5, lon: -0.12 });
+  const [s, setS] = useState<FarmSettings>({ farmName: "Green Acres", owner: "Farmer", units: "metric", autoSync: true, lat: 51.5, lon: -0.12 });
   useEffect(() => {
-    try { const v = localStorage.getItem("farmerplus:settings"); if (v) setS((p) => ({ ...p, ...JSON.parse(v) })); } catch {}
+    const load = () => { try { const v = localStorage.getItem("farmerplus:settings"); if (v) setS((p) => ({ ...p, ...JSON.parse(v) })); } catch {} };
+    load();
+    window.addEventListener("farmerplus:settings", load);
+    return () => window.removeEventListener("farmerplus:settings", load);
   }, []);
-  const update = (patch: Partial<typeof s>) => {
-    const next = { ...s, ...patch };
+  const update = (patch: Partial<FarmSettings>) => {
+    let cur: FarmSettings = s;
+    try { const v = localStorage.getItem("farmerplus:settings"); if (v) cur = { ...s, ...JSON.parse(v) }; } catch {}
+    const next = { ...cur, ...patch };
     localStorage.setItem("farmerplus:settings", JSON.stringify(next));
     setS(next);
+    window.dispatchEvent(new Event("farmerplus:settings"));
   };
   return [s, update] as const;
 }

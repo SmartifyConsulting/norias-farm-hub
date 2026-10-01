@@ -7,7 +7,7 @@ const codes: Record<number, [string, string]> = {
   75: ["❄️", "Heavy snow"], 80: ["🌦️", "Showers"], 81: ["🌧️", "Showers"], 82: ["⛈️", "Storms"], 95: ["⛈️", "Thunderstorm"],
 };
 
-export function Weather({ lat, lon }: { lat: number; lon: number }) {
+export function Weather({ lat, lon, compact, place }: { lat: number; lon: number; compact?: boolean; place?: string | undefined }) {
   const { data, isError } = useQuery({
     queryKey: ["weather", lat, lon],
     queryFn: async () => {
@@ -21,6 +21,18 @@ export function Weather({ lat, lon }: { lat: number; lon: number }) {
   });
   const c = data?.current;
   const [icon, label] = codes[c?.weather_code] ?? ["🌡️", isError ? "Offline" : "Loading…"];
+  if (compact) {
+    const rain = data?.daily?.precipitation_probability_max?.[0];
+    return (
+      <div className="soft-card flex items-center gap-3 border p-4" title={place ? `Weather in ${place}` : "Weather now"}>
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-earth-8 text-2xl">{icon}</span>
+        <div className="min-w-0">
+          <p className="font-display text-2xl font-bold leading-none">{c ? Math.round(c.temperature_2m) : "--"}°</p>
+          <p className="mt-1 truncate text-xs text-muted-foreground">{label}{rain != null ? ` · ${rain}% rain` : ""}</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="glass rounded-3xl p-5">
       <div className="flex items-center justify-between">

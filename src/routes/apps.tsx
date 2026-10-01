@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
 import { MINI_APPS } from "@/lib/farm";
 import { appTone } from "@/lib/app-colors";
-import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat, Stethoscope } from "lucide-react";
+import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat, Stethoscope, GraduationCap } from "lucide-react";
 
 const INTEL = [
   { to: "/passport", name: "Capability Passport", blurb: "Land, infrastructure, certifications & supply record", icon: BadgeCheck },
@@ -38,6 +38,13 @@ function Apps() {
         <div className="flex-1">
           <p className="font-semibold text-card-foreground">Farm Team</p>
           <p className="text-sm text-muted-foreground">Share your farm and give each person owner, manager, worker or viewer access</p>
+        </div>
+      </Link>
+      <Link to="/farmschool" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-earth-1 text-background"><GraduationCap className="h-7 w-7" /></span>
+        <div className="flex-1">
+          <p className="font-semibold text-card-foreground">FarmSchool</p>
+          <p className="text-sm text-muted-foreground">Farming courses and your learning progress</p>
         </div>
       </Link>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">

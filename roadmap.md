@@ -32,3 +32,5 @@
 - [ ] Seed data (Happy Acres Coop demo farm, ~40 farmers, listings) + SQL file in Files
 
 - [x] App Store/Home colourful icon frames, brand palette, new home layout with greeting
+- [x] Compact one-screen home, avatar menu + profile photo, account name sync, working location, FarmSchool screen
+- [ ] FarmSchool live courses — waiting on an access key and a courses feed from FarmSchool

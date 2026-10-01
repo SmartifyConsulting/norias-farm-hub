@@ -29,6 +29,13 @@
       "when": 1790853259634,
       "tag": "0003_health_and_shared_listings",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790864768372,
+      "tag": "0004_avatars_policies",
+      "breakpoints": true
     }
   ]
 }
