@@ -8,18 +8,19 @@ export const Route = createFileRoute("/app/$appId")({
   loader: ({ params }) => {
     const app = MINI_APPS.find((a) => a.id === params.appId);
     if (!app) throw notFound();
-    return { app };
+    return { appId: app.id, name: app.name, blurb: app.blurb };
   },
   head: ({ loaderData }) => {
-    const n = loaderData?.app.name ?? "Not found";
-    const d = loaderData ? `${loaderData.app.blurb} — FarmerPlus mini-app.` : "Mini-app not found.";
+    const n = loaderData?.name ?? "Not found";
+    const d = loaderData ? `${loaderData.blurb} — FarmerPlus mini-app.` : "Mini-app not found.";
     return { meta: [{ title: `${n} — FarmerPlus` }, { name: "description", content: d }, { property: "og:title", content: `${n} — FarmerPlus` }, { property: "og:description", content: d }] };
   },
   component: MiniAppPage,
 });
 
 function MiniAppPage() {
-  const { app } = Route.useLoaderData();
+  const { appId } = Route.useLoaderData();
+  const app = MINI_APPS.find((a) => a.id === appId)!;
   const { records, save } = useRecords(app.id);
   const online = useOnline();
   const [settings] = useSettings();
