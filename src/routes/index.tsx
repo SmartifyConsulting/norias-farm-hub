@@ -126,7 +126,7 @@ function Home() {
                 {today.map((n, i) => (
                   <li key={n.id}>
                     <Link to={n.to} className="flex items-center gap-3 py-2.5 text-sm hover:text-brand-orange">
-                      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${appTone(i).split(" ")[0]}`} />
+                      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${appTone(i)}`} />
                       <span className="flex-1">{n.text}</span>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </Link>
