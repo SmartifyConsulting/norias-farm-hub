@@ -30,3 +30,5 @@
 - [ ] AI Animal Symptom Check (text + photo)
 - [ ] Shared listings (opportunities, capacity, pools) in cloud + farmer profiles
 - [ ] Seed data (Happy Acres Coop demo farm, ~40 farmers, listings) + SQL file in Files
+
+- [x] App Store/Home colourful icon frames, brand palette, new home layout with greeting
