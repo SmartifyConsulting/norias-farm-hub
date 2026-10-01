@@ -83,9 +83,19 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-hover-accent: var(--hover-accent);
   --color-hover-accent-foreground: var(--hover-accent-foreground);
+  --color-brand-green: var(--brand-green);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-red: var(--brand-red);
+  --color-brand-ink: var(--brand-ink);
 }
 
 :root {
+  --brand-green: #00a754;
+  --brand-yellow: #fab805;
+  --brand-orange: #fd870a;
+  --brand-red: #d21018;
+  --brand-ink: #111111;
   --radius: 1.25rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.16 0 0);
@@ -93,7 +103,7 @@
   --card-foreground: oklch(0.16 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.16 0 0);
-  --primary: #061a30;
+  --primary: #111111;
   --primary-foreground: #ffffff;
   --primary-soft: #e1eaed;
   --secondary: oklch(0.16 0 0);
