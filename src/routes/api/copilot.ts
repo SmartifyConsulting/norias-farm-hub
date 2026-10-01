@@ -26,7 +26,6 @@ export const Route = createFileRoute("/api/copilot")({
         const { messages, context } = parsed.data;
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
           method: "POST",
-          signal: request.signal,
           headers: { "Content-Type": "application/json", "Lovable-API-Key": key, Authorization: `Bearer ${key}`, "X-Lovable-AIG-SDK": "fetch" },
           body: JSON.stringify({
             model: "openai/gpt-6-astra",
@@ -39,6 +38,7 @@ export const Route = createFileRoute("/api/copilot")({
             ],
           }),
         });
+        console.log("[copilot] upstream", upstream.status);
         if (!upstream.ok || !upstream.body) {
           const text = await upstream.text().catch(() => "");
           let msg = "The copilot is unavailable right now.";
