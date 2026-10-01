@@ -8,6 +8,13 @@
       "when": 1790840370717,
       "tag": "0000_animal_records",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790850244211,
+      "tag": "0001_generalize_records_and_user_data",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       animal_records: {
         Row: {
+          app: string
           detail: string
           id: string
           qty: string
@@ -25,6 +26,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          app?: string
           detail?: string
           id: string
           qty?: string
@@ -34,6 +36,7 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          app?: string
           detail?: string
           id?: string
           qty?: string
@@ -41,6 +44,27 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_data: {
+        Row: {
+          key: string
+          updated_at: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          user_id?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          user_id?: string
+          value?: Json
         }
         Relationships: []
       }
