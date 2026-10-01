@@ -32,7 +32,7 @@ function MiniAppPage() {
     e.preventDefault();
     if (!title.trim()) return;
     save([
-      { id: crypto.randomUUID(), title: title.trim(), detail: detail.trim(), qty: qty.trim() || undefined, date: new Date().toISOString(), sync: online && settings.autoSync ? "synced" : online ? "pending" : "local" },
+      { id: crypto.randomUUID(), title: title.trim(), detail: detail.trim(), qty: qty.trim(), date: new Date().toISOString(), sync: online && settings.autoSync ? "synced" : online ? "pending" : "local" },
       ...records,
     ]);
     setTitle(""); setDetail(""); setQty("");
