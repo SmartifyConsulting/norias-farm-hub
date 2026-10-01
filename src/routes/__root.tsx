@@ -13,6 +13,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Dock } from "../components/Dock";
+import { Toaster } from "@/components/ui/sonner";
+import { AutoSync } from "@/components/AutoSync";
 
 function NotFoundComponent() {
   return (
@@ -128,6 +130,8 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Dock />
+      <AutoSync />
+      <Toaster position="top-center" />
     </QueryClientProvider>
   );
 }
