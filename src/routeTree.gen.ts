@@ -24,6 +24,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RisksRouteImport } from './routes/risks'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulatorRouteImport } from './routes/simulator'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as TraceabilityRouteImport } from './routes/traceability'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as ApiCopilotRouteImport } from './routes/api/copilot'
@@ -104,6 +105,11 @@ const SimulatorRoute = SimulatorRouteImport.update({
   path: '/simulator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TraceabilityRoute = TraceabilityRouteImport.update({
   id: '/traceability',
   path: '/traceability',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/risks': typeof RisksRoute
   '/settings': typeof SettingsRoute
   '/simulator': typeof SimulatorRoute
+  '/team': typeof TeamRoute
   '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
   '/api/copilot': typeof ApiCopilotRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/risks': typeof RisksRoute
   '/settings': typeof SettingsRoute
   '/simulator': typeof SimulatorRoute
+  '/team': typeof TeamRoute
   '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
   '/api/copilot': typeof ApiCopilotRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/risks': typeof RisksRoute
   '/settings': typeof SettingsRoute
   '/simulator': typeof SimulatorRoute
+  '/team': typeof TeamRoute
   '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
   '/api/copilot': typeof ApiCopilotRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/risks'
     | '/settings'
     | '/simulator'
+    | '/team'
     | '/traceability'
     | '/wallet'
     | '/api/copilot'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/risks'
     | '/settings'
     | '/simulator'
+    | '/team'
     | '/traceability'
     | '/wallet'
     | '/api/copilot'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/risks'
     | '/settings'
     | '/simulator'
+    | '/team'
     | '/traceability'
     | '/wallet'
     | '/api/copilot'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   RisksRoute: typeof RisksRoute
   SettingsRoute: typeof SettingsRoute
   SimulatorRoute: typeof SimulatorRoute
+  TeamRoute: typeof TeamRoute
   TraceabilityRoute: typeof TraceabilityRoute
   WalletRoute: typeof WalletRoute
   ApiCopilotRoute: typeof ApiCopilotRoute
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SimulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/traceability': {
       id: '/traceability'
       path: '/traceability'
@@ -431,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   RisksRoute: RisksRoute,
   SettingsRoute: SettingsRoute,
   SimulatorRoute: SimulatorRoute,
+  TeamRoute: TeamRoute,
   TraceabilityRoute: TraceabilityRoute,
   WalletRoute: WalletRoute,
   ApiCopilotRoute: ApiCopilotRoute,
