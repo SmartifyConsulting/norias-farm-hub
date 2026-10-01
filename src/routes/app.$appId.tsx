@@ -29,7 +29,7 @@ function MiniAppPage() {
   const online = useOnline();
   const [settings] = useSettings();
   const { user } = useUser();
-  const cloud = app.id === "animals";
+  const cloud = true;
   const kick = async () => {
     if (!(cloud && user && online && settings.autoSync)) return;
     const r = await syncAnimals();
@@ -79,7 +79,7 @@ function MiniAppPage() {
               save(records.map((x) => (x.id === r.id ? { ...x, ...u, sync: cloud ? (user ? "pending" : "local") : x.sync === "synced" && online ? "synced" : "pending", syncError: undefined } : x)));
               setTimeout(kick, 0);
             }}
-            onDelete={() => { if (cloud && r.sync === "synced") markDeleted(r.id); save(records.filter((x) => x.id !== r.id)); setTimeout(kick, 0); }}
+            onDelete={() => { if (cloud && r.sync === "synced") markDeleted(r.id, app.id); save(records.filter((x) => x.id !== r.id)); setTimeout(kick, 0); }}
           />
         ))}
       </ul>

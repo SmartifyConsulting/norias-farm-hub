@@ -72,17 +72,10 @@ export function allRecordCounts() {
   return { total, pending };
 }
 
-/** Animals sync to the cloud for real; other apps are still simulated locally. */
+/** Every mini-app and AgriSphere tool syncs to the signed-in account. */
 export async function syncAll() {
-  const { syncAnimals } = await import("./animal-sync");
-  const res = await syncAnimals();
-  for (const a of MINI_APPS) {
-    if (a.id === "animals") continue;
-    const r = read(a.id).map((x) => ({ ...x, sync: "synced" as const }));
-    localStorage.setItem(key(a.id), JSON.stringify(r));
-  }
-  window.dispatchEvent(new Event("farmerplus:change"));
-  return res;
+  const { syncAll: run } = await import("./animal-sync");
+  return run();
 }
 
 export function useOnline() {
