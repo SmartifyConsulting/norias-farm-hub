@@ -3,6 +3,9 @@ import { useState } from "react";
 import { Trash2, ChevronLeft } from "lucide-react";
 import { Screen, SyncBadge } from "@/components/Dock";
 import { MINI_APPS, useOnline, useRecords, useSettings } from "@/lib/farm";
+import { markDeleted, syncAnimals } from "@/lib/animal-sync";
+import { useUser } from "@/lib/auth";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/$appId")({
   loader: ({ params }) => {
@@ -24,6 +27,13 @@ function MiniAppPage() {
   const { records, save } = useRecords(app.id);
   const online = useOnline();
   const [settings] = useSettings();
+  const { user } = useUser();
+  const cloud = app.id === "animals";
+  const kick = async () => {
+    if (!(cloud && user && online && settings.autoSync)) return;
+    const r = await syncAnimals();
+    if (!r.ok) toast.error(`Couldn't sync yet — kept on this device (${r.error})`);
+  };
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [qty, setQty] = useState("");
@@ -32,9 +42,10 @@ function MiniAppPage() {
     e.preventDefault();
     if (!title.trim()) return;
     save([
-      { id: crypto.randomUUID(), title: title.trim(), detail: detail.trim(), qty: qty.trim(), date: new Date().toISOString(), sync: online && settings.autoSync ? "synced" : online ? "pending" : "local" },
+      { id: crypto.randomUUID(), title: title.trim(), detail: detail.trim(), qty: qty.trim(), date: new Date().toISOString(), sync: cloud ? (user ? "pending" : "local") : online && settings.autoSync ? "synced" : online ? "pending" : "local" },
       ...records,
     ]);
+    setTimeout(kick, 0);
     setTitle(""); setDetail(""); setQty("");
   };
 
@@ -47,6 +58,11 @@ function MiniAppPage() {
         <input className={input} placeholder={app.detailLabel} value={detail} onChange={(e) => setDetail(e.target.value)} />
         {app.qtyLabel && <input className={input} placeholder={app.qtyLabel} value={qty} onChange={(e) => setQty(e.target.value)} />}
         <button className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">Add record</button>
+        {cloud && !user && (
+          <p className="text-center text-xs text-muted-foreground">
+            Saved on this device. <Link to="/auth" className="font-semibold text-primary">Sign in</Link> to back up and sync across devices.
+          </p>
+        )}
         {!online && <p className="text-center text-xs text-muted-foreground">You're offline — records save on this device.</p>}
       </form>
       <ul className="mt-4 space-y-2">
@@ -64,7 +80,7 @@ function MiniAppPage() {
                 {new Date(r.date).toLocaleDateString()}
               </p>
             </div>
-            <button aria-label="Delete" onClick={() => save(records.filter((x) => x.id !== r.id))} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+            <button aria-label="Delete" onClick={() => { if (cloud && r.sync === "synced") markDeleted(r.id); save(records.filter((x) => x.id !== r.id)); setTimeout(kick, 0); }} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
           </li>
         ))}
       </ul>

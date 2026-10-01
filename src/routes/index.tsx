@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import bg from "@/assets/countryside.jpg";
 import { Weather } from "@/components/Weather";
+import { toast } from "sonner";
 import { MINI_APPS, allRecordCounts, syncAll, useOnline, useSettings } from "@/lib/farm";
+import { useUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,6 +21,16 @@ export const Route = createFileRoute("/")({
 function Home() {
   const [s] = useSettings();
   const online = useOnline();
+  const { user } = useUser();
+  const [syncing, setSyncing] = useState(false);
+  const doSync = async () => {
+    setSyncing(true);
+    const r = await syncAll();
+    setSyncing(false);
+    if (r.ok) toast.success("Records synced");
+    else if (!user) toast("Animal records need an account to sync to the cloud", { action: { label: "Sign in", onClick: () => (window.location.href = "/auth") } });
+    else toast.error(r.error ?? "Sync failed");
+  };
   const [counts, setCounts] = useState({ total: 0, pending: 0 });
   useEffect(() => {
     const u = () => setCounts(allRecordCounts());
@@ -42,9 +54,12 @@ function Home() {
             <span className="text-foreground/80">{online ? "Online" : "Offline — saving locally"}</span>
             <span className="ml-auto text-foreground/80">{counts.total} records · {counts.pending} unsynced</span>
           </div>
+          {!user && (
+            <Link to="/auth" className="mt-2 block text-center text-xs font-semibold text-foreground underline">Sign in to back up your records</Link>
+          )}
           {counts.pending > 0 && online && (
-            <button onClick={syncAll} className="mt-3 w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">
-              Sync {counts.pending} records
+            <button onClick={doSync} disabled={syncing} className="mt-3 w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+              {syncing ? "Syncing…" : `Sync ${counts.pending} records`}
             </button>
           )}
         </div>
