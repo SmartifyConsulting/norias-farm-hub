@@ -12,13 +12,21 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppsRouteImport } from './routes/apps'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CapacityRouteImport } from './routes/capacity'
+import { Route as CollectiveRouteImport } from './routes/collective'
+import { Route as CopilotRouteImport } from './routes/copilot'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as FundingRouteImport } from './routes/funding'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
+import { Route as OutcomesRouteImport } from './routes/outcomes'
 import { Route as PassportRouteImport } from './routes/passport'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RisksRouteImport } from './routes/risks'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulatorRouteImport } from './routes/simulator'
+import { Route as TraceabilityRouteImport } from './routes/traceability'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as ApiCopilotRouteImport } from './routes/api/copilot'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -36,14 +44,39 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CapacityRoute = CapacityRouteImport.update({
+  id: '/capacity',
+  path: '/capacity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectiveRoute = CollectiveRouteImport.update({
+  id: '/collective',
+  path: '/collective',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CopilotRoute = CopilotRouteImport.update({
+  id: '/copilot',
+  path: '/copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FundingRoute = FundingRouteImport.update({
+  id: '/funding',
+  path: '/funding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
   id: '/opportunities',
   path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutcomesRoute = OutcomesRouteImport.update({
+  id: '/outcomes',
+  path: '/outcomes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PassportRoute = PassportRouteImport.update({
@@ -56,6 +89,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RisksRoute = RisksRouteImport.update({
+  id: '/risks',
+  path: '/risks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -66,9 +104,19 @@ const SimulatorRoute = SimulatorRouteImport.update({
   path: '/simulator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TraceabilityRoute = TraceabilityRouteImport.update({
+  id: '/traceability',
+  path: '/traceability',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCopilotRoute = ApiCopilotRouteImport.update({
+  id: '/api/copilot',
+  path: '/api/copilot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAppIdRoute = AppAppIdRouteImport.update({
@@ -81,26 +129,42 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
+  '/capacity': typeof CapacityRoute
+  '/collective': typeof CollectiveRoute
+  '/copilot': typeof CopilotRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/risks': typeof RisksRoute
   '/settings': typeof SettingsRoute
   '/simulator': typeof SimulatorRoute
+  '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
+  '/capacity': typeof CapacityRoute
+  '/collective': typeof CollectiveRoute
+  '/copilot': typeof CopilotRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/risks': typeof RisksRoute
   '/settings': typeof SettingsRoute
   '/simulator': typeof SimulatorRoute
+  '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRoutesById {
@@ -108,13 +172,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
+  '/capacity': typeof CapacityRoute
+  '/collective': typeof CollectiveRoute
+  '/copilot': typeof CopilotRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/risks': typeof RisksRoute
   '/settings': typeof SettingsRoute
   '/simulator': typeof SimulatorRoute
+  '/traceability': typeof TraceabilityRoute
   '/wallet': typeof WalletRoute
+  '/api/copilot': typeof ApiCopilotRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRouteTypes {
@@ -123,39 +195,63 @@ export interface FileRouteTypes {
     | '/'
     | '/apps'
     | '/auth'
+    | '/capacity'
+    | '/collective'
+    | '/copilot'
     | '/forgot-password'
+    | '/funding'
     | '/opportunities'
+    | '/outcomes'
     | '/passport'
     | '/reset-password'
+    | '/risks'
     | '/settings'
     | '/simulator'
+    | '/traceability'
     | '/wallet'
+    | '/api/copilot'
     | '/app/$appId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/apps'
     | '/auth'
+    | '/capacity'
+    | '/collective'
+    | '/copilot'
     | '/forgot-password'
+    | '/funding'
     | '/opportunities'
+    | '/outcomes'
     | '/passport'
     | '/reset-password'
+    | '/risks'
     | '/settings'
     | '/simulator'
+    | '/traceability'
     | '/wallet'
+    | '/api/copilot'
     | '/app/$appId'
   id:
     | '__root__'
     | '/'
     | '/apps'
     | '/auth'
+    | '/capacity'
+    | '/collective'
+    | '/copilot'
     | '/forgot-password'
+    | '/funding'
     | '/opportunities'
+    | '/outcomes'
     | '/passport'
     | '/reset-password'
+    | '/risks'
     | '/settings'
     | '/simulator'
+    | '/traceability'
     | '/wallet'
+    | '/api/copilot'
     | '/app/$appId'
   fileRoutesById: FileRoutesById
 }
@@ -163,13 +259,21 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppsRoute: typeof AppsRoute
   AuthRoute: typeof AuthRoute
+  CapacityRoute: typeof CapacityRoute
+  CollectiveRoute: typeof CollectiveRoute
+  CopilotRoute: typeof CopilotRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  FundingRoute: typeof FundingRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
+  OutcomesRoute: typeof OutcomesRoute
   PassportRoute: typeof PassportRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RisksRoute: typeof RisksRoute
   SettingsRoute: typeof SettingsRoute
   SimulatorRoute: typeof SimulatorRoute
+  TraceabilityRoute: typeof TraceabilityRoute
   WalletRoute: typeof WalletRoute
+  ApiCopilotRoute: typeof ApiCopilotRoute
   AppAppIdRoute: typeof AppAppIdRoute
 }
 
@@ -196,6 +300,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/capacity': {
+      id: '/capacity'
+      path: '/capacity'
+      fullPath: '/capacity'
+      preLoaderRoute: typeof CapacityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collective': {
+      id: '/collective'
+      path: '/collective'
+      fullPath: '/collective'
+      preLoaderRoute: typeof CollectiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/copilot': {
+      id: '/copilot'
+      path: '/copilot'
+      fullPath: '/copilot'
+      preLoaderRoute: typeof CopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
@@ -203,11 +328,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/funding': {
+      id: '/funding'
+      path: '/funding'
+      fullPath: '/funding'
+      preLoaderRoute: typeof FundingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/opportunities': {
       id: '/opportunities'
       path: '/opportunities'
       fullPath: '/opportunities'
       preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outcomes': {
+      id: '/outcomes'
+      path: '/outcomes'
+      fullPath: '/outcomes'
+      preLoaderRoute: typeof OutcomesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/passport': {
@@ -224,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/risks': {
+      id: '/risks'
+      path: '/risks'
+      fullPath: '/risks'
+      preLoaderRoute: typeof RisksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -238,11 +384,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SimulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/traceability': {
+      id: '/traceability'
+      path: '/traceability'
+      fullPath: '/traceability'
+      preLoaderRoute: typeof TraceabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wallet': {
       id: '/wallet'
       path: '/wallet'
       fullPath: '/wallet'
       preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/copilot': {
+      id: '/api/copilot'
+      path: '/api/copilot'
+      fullPath: '/api/copilot'
+      preLoaderRoute: typeof ApiCopilotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/$appId': {
@@ -259,13 +419,21 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppsRoute: AppsRoute,
   AuthRoute: AuthRoute,
+  CapacityRoute: CapacityRoute,
+  CollectiveRoute: CollectiveRoute,
+  CopilotRoute: CopilotRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  FundingRoute: FundingRoute,
   OpportunitiesRoute: OpportunitiesRoute,
+  OutcomesRoute: OutcomesRoute,
   PassportRoute: PassportRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RisksRoute: RisksRoute,
   SettingsRoute: SettingsRoute,
   SimulatorRoute: SimulatorRoute,
+  TraceabilityRoute: TraceabilityRoute,
   WalletRoute: WalletRoute,
+  ApiCopilotRoute: ApiCopilotRoute,
   AppAppIdRoute: AppAppIdRoute,
 }
 export const routeTree = rootRouteImport

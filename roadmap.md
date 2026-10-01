@@ -6,3 +6,14 @@
 - [x] Password reset (already built: /forgot-password, /reset-password)
 - [x] Heita stylesheet (navy/blue tokens, Sora + Manrope) and Heita split sign-in/sign-up landing on Home
 - [x] Responsive tablet (2-col, top header) and desktop (12-col, header with search) layouts; mobile unchanged
+
+## AgriSphere full brief
+- [x] Shared capacity network (/capacity)
+- [x] Risk & response network (/risks) — approval required for every response
+- [x] Collective buying & supply (/collective) — explicit confirm to join
+- [x] Opportunity → outcome workflow + outcome record (/outcomes)
+- [x] Traceability batches (/traceability)
+- [x] Funding readiness (/funding)
+- [x] Farm copilot (/copilot)
+- [x] Home action dashboard, notification bell, role + notification preferences
+- [ ] Cloud sync for the new tools (currently on this device only)
