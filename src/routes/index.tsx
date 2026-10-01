@@ -72,20 +72,17 @@ function Home() {
     <div className="min-h-screen bg-background">
       <main className="mx-auto max-w-md space-y-6 px-4 pb-32 pt-8 md:max-w-5xl md:px-6 md:pb-12 md:pt-24 lg:max-w-7xl">
         {/* Greeting */}
-        <section className="relative overflow-hidden rounded-3xl bg-brand-ink px-6 py-7 text-background md:px-10 md:py-10">
-          <div className="absolute inset-x-0 bottom-0 flex h-1.5">
-            <span className="flex-1 bg-brand-green" /><span className="flex-1 bg-brand-yellow" /><span className="flex-1 bg-brand-orange" /><span className="flex-1 bg-brand-red" />
-          </div>
+        <section className="px-1 py-2 text-foreground md:py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm text-background/70" suppressHydrationWarning>{mounted ? dateText : "\u00a0"}</p>
+              <p className="text-sm text-muted-foreground" suppressHydrationWarning>{mounted ? dateText : "\u00a0"}</p>
               <h1 className="mt-1 font-display text-3xl font-bold md:text-5xl" suppressHydrationWarning>{mounted ? greet : "Welcome"}, {s.owner}</h1>
-              <p className="mt-2 text-base text-background/80 md:text-lg">Here's what's happening at <span className="font-semibold text-brand-yellow">{s.farmName}</span> today.</p>
+              <p className="mt-2 text-base text-muted-foreground md:text-lg">Here's what's happening at <span className="font-semibold text-earth-3">{s.farmName}</span> today.</p>
             </div>
-            <NotificationBell className="bg-background/10 text-background md:hidden" />
+            <NotificationBell className="md:hidden" />
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-3 text-xs">
-            <span className="flex items-center gap-1.5 rounded-full bg-background/10 px-3 py-1">
+            <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1">
               <span className={`h-2 w-2 rounded-full ${online ? "bg-brand-green" : "bg-brand-red"}`} />
               {online ? "Online" : "Offline — saving locally"}
             </span>

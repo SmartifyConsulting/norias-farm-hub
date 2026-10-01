@@ -34,7 +34,7 @@ function Apps() {
   return (
     <Screen title="App Store">
       <Link to="/team" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-ink text-background"><Users className="h-7 w-7" /></span>
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-earth-10 text-background"><Users className="h-7 w-7" /></span>
         <div className="flex-1">
           <p className="font-semibold text-card-foreground">Farm Team</p>
           <p className="text-sm text-muted-foreground">Share your farm and give each person owner, manager, worker or viewer access</p>
