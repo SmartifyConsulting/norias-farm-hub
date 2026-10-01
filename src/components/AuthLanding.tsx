@@ -17,6 +17,7 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
     <div className="relative flex min-h-screen flex-col bg-primary">
       <img src={bg} alt="" className="pointer-events-none fixed inset-y-0 left-0 hidden h-full w-1/2 object-cover lg:block" />
       <div className="pointer-events-none fixed inset-y-0 left-0 hidden w-1/2 bg-primary/55 lg:block" />
+      <div className="pointer-events-none fixed inset-y-0 right-0 hidden w-1/2 bg-foreground lg:block" />
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 relative lg:flex-row lg:gap-24 lg:px-12">
         <div className="flex w-full flex-1 flex-col items-center gap-2 text-primary-foreground">
           <div className="mb-6 flex flex-col items-center gap-3">
