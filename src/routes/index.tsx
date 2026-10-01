@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Weather } from "@/components/Weather";
 import { toast } from "sonner";
-import { CloudUpload, Database, CalendarClock, TriangleAlert, ChevronRight } from "lucide-react";
+import { CloudUpload, Database, CalendarClock, TriangleAlert, ChevronRight, Settings as SettingsIcon } from "lucide-react";
 import { MINI_APPS, allRecordCounts, syncAll, useOnline, useSettings } from "@/lib/farm";
 import { useGuest, useUser } from "@/lib/auth";
 import { AuthLanding } from "@/components/AuthLanding";
@@ -100,7 +100,7 @@ function Home() {
                 {syncing ? "Syncing…" : `Sync ${counts.pending} records`}
               </button>
             )}
-            <span className="flex items-center gap-2 md:hidden"><NotificationBell /><UserMenu /></span>
+            <span className="flex items-center gap-2 md:hidden"><NotificationBell />{user ? <UserMenu /> : <Link to="/settings" aria-label="Settings" className="rounded-full p-1.5 hover:bg-muted"><SettingsIcon className="h-5 w-5" /></Link>}</span>
           </div>
         </section>
 
