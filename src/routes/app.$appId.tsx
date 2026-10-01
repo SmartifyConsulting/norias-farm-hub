@@ -1,6 +1,7 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Trash2, ChevronLeft } from "lucide-react";
+import { Trash2, ChevronLeft, Pencil, AlertTriangle } from "lucide-react";
+import type { FarmRecord, MiniApp } from "@/lib/farm";
 import { Screen, SyncBadge } from "@/components/Dock";
 import { MINI_APPS, useOnline, useRecords, useSettings } from "@/lib/farm";
 import { markDeleted, syncAnimals } from "@/lib/animal-sync";
@@ -68,22 +69,73 @@ function MiniAppPage() {
       <ul className="mt-4 space-y-2">
         {records.length === 0 && <li className="py-8 text-center text-sm text-muted-foreground">No records yet.</li>}
         {records.map((r) => (
-          <li key={r.id} className="flex items-start gap-3 rounded-2xl border bg-card p-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold text-card-foreground">{r.title}</p>
-                <SyncBadge status={r.sync} />
-              </div>
-              {r.detail && <p className="text-sm text-muted-foreground">{r.detail}</p>}
-              <p className="mt-1 text-xs text-muted-foreground">
-                {r.qty && <>{app.qtyLabel}: <b className="text-foreground">{r.qty}</b> · </>}
-                {new Date(r.date).toLocaleDateString()}
-              </p>
-            </div>
-            <button aria-label="Delete" onClick={() => { if (cloud && r.sync === "synced") markDeleted(r.id); save(records.filter((x) => x.id !== r.id)); setTimeout(kick, 0); }} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
-          </li>
+          <RecordItem
+            key={r.id}
+            r={r}
+            app={app}
+            cloud={cloud}
+            onSave={(u) => {
+              save(records.map((x) => (x.id === r.id ? { ...x, ...u, sync: cloud ? (user ? "pending" : "local") : x.sync === "synced" && online ? "synced" : "pending", syncError: undefined } : x)));
+              setTimeout(kick, 0);
+            }}
+            onDelete={() => { if (cloud && r.sync === "synced") markDeleted(r.id); save(records.filter((x) => x.id !== r.id)); setTimeout(kick, 0); }}
+          />
         ))}
       </ul>
     </Screen>
+  );
+}
+
+function RecordItem({ r, app, cloud, onSave, onDelete }: { r: FarmRecord; app: MiniApp; cloud: boolean; onSave: (u: Pick<FarmRecord, "title" | "detail" | "qty">) => void; onDelete: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [f, setF] = useState({ title: r.title, detail: r.detail, qty: r.qty ?? "" });
+  const input = "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+  if (editing)
+    return (
+      <li className="rounded-2xl border bg-card p-4">
+        <form
+          className="space-y-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!f.title.trim()) return;
+            onSave({ title: f.title.trim(), detail: f.detail.trim(), qty: f.qty.trim() });
+            setEditing(false);
+          }}
+        >
+          <input aria-label={app.titleLabel} className={input} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
+          <input aria-label={app.detailLabel} className={input} placeholder={app.detailLabel} value={f.detail} onChange={(e) => setF({ ...f, detail: e.target.value })} />
+          {app.qtyLabel && <input aria-label={app.qtyLabel} className={input} placeholder={app.qtyLabel} value={f.qty} onChange={(e) => setF({ ...f, qty: e.target.value })} />}
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => { setF({ title: r.title, detail: r.detail, qty: r.qty ?? "" }); setEditing(false); }} className="rounded-xl bg-secondary py-2 text-sm font-semibold text-secondary-foreground">Cancel</button>
+            <button className="rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">Save changes</button>
+          </div>
+        </form>
+      </li>
+    );
+  return (
+    <li className="flex items-start gap-3 rounded-2xl border bg-card p-4">
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <p className="font-semibold text-card-foreground">{r.title}</p>
+          <SyncBadge status={r.sync} />
+        </div>
+        {r.detail && <p className="text-sm text-muted-foreground">{r.detail}</p>}
+        <p className="mt-1 text-xs text-muted-foreground">
+          {r.qty && <>{app.qtyLabel}: <b className="text-foreground">{r.qty}</b> · </>}
+          {new Date(r.date).toLocaleDateString()}
+        </p>
+        {cloud && (
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {r.syncedAt ? `Last synced ${new Date(r.syncedAt).toLocaleString()}` : "Never synced"}
+            {r.sync !== "synced" && r.syncedAt && " · has newer changes"}
+          </p>
+        )}
+        {cloud && r.syncError && r.sync !== "synced" && (
+          <p className="mt-1 flex items-center gap-1 text-[11px] text-destructive"><AlertTriangle className="h-3 w-3" />Upload failed: {r.syncError}</p>
+        )}
+      </div>
+      <button aria-label="Edit" onClick={() => setEditing(true)} className="text-muted-foreground hover:text-primary"><Pencil className="h-4 w-4" /></button>
+      <button aria-label="Delete" onClick={onDelete} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+    </li>
   );
 }
