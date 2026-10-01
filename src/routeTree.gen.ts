@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CapacityRouteImport } from './routes/capacity'
 import { Route as CollectiveRouteImport } from './routes/collective'
 import { Route as CopilotRouteImport } from './routes/copilot'
+import { Route as FarmschoolRouteImport } from './routes/farmschool'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FundingRouteImport } from './routes/funding'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
@@ -60,6 +61,11 @@ const CollectiveRoute = CollectiveRouteImport.update({
 const CopilotRoute = CopilotRouteImport.update({
   id: '/copilot',
   path: '/copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FarmschoolRoute = FarmschoolRouteImport.update({
+  id: '/farmschool',
+  path: '/farmschool',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
   '/copilot': typeof CopilotRoute
+  '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
   '/copilot': typeof CopilotRoute
+  '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
   '/copilot': typeof CopilotRoute
+  '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/opportunities': typeof OpportunitiesRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/capacity'
     | '/collective'
     | '/copilot'
+    | '/farmschool'
     | '/forgot-password'
     | '/funding'
     | '/opportunities'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/capacity'
     | '/collective'
     | '/copilot'
+    | '/farmschool'
     | '/forgot-password'
     | '/funding'
     | '/opportunities'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/capacity'
     | '/collective'
     | '/copilot'
+    | '/farmschool'
     | '/forgot-password'
     | '/funding'
     | '/opportunities'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   CapacityRoute: typeof CapacityRoute
   CollectiveRoute: typeof CollectiveRoute
   CopilotRoute: typeof CopilotRoute
+  FarmschoolRoute: typeof FarmschoolRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   FundingRoute: typeof FundingRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/copilot'
       fullPath: '/copilot'
       preLoaderRoute: typeof CopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/farmschool': {
+      id: '/farmschool'
+      path: '/farmschool'
+      fullPath: '/farmschool'
+      preLoaderRoute: typeof FarmschoolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -482,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   CapacityRoute: CapacityRoute,
   CollectiveRoute: CollectiveRoute,
   CopilotRoute: CopilotRoute,
+  FarmschoolRoute: FarmschoolRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   FundingRoute: FundingRoute,
   OpportunitiesRoute: OpportunitiesRoute,

@@ -40,6 +40,13 @@ function Apps() {
           <p className="text-sm text-muted-foreground">Share your farm and give each person owner, manager, worker or viewer access</p>
         </div>
       </Link>
+      <Link to="/farmschool" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-earth-1 text-background"><GraduationCap className="h-7 w-7" /></span>
+        <div className="flex-1">
+          <p className="font-semibold text-card-foreground">FarmSchool</p>
+          <p className="text-sm text-muted-foreground">Farming courses and your learning progress</p>
+        </div>
+      </Link>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
         {MINI_APPS.map((a, i) => (
           <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
