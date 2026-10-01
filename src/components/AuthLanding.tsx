@@ -6,6 +6,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useGuest } from "@/lib/auth";
+import bg from "@/assets/countryside.jpg";
 
 type Mode = "signin" | "signup";
 
@@ -13,8 +14,10 @@ type Mode = "signin" | "signup";
 export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
   const [mode, setMode] = useState<Mode>(initial);
   return (
-    <div className="flex min-h-screen flex-col bg-primary">
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 lg:flex-row lg:gap-24 lg:px-12">
+    <div className="relative flex min-h-screen flex-col bg-primary">
+      <img src={bg} alt="" className="pointer-events-none fixed inset-y-0 left-0 hidden h-full w-1/2 object-cover lg:block" />
+      <div className="pointer-events-none fixed inset-y-0 left-0 hidden w-1/2 bg-primary/55 lg:block" />
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 relative lg:flex-row lg:gap-24 lg:px-12">
         <div className="flex w-full flex-1 flex-col items-center gap-2 text-primary-foreground">
           <div className="mb-6 flex flex-col items-center gap-3">
             <span className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-foreground text-primary md:h-32 md:w-32">
