@@ -45,7 +45,7 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
           </section>
         </div>
         <div className="flex w-full max-w-xl flex-1 flex-col lg:w-1/2 lg:max-w-none lg:items-center lg:justify-center lg:px-12">
-          <AuthCard key={mode} mode={mode} setMode={setMode} />
+          <div className="w-full max-w-xl"><AuthCard key={mode} mode={mode} setMode={setMode} /></div>
         </div>
       </main>
       <div className="shrink-0 rounded-t-3xl bg-background">
