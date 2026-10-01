@@ -32,13 +32,13 @@ function AuthPage() {
     if (mode === "in") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setBusy(false);
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
       toast.success("Signed in — syncing your animals");
       nav({ to: "/" });
     } else {
       const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
       setBusy(false);
-      if (error) return toast.error(error.message);
+      if (error) { toast.error(error.message); return; }
       toast.success("Check your email to confirm your account");
       setMode("in");
     }
@@ -46,7 +46,7 @@ function AuthPage() {
 
   const google = async () => {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (r.error) return toast.error(r.error.message ?? "Google sign-in failed");
+    if (r.error) { toast.error(r.error.message ?? "Google sign-in failed"); return; }
     if (r.redirected) return;
     nav({ to: "/" });
   };
