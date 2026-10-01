@@ -49,8 +49,9 @@ function Home() {
 
   return (
     <div className="relative min-h-screen">
-      <img src={bg} alt="" width={1024} height={1792} className="fixed inset-0 -z-10 h-full w-full object-cover" />
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-background/10 via-transparent to-background/60" />
+      <img src={bg} alt="" width={1024} height={1792} className="fixed inset-y-0 left-0 -z-10 h-full w-full object-cover md:w-1/2" />
+      <div className="fixed inset-y-0 left-0 -z-10 w-full bg-gradient-to-b from-background/10 via-transparent to-background/60 md:w-1/2" />
+      <div className="fixed inset-y-0 right-0 -z-20 hidden w-1/2 bg-background md:block" />
       <main className="mx-auto max-w-md space-y-4 px-4 pb-32 pt-10 md:grid md:max-w-5xl md:grid-cols-2 md:gap-6 md:space-y-0 md:px-6 md:pb-12 md:pt-24 lg:max-w-7xl lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-4">
         <div className="glass rounded-3xl px-5 py-4">

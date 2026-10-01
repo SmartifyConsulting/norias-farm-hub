@@ -3,8 +3,9 @@ import { useRef, useState } from "react";
 import { Wheat, Send, Square } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { MINI_APPS } from "@/lib/farm";
-import { SAMPLE_OPPORTUNITIES, matchOpportunity, readPassport } from "@/lib/agri";
-import { SAMPLE_CAPACITY, SAMPLE_POOLS, readStore } from "@/lib/network";
+import { matchOpportunity, readPassport } from "@/lib/agri";
+import { readStore } from "@/lib/network";
+import { sharedNow } from "@/lib/shared";
 
 export const Route = createFileRoute("/copilot")({
   head: () => ({
@@ -33,6 +34,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 function buildContext() {
   const passport = readPassport();
+  const { opportunities: SAMPLE_OPPORTUNITIES, capacity: SAMPLE_CAPACITY, pools: SAMPLE_POOLS } = sharedNow();
   const records = Object.fromEntries(MINI_APPS.map((a) => [a.id, readStore<{ title: string; detail?: string; qty?: string; date?: string }[]>(`farmerplus:${a.id}`, []).slice(0, 30).map(({ title, detail, qty, date }) => ({ title, detail, qty, date }))]));
   return JSON.stringify({
     farm: readStore("farmerplus:settings", {}),
@@ -45,7 +47,7 @@ function buildContext() {
     sharedCapacity: [...readStore("farmerplus:capacity", []), ...SAMPLE_CAPACITY],
     collectivePools: SAMPLE_POOLS, poolPledges: readStore("farmerplus:pools", {}),
     batches: readStore("farmerplus:batches", []),
-    notes: "Opportunities, capacity and pools are sample listings, not live market data.",
+    notes: "Opportunities, capacity and pools are fictional sample listings from the shared network, not live market data.",
   });
 }
 

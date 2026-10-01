@@ -26,8 +26,10 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as TraceabilityRouteImport } from './routes/traceability'
+import { Route as VetCheckRouteImport } from './routes/vet-check'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as ApiCopilotRouteImport } from './routes/api/copilot'
+import { Route as ApiVetCheckRouteImport } from './routes/api/vet-check'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -115,6 +117,11 @@ const TraceabilityRoute = TraceabilityRouteImport.update({
   path: '/traceability',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VetCheckRoute = VetCheckRouteImport.update({
+  id: '/vet-check',
+  path: '/vet-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -123,6 +130,11 @@ const WalletRoute = WalletRouteImport.update({
 const ApiCopilotRoute = ApiCopilotRouteImport.update({
   id: '/api/copilot',
   path: '/api/copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVetCheckRoute = ApiVetCheckRouteImport.update({
+  id: '/api/vet-check',
+  path: '/api/vet-check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAppIdRoute = AppAppIdRouteImport.update({
@@ -149,8 +161,10 @@ export interface FileRoutesByFullPath {
   '/simulator': typeof SimulatorRoute
   '/team': typeof TeamRoute
   '/traceability': typeof TraceabilityRoute
+  '/vet-check': typeof VetCheckRoute
   '/wallet': typeof WalletRoute
   '/api/copilot': typeof ApiCopilotRoute
+  '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRoutesByTo {
@@ -171,8 +185,10 @@ export interface FileRoutesByTo {
   '/simulator': typeof SimulatorRoute
   '/team': typeof TeamRoute
   '/traceability': typeof TraceabilityRoute
+  '/vet-check': typeof VetCheckRoute
   '/wallet': typeof WalletRoute
   '/api/copilot': typeof ApiCopilotRoute
+  '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRoutesById {
@@ -194,8 +210,10 @@ export interface FileRoutesById {
   '/simulator': typeof SimulatorRoute
   '/team': typeof TeamRoute
   '/traceability': typeof TraceabilityRoute
+  '/vet-check': typeof VetCheckRoute
   '/wallet': typeof WalletRoute
   '/api/copilot': typeof ApiCopilotRoute
+  '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
 }
 export interface FileRouteTypes {
@@ -218,8 +236,10 @@ export interface FileRouteTypes {
     | '/simulator'
     | '/team'
     | '/traceability'
+    | '/vet-check'
     | '/wallet'
     | '/api/copilot'
+    | '/api/vet-check'
     | '/app/$appId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -240,8 +260,10 @@ export interface FileRouteTypes {
     | '/simulator'
     | '/team'
     | '/traceability'
+    | '/vet-check'
     | '/wallet'
     | '/api/copilot'
+    | '/api/vet-check'
     | '/app/$appId'
   id:
     | '__root__'
@@ -262,8 +284,10 @@ export interface FileRouteTypes {
     | '/simulator'
     | '/team'
     | '/traceability'
+    | '/vet-check'
     | '/wallet'
     | '/api/copilot'
+    | '/api/vet-check'
     | '/app/$appId'
   fileRoutesById: FileRoutesById
 }
@@ -285,8 +309,10 @@ export interface RootRouteChildren {
   SimulatorRoute: typeof SimulatorRoute
   TeamRoute: typeof TeamRoute
   TraceabilityRoute: typeof TraceabilityRoute
+  VetCheckRoute: typeof VetCheckRoute
   WalletRoute: typeof WalletRoute
   ApiCopilotRoute: typeof ApiCopilotRoute
+  ApiVetCheckRoute: typeof ApiVetCheckRoute
   AppAppIdRoute: typeof AppAppIdRoute
 }
 
@@ -411,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TraceabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vet-check': {
+      id: '/vet-check'
+      path: '/vet-check'
+      fullPath: '/vet-check'
+      preLoaderRoute: typeof VetCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wallet': {
       id: '/wallet'
       path: '/wallet'
@@ -423,6 +456,13 @@ declare module '@tanstack/react-router' {
       path: '/api/copilot'
       fullPath: '/api/copilot'
       preLoaderRoute: typeof ApiCopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/vet-check': {
+      id: '/api/vet-check'
+      path: '/api/vet-check'
+      fullPath: '/api/vet-check'
+      preLoaderRoute: typeof ApiVetCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/$appId': {
@@ -453,8 +493,10 @@ const rootRouteChildren: RootRouteChildren = {
   SimulatorRoute: SimulatorRoute,
   TeamRoute: TeamRoute,
   TraceabilityRoute: TraceabilityRoute,
+  VetCheckRoute: VetCheckRoute,
   WalletRoute: WalletRoute,
   ApiCopilotRoute: ApiCopilotRoute,
+  ApiVetCheckRoute: ApiVetCheckRoute,
   AppAppIdRoute: AppAppIdRoute,
 }
 export const routeTree = rootRouteImport

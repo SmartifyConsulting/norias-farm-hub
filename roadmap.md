@@ -23,3 +23,10 @@
 - [x] Farm Team shared space with owner/manager/worker/viewer roles (/team, App Store card)
 - [x] Link tasks, inputs/sprays, maintenance, costs to field + crop cycle
 - [x] Calendar + weekly overview + in-app reminders for Tasks and Crop Cycles
+
+## Oct 1 batch
+- [ ] Home bg left half only; tab active black, lighter grey hover
+- [ ] Animal Health recurring reminders with completion tracking
+- [ ] AI Animal Symptom Check (text + photo)
+- [ ] Shared listings (opportunities, capacity, pools) in cloud + farmer profiles
+- [ ] Seed data (Happy Acres Coop demo farm, ~40 farmers, listings) + SQL file in Files

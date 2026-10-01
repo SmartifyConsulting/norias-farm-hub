@@ -57,7 +57,7 @@ export function syncAll() {
         const unsynced = read<FarmRecord[]>(key(app), []).filter((r) => r.sync !== "synced");
         if (unsynced.length) {
           const { error } = await supabase.from("animal_records").upsert(
-            unsynced.map((r) => ({ id: r.id, app, title: r.title, detail: r.detail, qty: r.qty ?? "", recorded_at: r.date, updated_at: new Date().toISOString(), farm_id: r.farmId === undefined ? activeFarmId() : r.farmId, field_id: r.fieldId ?? "", crop_id: r.cropId ?? "", due_on: r.due || null, ends_on: r.end || null })),
+            unsynced.map((r) => ({ id: r.id, app, title: r.title, detail: r.detail, qty: r.qty ?? "", recorded_at: r.date, updated_at: new Date().toISOString(), farm_id: r.farmId === undefined ? activeFarmId() : r.farmId, field_id: r.fieldId ?? "", crop_id: r.cropId ?? "", due_on: r.due || null, ends_on: r.end || null, animal_id: r.animalId ?? "", repeat_days: r.repeatDays ?? null, completed: (r.completed ?? []) as never })),
           );
           if (error) throw error;
         }
@@ -67,7 +67,7 @@ export function syncAll() {
       if (error) throw error;
       const now = new Date().toISOString();
       for (const app of APPS) {
-        const merged: FarmRecord[] = (data ?? []).filter((r) => r.app === app).map((r) => ({ id: r.id, title: r.title, detail: r.detail, qty: r.qty, date: r.recorded_at, sync: "synced", syncedAt: now, farmId: r.farm_id, fieldId: r.field_id || undefined, cropId: r.crop_id || undefined, due: r.due_on ?? undefined, end: r.ends_on ?? undefined }));
+        const merged: FarmRecord[] = (data ?? []).filter((r) => r.app === app).map((r) => ({ id: r.id, title: r.title, detail: r.detail, qty: r.qty, date: r.recorded_at, sync: "synced", syncedAt: now, farmId: r.farm_id, fieldId: r.field_id || undefined, cropId: r.crop_id || undefined, due: r.due_on ?? undefined, end: r.ends_on ?? undefined, animalId: r.animal_id || undefined, repeatDays: r.repeat_days ?? undefined, completed: Array.isArray(r.completed) ? (r.completed as string[]) : [] }));
         const serverIds = new Set(merged.map((r) => r.id));
         const dead = new Set(read<string[]>(tombKey(app), []));
         const fresh = read<FarmRecord[]>(key(app), []).filter((r) => r.sync !== "synced" && !serverIds.has(r.id) && !dead.has(r.id));

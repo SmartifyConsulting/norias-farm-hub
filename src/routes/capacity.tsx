@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { Search, Trash2 } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { usePassport, effectiveSource } from "@/lib/agri";
-import { SAMPLE_CAPACITY, useCapacity, uid, type CapacityKind, type CapacityListing } from "@/lib/network";
+import { useShared } from "@/lib/shared";
+import { useCapacity, uid, type CapacityKind, type CapacityListing } from "@/lib/network";
 
 export const Route = createFileRoute("/capacity")({
   head: () => ({
@@ -25,6 +26,7 @@ const input = "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-
 
 function CapacityPage() {
   const [own, setOwn] = useCapacity();
+  const { capacity: SAMPLE_CAPACITY } = useShared();
   const [passport] = usePassport();
   const [q, setQ] = useState("");
   const [kind, setKind] = useState<CapacityKind | "All">("All");
@@ -41,7 +43,7 @@ function CapacityPage() {
     return n;
   }, [passport]);
 
-  const list = [...own, ...SAMPLE_CAPACITY]
+  const list = [...own, ...SAMPLE_CAPACITY.filter((c) => !own.some((o) => o.id === c.id))]
     .filter((c) => kind === "All" || c.kind === kind)
     .filter((c) => !q || `${c.title} ${c.location} ${c.provider}`.toLowerCase().includes(q.toLowerCase()))
     .map((c) => {

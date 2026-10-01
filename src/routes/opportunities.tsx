@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { addToPipeline } from "@/lib/network";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { Screen } from "@/components/Dock";
-import { SAMPLE_OPPORTUNITIES, matchOpportunity, useDemand, usePassport, type Opportunity, type OppType } from "@/lib/agri";
+import { useShared } from "@/lib/shared";
+import { matchOpportunity, useDemand, usePassport, type Opportunity, type OppType } from "@/lib/agri";
 
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
@@ -23,9 +24,10 @@ const TYPES: (OppType | "All")[] = ["All", "Buyer demand", "Contract farming", "
 function OpportunitiesPage() {
   const [p] = usePassport();
   const [demand, setDemand] = useDemand();
+  const { opportunities: SAMPLE_OPPORTUNITIES } = useShared();
   const [filter, setFilter] = useState<(typeof TYPES)[number]>("All");
   const [tab, setTab] = useState<"matches" | "demand">("matches");
-  const all = useMemo(() => [...demand, ...SAMPLE_OPPORTUNITIES], [demand]);
+  const all = useMemo(() => [...demand, ...SAMPLE_OPPORTUNITIES], [demand, SAMPLE_OPPORTUNITIES]);
   const ranked = all
     .filter((o) => filter === "All" || o.type === filter)
     .map((o) => ({ o, m: matchOpportunity(p, o) }))
@@ -117,6 +119,7 @@ function DemandBoard({ demand, setDemand }: { demand: Opportunity[]; setDemand: 
     setF({ crop: "", volume: "", quality: "", location: "", period: "", frequency: "", certs: "", terms: "" });
     toast.success("Demand published");
   };
+  const { opportunities: SAMPLE_OPPORTUNITIES } = useShared();
   const board = [...demand, ...SAMPLE_OPPORTUNITIES.filter((o) => o.type === "Buyer demand" || o.type === "Contract farming")];
   return (
     <div className="md:grid md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] md:gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">

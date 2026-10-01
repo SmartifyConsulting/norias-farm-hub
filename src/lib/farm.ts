@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Warehouse, PawPrint, NotebookPen, Wheat, Map, Package, ListTodo, Sprout, Wrench, Stethoscope, Receipt, type LucideIcon } from "lucide-react";
+import { Warehouse, PawPrint, NotebookPen, Wheat, Map, Package, ListTodo, Sprout, Wrench, Stethoscope, Receipt, Syringe, type LucideIcon } from "lucide-react";
 
 export type SyncStatus = "synced" | "pending" | "local";
 export type FarmRecord = {
@@ -16,6 +16,9 @@ export type FarmRecord = {
   cropId?: string | undefined;
   due?: string | undefined;
   end?: string | undefined;
+  animalId?: string | undefined;
+  repeatDays?: number | undefined;
+  completed?: string[] | undefined;
 };
 
 export type MiniApp = {
@@ -30,12 +33,15 @@ export type MiniApp = {
   /** Date inputs: [start/due label, optional end label]. Shown on the calendar. */
   dates?: [string] | [string, string];
   /** Link to a field and/or crop cycle. */
-  links?: ("field" | "crop")[];
+  links?: ("field" | "crop" | "animal")[];
+  /** Recurring schedule with completion tracking. */
+  recurring?: boolean;
 };
 
 export const MINI_APPS: MiniApp[] = [
   { id: "farm", name: "My Farm", emoji: "🏡", icon: Warehouse, blurb: "Buildings, equipment & assets", titleLabel: "Asset", detailLabel: "Notes", qtyLabel: "Value" },
   { id: "animals", name: "My Animals", emoji: "🐄", icon: PawPrint, blurb: "Herd records & health", titleLabel: "Animal / tag", detailLabel: "Breed & health", qtyLabel: "Weight (kg)" },
+  { id: "health", name: "Animal Health", emoji: "💉", icon: Syringe, blurb: "Vaccinations, treatments & checkups", titleLabel: "Vaccination / treatment / checkup", detailLabel: "Product, dose or vet notes", dates: ["Next due"], links: ["animal"], recurring: true },
   { id: "diary", name: "Farm Diary", emoji: "📔", icon: NotebookPen, blurb: "Daily notes & tasks", titleLabel: "Entry", detailLabel: "What happened" },
   { id: "harvest", name: "Harvest", emoji: "🌾", icon: Wheat, blurb: "Yields by crop & season", titleLabel: "Crop", detailLabel: "Field / notes", qtyLabel: "Yield (kg)" },
   { id: "fields", name: "Field Mapping", emoji: "🗺️", icon: Map, blurb: "Plots, sizes & rotations", titleLabel: "Field name", detailLabel: "Crop / rotation", qtyLabel: "Area (ha)" },

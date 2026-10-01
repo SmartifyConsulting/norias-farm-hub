@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Screen } from "@/components/Dock";
-import { SAMPLE_POOLS, uid, useOwnPools, usePools, type Pool } from "@/lib/network";
+import { useShared } from "@/lib/shared";
+import { uid, useOwnPools, usePools, type Pool } from "@/lib/network";
 
 export const Route = createFileRoute("/collective")({
   head: () => ({
@@ -24,6 +25,7 @@ function CollectivePage() {
   const [mine, setMine] = usePools();
   const [own, setOwn] = useOwnPools();
   const [tab, setTab] = useState<"buying" | "supply">("buying");
+  const { pools: SAMPLE_POOLS } = useShared();
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [f, setF] = useState({ title: "", item: "", unit: "t", target: "", location: "", closes: "", benefit: "" });
 
