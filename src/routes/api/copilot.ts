@@ -47,14 +47,11 @@ export const Route = createFileRoute("/api/copilot")({
           else { try { msg = JSON.parse(text)?.error?.message ?? msg; } catch { /* keep */ } }
           return new Response(msg, { status: upstream.status });
         }
-        const reader = upstream.body.getReader();
         const dec = new TextDecoder(), enc = new TextEncoder();
         let buf = "";
-        const stream = new ReadableStream({
-          async pull(ctrl) {
-            const { value, done } = await reader.read();
-            if (done) { ctrl.close(); return; }
-            buf += dec.decode(value, { stream: true });
+        const stream = upstream.body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+          transform(chunk, ctrl) {
+            buf += dec.decode(chunk, { stream: true });
             const lines = buf.split("\n");
             buf = lines.pop() ?? "";
             for (const l of lines) {
@@ -68,8 +65,7 @@ export const Route = createFileRoute("/api/copilot")({
               } catch { /* partial */ }
             }
           },
-          cancel() { reader.cancel(); },
-        });
+        }));
         return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" } });
       },
     },
