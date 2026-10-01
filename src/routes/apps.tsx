@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
 import { MINI_APPS } from "@/lib/farm";
-import { APP_PHOTOS } from "@/lib/app-photos";
+import { appTone } from "@/lib/app-colors";
 import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat, Stethoscope } from "lucide-react";
 
 const INTEL = [
@@ -34,34 +34,34 @@ function Apps() {
   return (
     <Screen title="App Store">
       <Link to="/team" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-        <img src={APP_PHOTOS["team"]} alt="" loading="lazy" width={56} height={56} className="h-14 w-14 shrink-0 rounded-full object-cover" />
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-ink text-background"><Users className="h-7 w-7" /></span>
         <div className="flex-1">
           <p className="font-semibold text-card-foreground">Farm Team</p>
           <p className="text-sm text-muted-foreground">Share your farm and give each person owner, manager, worker or viewer access</p>
         </div>
       </Link>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
-        {MINI_APPS.map((a) => (
+        {MINI_APPS.map((a, i) => (
           <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-            <img src={APP_PHOTOS[a.id]} alt="" loading="lazy" width={56} height={56} className="h-14 w-14 shrink-0 rounded-full object-cover" />
+            <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(i)}`}><a.icon className="h-7 w-7" /></span>
             <div className="flex-1">
               <p className="font-semibold text-card-foreground">{a.name}</p>
               <p className="text-sm text-muted-foreground">{a.blurb}</p>
             </div>
-            <span className="rounded-full bg-primary px-4 py-1 text-xs font-bold text-primary-foreground">OPEN</span>
+            <span className="rounded-full bg-brand-green px-4 py-1 text-xs font-bold text-background">OPEN</span>
           </Link>
         ))}
       </div>
       <h2 className="mb-3 mt-8 font-display text-lg font-semibold">Farm intelligence</h2>
       <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
-        {INTEL.map((a) => (
+        {INTEL.map((a, i) => (
           <Link key={a.to} to={a.to} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-            <img src={APP_PHOTOS[a.to]} alt="" loading="lazy" width={56} height={56} className="h-14 w-14 shrink-0 rounded-full object-cover" />
+            <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(i + 2)}`}><a.icon className="h-7 w-7" /></span>
             <div className="flex-1">
               <p className="font-semibold text-card-foreground">{a.name}</p>
               <p className="text-sm text-muted-foreground">{a.blurb}</p>
             </div>
-            <span className="rounded-full bg-primary px-4 py-1 text-xs font-bold text-primary-foreground">OPEN</span>
+            <span className="rounded-full bg-brand-green px-4 py-1 text-xs font-bold text-background">OPEN</span>
           </Link>
         ))}
       </div>
