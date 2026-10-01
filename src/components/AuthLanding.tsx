@@ -5,6 +5,7 @@ import { ShieldCheck, Sprout } from "lucide-react";
 import { PasswordInput } from "@/components/PasswordInput";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useGuest } from "@/lib/auth";
 
 type Mode = "signin" | "signup";
 
@@ -55,6 +56,7 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
 
 function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void }) {
   const nav = useNavigate();
+  const [, setGuest] = useGuest();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -118,7 +120,7 @@ function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
       <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="mt-4 w-full text-center text-sm text-info">
         {mode === "signin" ? "New here? Create an account" : "Have an account? Sign in"}
       </button>
-      <Link to="/" search={{}} className="mt-2 block text-center text-xs text-muted-foreground" onClick={() => sessionStorage.setItem("farmerplus:guest", "1")}>Continue without an account</Link>
+      <button type="button" onClick={() => { setGuest(true); nav({ to: "/" }); }} className="mt-2 block w-full text-center text-xs text-muted-foreground hover:text-foreground">Continue without an account</button>
     </div>
   );
 }

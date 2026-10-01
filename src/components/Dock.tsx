@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Home, LayoutGrid, Wallet, Settings, Search, Sprout, LogIn } from "lucide-react";
-import { useUser } from "@/lib/auth";
+import { useGuest, useUser } from "@/lib/auth";
 import { MINI_APPS, useOnline } from "@/lib/farm";
 
 const items = [
@@ -15,7 +15,8 @@ const items = [
 function useNavHidden() {
   const { pathname } = useLocation();
   const { user, loading } = useUser();
-  return pathname === "/auth" || (pathname === "/" && !loading && !user);
+  const [guest] = useGuest();
+  return pathname === "/auth" || (pathname === "/" && !loading && !user && !guest);
 }
 
 /** Mobile (< md): floating glass dock. */

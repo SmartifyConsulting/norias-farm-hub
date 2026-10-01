@@ -15,3 +15,20 @@ export function useUser() {
   }, []);
   return { user, loading };
 }
+
+const GUEST = "farmerplus:guest";
+/** Signed-out users who chose to keep using the app on-device only. */
+export function useGuest() {
+  const [guest, setGuest] = useState(false);
+  useEffect(() => {
+    const u = () => setGuest(localStorage.getItem(GUEST) === "1");
+    u();
+    window.addEventListener("farmerplus:guest", u);
+    return () => window.removeEventListener("farmerplus:guest", u);
+  }, []);
+  const set = (v: boolean) => {
+    if (v) localStorage.setItem(GUEST, "1"); else localStorage.removeItem(GUEST);
+    window.dispatchEvent(new Event("farmerplus:guest"));
+  };
+  return [guest, set] as const;
+}
