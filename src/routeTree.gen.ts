@@ -13,8 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppsRouteImport } from './routes/apps'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
+import { Route as PassportRouteImport } from './routes/passport'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
 
@@ -38,6 +41,16 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpportunitiesRoute = OpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PassportRoute = PassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -46,6 +59,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulatorRoute = SimulatorRouteImport.update({
+  id: '/simulator',
+  path: '/simulator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WalletRoute = WalletRouteImport.update({
@@ -64,8 +82,11 @@ export interface FileRoutesByFullPath {
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/passport': typeof PassportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/simulator': typeof SimulatorRoute
   '/wallet': typeof WalletRoute
   '/app/$appId': typeof AppAppIdRoute
 }
@@ -74,8 +95,11 @@ export interface FileRoutesByTo {
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/passport': typeof PassportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/simulator': typeof SimulatorRoute
   '/wallet': typeof WalletRoute
   '/app/$appId': typeof AppAppIdRoute
 }
@@ -85,8 +109,11 @@ export interface FileRoutesById {
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/passport': typeof PassportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/simulator': typeof SimulatorRoute
   '/wallet': typeof WalletRoute
   '/app/$appId': typeof AppAppIdRoute
 }
@@ -97,8 +124,11 @@ export interface FileRouteTypes {
     | '/apps'
     | '/auth'
     | '/forgot-password'
+    | '/opportunities'
+    | '/passport'
     | '/reset-password'
     | '/settings'
+    | '/simulator'
     | '/wallet'
     | '/app/$appId'
   fileRoutesByTo: FileRoutesByTo
@@ -107,8 +137,11 @@ export interface FileRouteTypes {
     | '/apps'
     | '/auth'
     | '/forgot-password'
+    | '/opportunities'
+    | '/passport'
     | '/reset-password'
     | '/settings'
+    | '/simulator'
     | '/wallet'
     | '/app/$appId'
   id:
@@ -117,8 +150,11 @@ export interface FileRouteTypes {
     | '/apps'
     | '/auth'
     | '/forgot-password'
+    | '/opportunities'
+    | '/passport'
     | '/reset-password'
     | '/settings'
+    | '/simulator'
     | '/wallet'
     | '/app/$appId'
   fileRoutesById: FileRoutesById
@@ -128,8 +164,11 @@ export interface RootRouteChildren {
   AppsRoute: typeof AppsRoute
   AuthRoute: typeof AuthRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  OpportunitiesRoute: typeof OpportunitiesRoute
+  PassportRoute: typeof PassportRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
+  SimulatorRoute: typeof SimulatorRoute
   WalletRoute: typeof WalletRoute
   AppAppIdRoute: typeof AppAppIdRoute
 }
@@ -164,6 +203,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/opportunities': {
+      id: '/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/passport': {
+      id: '/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof PassportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -176,6 +229,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulator': {
+      id: '/simulator'
+      path: '/simulator'
+      fullPath: '/simulator'
+      preLoaderRoute: typeof SimulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/wallet': {
@@ -200,8 +260,11 @@ const rootRouteChildren: RootRouteChildren = {
   AppsRoute: AppsRoute,
   AuthRoute: AuthRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  OpportunitiesRoute: OpportunitiesRoute,
+  PassportRoute: PassportRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
+  SimulatorRoute: SimulatorRoute,
   WalletRoute: WalletRoute,
   AppAppIdRoute: AppAppIdRoute,
 }
