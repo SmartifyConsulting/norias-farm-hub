@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import bg from "@/assets/countryside.jpg";
+import { BACKGROUNDS, useBackground } from "@/lib/background";
 import { Weather } from "@/components/Weather";
 import { toast } from "sonner";
 import { MINI_APPS, allRecordCounts, syncAll, useOnline, useSettings } from "@/lib/farm";
@@ -25,6 +25,7 @@ function Home() {
   const { user, loading } = useUser();
   const [guest] = useGuest();
   const [syncing, setSyncing] = useState(false);
+  const [bgKey, setBgKey] = useBackground();
   const doSync = async () => {
     setSyncing(true);
     const r = await syncAll();
@@ -47,7 +48,15 @@ function Home() {
 
   return (
     <div className="relative min-h-screen">
-      <img src={bg} alt="" width={1024} height={1792} className="fixed inset-0 -z-10 h-full w-full object-cover" />
+      <img src={BACKGROUNDS[bgKey]} alt="" width={1024} height={1792} className="fixed inset-0 -z-10 h-full w-full object-cover" />
+      <div className="glass fixed right-3 top-3 z-20 flex gap-1 rounded-full p-1 md:top-20">
+        {(["meadow", "countryside"] as const).map((k) => (
+          <button key={k} type="button" onClick={() => setBgKey(k)} aria-pressed={bgKey === k}
+            className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${bgKey === k ? "bg-primary text-primary-foreground" : "text-foreground"}`}>
+            {k}
+          </button>
+        ))}
+      </div>
       <div className="fixed inset-0 -z-10 bg-gradient-to-b from-background/10 via-transparent to-background/60" />
       <main className="mx-auto max-w-md space-y-4 px-4 pb-32 pt-10 md:grid md:max-w-5xl md:grid-cols-2 md:gap-6 md:space-y-0 md:px-6 md:pb-12 md:pt-24 lg:max-w-7xl lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-4">
