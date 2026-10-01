@@ -11,6 +11,11 @@ export type FarmRecord = {
   sync: SyncStatus;
   syncedAt?: string;
   syncError?: string | undefined;
+  farmId?: string | null | undefined;
+  fieldId?: string | undefined;
+  cropId?: string | undefined;
+  due?: string | undefined;
+  end?: string | undefined;
 };
 
 export type MiniApp = {
@@ -22,6 +27,10 @@ export type MiniApp = {
   titleLabel: string;
   detailLabel: string;
   qtyLabel?: string;
+  /** Date inputs: [start/due label, optional end label]. Shown on the calendar. */
+  dates?: [string] | [string, string];
+  /** Link to a field and/or crop cycle. */
+  links?: ("field" | "crop")[];
 };
 
 export const MINI_APPS: MiniApp[] = [
@@ -31,16 +40,16 @@ export const MINI_APPS: MiniApp[] = [
   { id: "harvest", name: "Harvest", emoji: "🌾", icon: Wheat, blurb: "Yields by crop & season", titleLabel: "Crop", detailLabel: "Field / notes", qtyLabel: "Yield (kg)" },
   { id: "fields", name: "Field Mapping", emoji: "🗺️", icon: Map, blurb: "Plots, sizes & rotations", titleLabel: "Field name", detailLabel: "Crop / rotation", qtyLabel: "Area (ha)" },
   { id: "stock", name: "Stock", emoji: "📦", icon: Package, blurb: "Feed, seed & supplies", titleLabel: "Item", detailLabel: "Location", qtyLabel: "Quantity" },
-  { id: "tasks", name: "Tasks", emoji: "✅", icon: ListTodo, blurb: "Jobs, assignees & due dates", titleLabel: "Task", detailLabel: "Field / assignee / notes", qtyLabel: "Due date (YYYY-MM-DD)" },
-  { id: "crops", name: "Crop Cycles", emoji: "🌱", icon: Sprout, blurb: "Plantings from sowing to harvest", titleLabel: "Crop & field", detailLabel: "Variety / planting date / stage", qtyLabel: "Area (ha)" },
-  { id: "treatments", name: "Inputs & Sprays", emoji: "🧪", icon: Stethoscope, blurb: "Fertiliser, spray & vet treatments", titleLabel: "Product", detailLabel: "Field or animal / rate / withholding", qtyLabel: "Amount used" },
-  { id: "maintenance", name: "Maintenance", emoji: "🔧", icon: Wrench, blurb: "Equipment services & repairs", titleLabel: "Equipment", detailLabel: "Work done / next service", qtyLabel: "Cost (R)" },
-  { id: "finance", name: "Costs & Sales", emoji: "🧾", icon: Receipt, blurb: "Expenses and income by enterprise", titleLabel: "Item (cost or sale)", detailLabel: "Enterprise / buyer / supplier", qtyLabel: "Amount (R, minus for cost)" },
+  { id: "tasks", name: "Tasks", emoji: "✅", icon: ListTodo, blurb: "Jobs, assignees & due dates", titleLabel: "Task", detailLabel: "Field / assignee / notes", dates: ["Due date"], links: ["field", "crop"] },
+  { id: "crops", name: "Crop Cycles", emoji: "🌱", icon: Sprout, blurb: "Plantings from sowing to harvest", titleLabel: "Crop & field", detailLabel: "Variety / stage", qtyLabel: "Area (ha)", dates: ["Planting date", "Harvest date"], links: ["field"] },
+  { id: "treatments", name: "Inputs & Sprays", emoji: "🧪", icon: Stethoscope, blurb: "Fertiliser, spray & vet treatments", titleLabel: "Product", detailLabel: "Field or animal / rate / withholding", qtyLabel: "Amount used", dates: ["Date"], links: ["field", "crop"] },
+  { id: "maintenance", name: "Maintenance", emoji: "🔧", icon: Wrench, blurb: "Equipment services & repairs", titleLabel: "Equipment", detailLabel: "Work done / next service", qtyLabel: "Cost (R)", dates: ["Date"], links: ["field", "crop"] },
+  { id: "finance", name: "Costs & Sales", emoji: "🧾", icon: Receipt, blurb: "Expenses and income by enterprise", titleLabel: "Item (cost or sale)", detailLabel: "Enterprise / buyer / supplier", qtyLabel: "Amount (R, minus for cost)", dates: ["Date"], links: ["field", "crop"] },
 ];
 
 const key = (app: string) => `farmerplus:${app}`;
 
-function read(app: string): FarmRecord[] {
+export function read(app: string): FarmRecord[] {
   try {
     return JSON.parse(localStorage.getItem(key(app)) || "[]");
   } catch {

@@ -17,3 +17,4 @@
 - Signed-out Home shows Heita-style AuthLanding unless the user picked "continue without an account" (localStorage farmerplus:guest).
 - AgriSphere features (capacity, risks, collective, pipeline/outcomes, traceability, role, notifications) are local-first in src/lib/network.ts via useStore (localStorage farmerplus:* keys + farmerplus:change event) — matches the existing offline-first model.
 - Farm Copilot streams through the /api/copilot server route; the browser sends its local farm data as context because records live on the device. Do not pass request.signal to the upstream fetch (stalls the stream in dev).
+- Shared farms: farms/farm_members/farm_invites with farm_role_of() security-definer for RLS; records carry farm_id from the active farm (localStorage farmerplus:activeFarm) — keeps private and team records in one table.

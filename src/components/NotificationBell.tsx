@@ -1,10 +1,14 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNotices } from "@/lib/notices";
 
 export function NotificationBell({ className = "" }: { className?: string }) {
-  const { notices, unread, markAll } = useNotices();
+  const { notices, unread: u, markAll } = useNotices();
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
+  const unread = ready ? u : [];
   return (
     <Popover onOpenChange={(o) => { if (!o) markAll(); }}>
       <PopoverTrigger aria-label={`Notifications (${unread.length} new)`} className={`relative flex h-9 w-9 items-center justify-center rounded-full ${className}`}>

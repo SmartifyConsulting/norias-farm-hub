@@ -17,7 +17,12 @@ export type Database = {
       animal_records: {
         Row: {
           app: string
+          crop_id: string
           detail: string
+          due_on: string | null
+          ends_on: string | null
+          farm_id: string | null
+          field_id: string
           id: string
           qty: string
           recorded_at: string
@@ -27,7 +32,12 @@ export type Database = {
         }
         Insert: {
           app?: string
+          crop_id?: string
           detail?: string
+          due_on?: string | null
+          ends_on?: string | null
+          farm_id?: string | null
+          field_id?: string
           id: string
           qty?: string
           recorded_at?: string
@@ -37,13 +47,114 @@ export type Database = {
         }
         Update: {
           app?: string
+          crop_id?: string
           detail?: string
+          due_on?: string | null
+          ends_on?: string | null
+          farm_id?: string | null
+          field_id?: string
           id?: string
           qty?: string
           recorded_at?: string
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animal_records_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farm_invites: {
+        Row: {
+          created_at: string
+          created_by: string
+          email: string
+          farm_id: string
+          id: string
+          role: Database["public"]["Enums"]["farm_role"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          email: string
+          farm_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["farm_role"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          email?: string
+          farm_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["farm_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_invites_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farm_members: {
+        Row: {
+          created_at: string
+          email: string
+          farm_id: string
+          role: Database["public"]["Enums"]["farm_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          farm_id: string
+          role?: Database["public"]["Enums"]["farm_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          farm_id?: string
+          role?: Database["public"]["Enums"]["farm_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "farm_members_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
         }
         Relationships: []
       }
@@ -73,10 +184,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_farm_invite: { Args: { _invite: string }; Returns: string }
+      create_farm: { Args: { _name: string }; Returns: string }
+      farm_role_of: {
+        Args: { _farm: string }
+        Returns: Database["public"]["Enums"]["farm_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      farm_role: "owner" | "manager" | "worker" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -203,6 +319,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      farm_role: ["owner", "manager", "worker", "viewer"],
+    },
   },
 } as const

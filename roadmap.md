@@ -17,5 +17,9 @@
 - [x] Farm copilot (/copilot)
 - [x] Home action dashboard, notification bell, role + notification preferences
 - [x] Cloud sync for all mini-apps and AgriSphere tools
-- [ ] Shared farm workspace + team roles (next phase)
+
 - [x] Operating foundation mini-apps: tasks, crop cycles, inputs/sprays, maintenance, costs & sales (stock, fields, harvest existed)
+- [x] Verified two-device sync (task, crop cycle, cost)
+- [x] Farm Team shared space with owner/manager/worker/viewer roles (/team, App Store card)
+- [x] Link tasks, inputs/sprays, maintenance, costs to field + crop cycle
+- [x] Calendar + weekly overview + in-app reminders for Tasks and Crop Cycles

@@ -105,7 +105,7 @@ export const useBatches = () => useStore<Batch[]>("farmerplus:batches", []);
 export type Role = "Farmer" | "Farm manager" | "Buyer" | "Agricultural supplier" | "Agronomist" | "Equipment owner" | "Logistics provider" | "Storage provider" | "Finance provider" | "Cooperative" | "Agricultural programme";
 export const ROLES: Role[] = ["Farmer", "Farm manager", "Buyer", "Agricultural supplier", "Agronomist", "Equipment owner", "Logistics provider", "Storage provider", "Finance provider", "Cooperative", "Agricultural programme"];
 export const useRole = () => useStore<Role>("farmerplus:role", "Farmer");
-export const NOTIFY_TYPES = ["New matching opportunity", "Opportunity closing soon", "Missing requirement", "Risk detected", "Commitment approaching", "Outcome due for recording", "Verification expiring"] as const;
+export const NOTIFY_TYPES = ["New matching opportunity", "Opportunity closing soon", "Missing requirement", "Risk detected", "Commitment approaching", "Outcome due for recording", "Verification expiring", "Task or crop date due"] as const;
 export type NotifyType = (typeof NOTIFY_TYPES)[number];
 export const useNotifyPrefs = () => useStore<Record<string, boolean>>("farmerplus:notify", {});
 export const useReadNotices = () => useStore<string[]>("farmerplus:notify:read", []);
