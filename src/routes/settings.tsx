@@ -29,21 +29,7 @@ function SettingsPage() {
   const { user } = useUser();
   const qc = useQueryClient();
   const nav = useNavigate();
-  const signOut = async () => {
-    const { syncAnimals, unsyncedAnimalCount } = await import("@/lib/animal-sync");
-    if (unsyncedAnimalCount() > 0) {
-      const r = await syncAnimals();
-      if (!r.ok && !confirm(`${unsyncedAnimalCount()} changes haven't reached the cloud yet (${r.error}). Sign out and lose them?`)) return;
-    }
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    localStorage.removeItem("farmerplus:animals");
-    localStorage.removeItem("farmerplus:animals:deleted");
-    window.dispatchEvent(new Event("farmerplus:change"));
-    toast("Signed out");
-    nav({ to: "/auth", replace: true });
-  };
+  const signOut = () => signOutEverywhere(nav, () => { qc.cancelQueries(); qc.clear(); });
   const input = "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
   const [locating, setLocating] = useState(false);
   const [town, setTown] = useState("");
