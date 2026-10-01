@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      animal_records: {
+        Row: {
+          detail: string
+          id: string
+          qty: string
+          recorded_at: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          detail?: string
+          id: string
+          qty?: string
+          recorded_at?: string
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          detail?: string
+          id?: string
+          qty?: string
+          recorded_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
