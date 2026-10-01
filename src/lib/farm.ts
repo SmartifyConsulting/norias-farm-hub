@@ -43,7 +43,12 @@ function read(app: string): FarmRecord[] {
 
 export function useRecords(app: string) {
   const [records, setRecords] = useState<FarmRecord[]>([]);
-  useEffect(() => setRecords(read(app)), [app]);
+  useEffect(() => {
+    const u = () => setRecords(read(app));
+    u();
+    window.addEventListener("farmerplus:change", u);
+    return () => window.removeEventListener("farmerplus:change", u);
+  }, [app]);
   const save = useCallback(
     (next: FarmRecord[]) => {
       localStorage.setItem(key(app), JSON.stringify(next));
@@ -65,13 +70,17 @@ export function allRecordCounts() {
   return { total, pending };
 }
 
-/** Simulated sync: marks all pending/local records as synced when online. */
-export function syncAll() {
+/** Animals sync to the cloud for real; other apps are still simulated locally. */
+export async function syncAll() {
+  const { syncAnimals } = await import("./animal-sync");
+  const res = await syncAnimals();
   for (const a of MINI_APPS) {
+    if (a.id === "animals") continue;
     const r = read(a.id).map((x) => ({ ...x, sync: "synced" as const }));
     localStorage.setItem(key(a.id), JSON.stringify(r));
   }
   window.dispatchEvent(new Event("farmerplus:change"));
+  return res;
 }
 
 export function useOnline() {
