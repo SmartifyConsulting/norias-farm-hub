@@ -31,7 +31,7 @@ function SettingsPage() {
     const { syncAnimals, unsyncedAnimalCount } = await import("@/lib/animal-sync");
     if (unsyncedAnimalCount() > 0) {
       const r = await syncAnimals();
-      if (!r.ok && !confirm(`${unsyncedAnimalCount()} animal changes haven't reached the cloud yet (${r.error}). Sign out and lose them?`)) return;
+      if (!r.ok && !confirm(`${unsyncedAnimalCount()} changes haven't reached the cloud yet (${r.error}). Sign out and lose them?`)) return;
     }
     await qc.cancelQueries();
     qc.clear();

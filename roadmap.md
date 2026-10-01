@@ -16,4 +16,6 @@
 - [x] Funding readiness (/funding)
 - [x] Farm copilot (/copilot)
 - [x] Home action dashboard, notification bell, role + notification preferences
-- [ ] Cloud sync for the new tools (currently on this device only)
+- [x] Cloud sync for all mini-apps and AgriSphere tools
+- [ ] Shared farm workspace + team roles (next phase)
+- [ ] Operating foundation: crop cycles, tasks/calendar, inventory, maintenance, finances
