@@ -6,6 +6,7 @@ import { useUser } from "@/lib/auth";
 import { Screen } from "@/components/Dock";
 import { Switch } from "@/components/ui/switch";
 import { MINI_APPS, useSettings } from "@/lib/farm";
+import { NOTIFY_TYPES, ROLES, useNotifyPrefs, useRole, type Role } from "@/lib/network";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -21,6 +22,8 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   const [s, update] = useSettings();
+  const [role, setRole] = useRole();
+  const [prefs, setPrefs] = useNotifyPrefs();
   const { user } = useUser();
   const qc = useQueryClient();
   const nav = useNavigate();
@@ -75,6 +78,18 @@ function SettingsPage() {
       <section className="mt-4 flex items-center justify-between rounded-2xl border bg-card p-4">
         <div><p className="text-sm font-medium">Auto-sync when online</p><p className="text-xs text-muted-foreground">New records are marked synced immediately</p></div>
         <Switch checked={s.autoSync} onCheckedChange={(v) => update({ autoSync: v })} />
+      </section>
+      <section className="mt-4 space-y-2 rounded-2xl border bg-card p-4">
+        <label className="block text-sm font-medium">Your role
+          <select className={input} value={role} onChange={(e) => setRole(e.target.value as Role)}>{ROLES.map((r) => <option key={r}>{r}</option>)}</select>
+        </label>
+        <p className="text-xs text-muted-foreground">Shapes which opportunities you see. Your private farm, financial and commercial data is never shown to others.</p>
+      </section>
+      <section className="mt-4 space-y-2 rounded-2xl border bg-card p-4">
+        <p className="text-sm font-medium">Notifications</p>
+        {NOTIFY_TYPES.map((t) => (
+          <div key={t} className="flex items-center justify-between text-sm"><span>{t}</span><Switch aria-label={t} checked={prefs[t] !== false} onCheckedChange={(v) => setPrefs({ ...prefs, [t]: v })} /></div>
+        ))}
       </section>
       <section className="mt-4 rounded-2xl border bg-card p-4">
         <p className="text-sm font-medium">Install FarmerPlus</p>

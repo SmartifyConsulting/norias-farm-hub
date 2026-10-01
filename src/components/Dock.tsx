@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Home, LayoutGrid, Wallet, Settings, Search, Sprout, LogIn } from "lucide-react";
 import { useGuest, useUser } from "@/lib/auth";
 import { MINI_APPS, useOnline } from "@/lib/farm";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const items = [
   { to: "/", label: "Home", icon: Home },
@@ -83,6 +84,7 @@ export function TopNav() {
             <span className={`h-2 w-2 rounded-full ${online ? "bg-success" : "bg-destructive"}`} />
             {online ? "Online" : "Offline"}
           </span>
+          <NotificationBell className="hover:bg-primary-foreground/10" />
           {user ? (
             <Link to="/settings" className="max-w-[12rem] truncate rounded-full bg-primary-foreground/10 px-3 py-1.5 text-xs font-semibold">{user.email}</Link>
           ) : (
