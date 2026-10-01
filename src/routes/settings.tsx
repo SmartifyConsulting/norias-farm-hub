@@ -51,6 +51,7 @@ function SettingsPage() {
   };
   return (
     <Screen title="Settings">
+      <div className="md:grid md:grid-cols-2 md:gap-4 md:[&>*]:mt-0 md:[&>*]:mb-0">
       <section className="mb-4 rounded-2xl border bg-card p-4">
         <p className="text-sm font-medium">Account</p>
         {user ? (
@@ -80,6 +81,7 @@ function SettingsPage() {
         <p className="text-xs text-muted-foreground">Use your browser's "Add to Home Screen" or install option to put FarmerPlus on your phone.</p>
       </section>
       <button onClick={clear} className="mt-4 w-full rounded-xl border border-destructive py-2 text-sm font-semibold text-destructive">Clear all local data</button>
+      </div>
     </Screen>
   );
 }

@@ -4,7 +4,8 @@ import bg from "@/assets/countryside.jpg";
 import { Weather } from "@/components/Weather";
 import { toast } from "sonner";
 import { MINI_APPS, allRecordCounts, syncAll, useOnline, useSettings } from "@/lib/farm";
-import { useUser } from "@/lib/auth";
+import { useGuest, useUser } from "@/lib/auth";
+import { AuthLanding } from "@/components/AuthLanding";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -21,7 +22,8 @@ export const Route = createFileRoute("/")({
 function Home() {
   const [s] = useSettings();
   const online = useOnline();
-  const { user } = useUser();
+  const { user, loading } = useUser();
+  const [guest] = useGuest();
   const [syncing, setSyncing] = useState(false);
   const doSync = async () => {
     setSyncing(true);
@@ -41,11 +43,14 @@ function Home() {
   const hour = new Date().getHours();
   const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
+  if (!loading && !user && !guest) return <AuthLanding initial="signup" />;
+
   return (
     <div className="relative min-h-screen">
       <img src={bg} alt="" width={1024} height={1792} className="fixed inset-0 -z-10 h-full w-full object-cover" />
       <div className="fixed inset-0 -z-10 bg-gradient-to-b from-background/10 via-transparent to-background/60" />
-      <main className="mx-auto max-w-md space-y-4 px-4 pb-32 pt-10">
+      <main className="mx-auto max-w-md space-y-4 px-4 pb-32 pt-10 md:grid md:max-w-5xl md:grid-cols-2 md:gap-6 md:space-y-0 md:px-6 md:pb-12 md:pt-24 lg:max-w-7xl lg:grid-cols-12">
+        <div className="space-y-4 lg:col-span-4">
         <div className="glass rounded-3xl px-5 py-4">
           <p className="text-sm text-foreground/80">{greet}, {s.owner}</p>
           <h1 className="font-display text-3xl text-foreground">{s.farmName}</h1>
@@ -64,9 +69,10 @@ function Home() {
           )}
         </div>
         <Weather lat={s.lat} lon={s.lon} />
-        <div className="grid grid-cols-3 gap-4 pt-2">
+        </div>
+        <div className="grid grid-cols-3 gap-4 pt-2 md:content-start md:grid-cols-2 md:pt-0 lg:col-span-8 lg:grid-cols-4">
           {MINI_APPS.map((a) => (
-            <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex flex-col items-center gap-1.5">
+            <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex flex-col items-center gap-1.5 md:glass md:rounded-3xl md:p-5">
               <span className="glass flex h-16 w-16 items-center justify-center rounded-2xl text-foreground"><a.icon className="h-8 w-8" /></span>
               <span className="text-center text-xs font-semibold text-foreground drop-shadow">{a.name}</span>
             </Link>

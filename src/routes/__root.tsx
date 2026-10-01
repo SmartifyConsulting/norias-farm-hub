@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { Dock } from "../components/Dock";
+import { Dock, TopNav } from "../components/Dock";
 import { Toaster } from "@/components/ui/sonner";
 import { AutoSync } from "@/components/AutoSync";
 
@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "FarmerPlus" },
       { name: "description", content: "Farm management app for records, weather and more." },
-      { name: "theme-color", content: "#3f6b2a" },
+      { name: "theme-color", content: "#061a30" },
       { property: "og:title", content: "FarmerPlus" },
       { property: "og:description", content: "Farm management app for records, weather and more." },
       { property: "og:type", content: "website" },
@@ -99,7 +99,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -128,6 +128,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <TopNav />
       <Outlet />
       <Dock />
       <AutoSync />
