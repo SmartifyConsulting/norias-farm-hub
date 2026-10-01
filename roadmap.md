@@ -18,4 +18,4 @@
 - [x] Home action dashboard, notification bell, role + notification preferences
 - [x] Cloud sync for all mini-apps and AgriSphere tools
 - [ ] Shared farm workspace + team roles (next phase)
-- [ ] Operating foundation: crop cycles, tasks/calendar, inventory, maintenance, finances
+- [x] Operating foundation mini-apps: tasks, crop cycles, inputs/sprays, maintenance, costs & sales (stock, fields, harvest existed)

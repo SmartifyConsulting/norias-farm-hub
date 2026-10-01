@@ -1,8 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { FarmRecord } from "./farm";
+import { MINI_APPS, type FarmRecord } from "./farm";
 
 /** Mini-apps whose records sync to the cloud (all of them). */
-const APPS = ["farm", "animals", "diary", "harvest", "fields", "stock"];
+const APPS = MINI_APPS.map((a) => a.id);
 /** AgriSphere + wallet/settings stores backed up as whole documents. */
 const DOC_KEYS = [
   "farmerplus:passport", "farmerplus:demand", "farmerplus:capacity", "farmerplus:risks", "farmerplus:pipeline",
