@@ -58,6 +58,9 @@ export function effectiveSource(c?: Claim): Provenance | undefined {
 export function usePassport() {
   return useLocal<Passport>(PKEY, {});
 }
+export function readPassport(): Passport {
+  try { return JSON.parse(localStorage.getItem(PKEY) || "{}"); } catch { return {}; }
+}
 
 export type OppType = "Buyer demand" | "Contract farming" | "Funding" | "Finance" | "Equipment" | "Storage" | "Transport" | "Programme" | "Training" | "Inputs" | "Cooperative";
 export type Opportunity = {

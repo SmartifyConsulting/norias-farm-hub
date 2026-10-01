@@ -1,12 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
 import { MINI_APPS } from "@/lib/farm";
-import { BadgeCheck, Handshake, Calculator } from "lucide-react";
+import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, Route as RouteIcon, ScanLine, Landmark, Wheat } from "lucide-react";
 
 const INTEL = [
   { to: "/passport", name: "Capability Passport", blurb: "Land, infrastructure, certifications & supply record", icon: BadgeCheck },
   { to: "/opportunities", name: "Opportunities", blurb: "Buyer demand, contracts & services matched to you", icon: Handshake },
   { to: "/simulator", name: "Decision Simulator", blurb: "Compare crops, costs and price or yield shocks", icon: Calculator },
+  { to: "/capacity", name: "Shared Capacity", blurb: "Equipment, trucks, storage & labour near you", icon: Tractor },
+  { to: "/risks", name: "Risk & Response", blurb: "Forecast and field risks with responses you approve", icon: CloudLightning },
+  { to: "/collective", name: "Collective", blurb: "Bulk buying and combined supply lots", icon: Users },
+  { to: "/outcomes", name: "Opportunity → Outcome", blurb: "Decide, commit, act and record what happened", icon: RouteIcon },
+  { to: "/traceability", name: "Traceability", blurb: "Batch records from field to buyer", icon: ScanLine },
+  { to: "/funding", name: "Funding Readiness", blurb: "What a lender or funder may ask for", icon: Landmark },
+  { to: "/copilot", name: "Farm Copilot", blurb: "Ask questions about your farm data", icon: Wheat },
 ] as const;
 
 export const Route = createFileRoute("/apps")({

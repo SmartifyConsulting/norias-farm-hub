@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { addToPipeline } from "@/lib/network";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { SAMPLE_OPPORTUNITIES, matchOpportunity, useDemand, usePassport, type Opportunity, type OppType } from "@/lib/agri";
@@ -90,7 +91,10 @@ function OppCard({ o, m }: { o: Opportunity; m: ReturnType<typeof matchOpportuni
           <ul className="mt-1 space-y-0.5 text-xs">{m.gaps.map((g) => <li key={g} className="flex gap-1"><AlertTriangle className="h-3.5 w-3.5 shrink-0 text-destructive" />{g}</li>)}</ul>
         )}
       </div>
-      <button onClick={() => toast.success(`Interest noted for "${o.title}" — the provider must still confirm.`)} className="mt-3 w-full rounded-xl border py-1.5 text-sm font-semibold">Express interest</button>
+      <div className="mt-3 flex gap-2">
+        <button onClick={() => toast.success(`Interest noted for "${o.title}" — the provider must still confirm.`)} className="flex-1 rounded-xl border py-1.5 text-sm font-semibold">Express interest</button>
+        <button onClick={() => toast(addToPipeline({ title: o.title, oppId: o.id, participant: o.participant, ...(o.deadline ? { deadline: o.deadline } : {}) }) ? "Added to Opportunity → Outcome" : "Already being tracked")} className="flex-1 rounded-xl bg-primary py-1.5 text-sm font-semibold text-primary-foreground">Track</button>
+      </div>
     </article>
   );
 }
