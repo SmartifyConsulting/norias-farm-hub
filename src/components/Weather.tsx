@@ -7,7 +7,7 @@ const codes: Record<number, [string, string]> = {
   75: ["❄️", "Heavy snow"], 80: ["🌦️", "Showers"], 81: ["🌧️", "Showers"], 82: ["⛈️", "Storms"], 95: ["⛈️", "Thunderstorm"],
 };
 
-export function Weather({ lat, lon, compact, place }: { lat: number; lon: number; compact?: boolean; place?: string }) {
+export function Weather({ lat, lon, compact, place }: { lat: number; lon: number; compact?: boolean; place?: string | undefined }) {
   const { data, isError } = useQuery({
     queryKey: ["weather", lat, lon],
     queryFn: async () => {

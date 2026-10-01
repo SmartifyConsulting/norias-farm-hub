@@ -6,10 +6,10 @@ import { useSettings } from "@/lib/farm";
 
 export function profileOf(user: User | null) {
   const m = (user?.user_metadata ?? {}) as Record<string, string | undefined>;
-  const full = (m.display_name || m.full_name || m.name || [m.first_name, m.last_name].filter(Boolean).join(" ") || "").trim();
-  const first = (m.first_name || full.split(" ")[0] || "").trim();
+  const full = (m["display_name"] || m["full_name"] || m["name"] || [m["first_name"], m["last_name"]].filter(Boolean).join(" ") || "").trim();
+  const first = (m["first_name"] || full.split(" ")[0] || "").trim();
   const initials = (full || user?.email || "?").split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join("");
-  return { full, first, initials, avatar: m.avatar_url || m.picture || "", email: user?.email ?? "" };
+  return { full, first, initials, avatar: m["avatar_url"] || m["picture"] || "", email: user?.email ?? "" };
 }
 
 /** Account name → settings.owner when the device still has the default name. */
