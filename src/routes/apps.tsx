@@ -17,7 +17,7 @@ export const Route = createFileRoute("/apps")({
 function Apps() {
   return (
     <Screen title="App Store">
-      <div className="space-y-3">
+      <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
         {MINI_APPS.map((a) => (
           <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary"><a.icon className="h-7 w-7" /></span>

@@ -4,3 +4,5 @@
 - [x] Edit animal records (pending → upload on next sync)
 - [x] Per-animal last-synced time + upload error
 - [x] Password reset (already built: /forgot-password, /reset-password)
+- [x] Heita stylesheet (navy/blue tokens, Sora + Manrope) and Heita split sign-in/sign-up landing on Home
+- [x] Responsive tablet (2-col, top header) and desktop (12-col, header with search) layouts; mobile unchanged

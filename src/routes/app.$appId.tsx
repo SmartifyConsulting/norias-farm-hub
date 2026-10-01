@@ -54,7 +54,8 @@ function MiniAppPage() {
   return (
     <Screen title={app.name}>
       <Link to="/apps" className="-mt-3 mb-4 inline-flex items-center text-sm text-muted-foreground"><ChevronLeft className="h-4 w-4" />App Store</Link>
-      <form onSubmit={add} className="space-y-2 rounded-2xl border bg-card p-4">
+      <div className="md:grid md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] md:items-start md:gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+      <form onSubmit={add} className="space-y-2 rounded-2xl border bg-card p-4 md:sticky md:top-24">
         <input className={input} placeholder={app.titleLabel} value={title} onChange={(e) => setTitle(e.target.value)} />
         <input className={input} placeholder={app.detailLabel} value={detail} onChange={(e) => setDetail(e.target.value)} />
         {app.qtyLabel && <input className={input} placeholder={app.qtyLabel} value={qty} onChange={(e) => setQty(e.target.value)} />}
@@ -66,8 +67,8 @@ function MiniAppPage() {
         )}
         {!online && <p className="text-center text-xs text-muted-foreground">You're offline — records save on this device.</p>}
       </form>
-      <ul className="mt-4 space-y-2">
-        {records.length === 0 && <li className="py-8 text-center text-sm text-muted-foreground">No records yet.</li>}
+      <ul className="mt-4 space-y-2 md:mt-0 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0">
+        {records.length === 0 && <li className="py-8 text-center xl:col-span-2 text-sm text-muted-foreground">No records yet.</li>}
         {records.map((r) => (
           <RecordItem
             key={r.id}
@@ -82,6 +83,7 @@ function MiniAppPage() {
           />
         ))}
       </ul>
+      </div>
     </Screen>
   );
 }
