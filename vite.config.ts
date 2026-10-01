@@ -15,7 +15,14 @@ export default defineConfig({
   vite: {
     // Pre-bundle lazily discovered deps so a mid-session re-optimization can't load two React copies.
     optimizeDeps: {
-      include: ["@radix-ui/react-avatar", "@radix-ui/react-dropdown-menu"],
+      include: [
+        "@radix-ui/react-avatar",
+        "@radix-ui/react-dropdown-menu",
+        "@tanstack/router-core",
+        "@tanstack/router-core/isServer",
+        "@tanstack/router-core/ssr/client",
+        "seroval",
+      ],
     },
   },
 });
