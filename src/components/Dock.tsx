@@ -31,7 +31,7 @@ export function Dock() {
           to={to}
           activeOptions={{ exact: to === "/" }}
           className="flex w-16 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium text-foreground/80 transition-colors hover:bg-muted"
-          activeProps={{ className: "bg-card text-foreground" }}
+          activeProps={{ className: "!bg-card !text-foreground" }}
         >
           <Icon className="h-5 w-5" />
           {label}
@@ -66,8 +66,8 @@ export function TopNav() {
               key={to}
               to={to}
               activeOptions={{ exact: to === "/" }}
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-primary-foreground/75 hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "bg-card text-foreground hover:bg-muted hover:text-foreground" }}
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-primary-foreground/75 hover:!bg-muted hover:!text-foreground"
+              activeProps={{ className: "!bg-card !text-foreground font-semibold" }}
             >
               <Icon className="h-4 w-4" />
               <span className="hidden lg:inline">{label}</span>
