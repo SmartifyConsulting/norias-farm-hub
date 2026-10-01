@@ -10,7 +10,7 @@ export type FarmRecord = {
   date: string;
   sync: SyncStatus;
   syncedAt?: string;
-  syncError?: string;
+  syncError?: string | undefined;
 };
 
 export type MiniApp = {
