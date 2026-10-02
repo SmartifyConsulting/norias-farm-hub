@@ -63,7 +63,7 @@ function Home() {
   const today = notices.slice(0, 4);
   const firstName = profileOf(user).first || s.owner.split(" ")[0];
 
-  if (!loading && !user && !guest) return <AuthLanding initial="signup" />;
+  if (!loading && !user && !guest) return <AuthLanding initial="signin" />;
 
   const stats = [
     { label: "Records", value: counts.total, icon: Database, tone: appTone(7) },
