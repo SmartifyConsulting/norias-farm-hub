@@ -160,6 +160,9 @@ export function useCooperative(id: string | undefined) {
   const isAdmin = role === "administrator" || role === "chairperson" || role === "secretary";
   const canTrade =
     role === "administrator" || role === "chairperson" || role === "operations_manager";
+  const canGovern = isAdmin;
+  const canFinance = role === "administrator" || role === "chairperson" || role === "treasurer";
+  const canManageResources = canTrade;
   return {
     user,
     coop,
@@ -167,6 +170,9 @@ export function useCooperative(id: string | undefined) {
     pending,
     isAdmin,
     canTrade,
+    canGovern,
+    canFinance,
+    canManageResources,
     members,
     requests,
     invites,

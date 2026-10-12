@@ -427,6 +427,417 @@ export type Database = {
           },
         ]
       }
+      cooperative_actions: {
+        Row: {
+          assigned_to: string | null
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
+          id: string
+          meeting_id: string | null
+          status: Database["public"]["Enums"]["coop_action_status"]
+        }
+        Insert: {
+          assigned_to?: string | null
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          description: string
+          due_date?: string | null
+          id?: string
+          meeting_id?: string | null
+          status?: Database["public"]["Enums"]["coop_action_status"]
+        }
+        Update: {
+          assigned_to?: string | null
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          meeting_id?: string | null
+          status?: Database["public"]["Enums"]["coop_action_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_actions_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooperative_actions_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_asset_bookings: {
+        Row: {
+          asset_id: string
+          created_at: string
+          end_date: string
+          id: string
+          notes: string
+          operating_cost: number | null
+          start_date: string
+          status: Database["public"]["Enums"]["coop_booking_status"]
+          user_id: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          end_date: string
+          id?: string
+          notes?: string
+          operating_cost?: number | null
+          start_date: string
+          status?: Database["public"]["Enums"]["coop_booking_status"]
+          user_id?: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          notes?: string
+          operating_cost?: number | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["coop_booking_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_asset_bookings_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_assets: {
+        Row: {
+          category: string
+          cooperative_id: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          responsible_user_id: string | null
+          status: Database["public"]["Enums"]["coop_asset_status"]
+        }
+        Insert: {
+          category?: string
+          cooperative_id: string
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+          responsible_user_id?: string | null
+          status?: Database["public"]["Enums"]["coop_asset_status"]
+        }
+        Update: {
+          category?: string
+          cooperative_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          responsible_user_id?: string | null
+          status?: Database["public"]["Enums"]["coop_asset_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_assets_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_committee_members: {
+        Row: { committee_id: string; title: string; user_id: string }
+        Insert: { committee_id: string; title?: string; user_id: string }
+        Update: { committee_id?: string; title?: string; user_id?: string }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_committee_members_committee_id_fkey"
+            columns: ["committee_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_committees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_committees: {
+        Row: {
+          cooperative_id: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+        }
+        Insert: {
+          cooperative_id: string
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          cooperative_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_committees_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_ledger_entries: {
+        Row: {
+          amount: number
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          kind: Database["public"]["Enums"]["coop_ledger_kind"]
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          kind: Database["public"]["Enums"]["coop_ledger_kind"]
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["coop_ledger_kind"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_ledger_entries_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_meeting_attendance: {
+        Row: { attended: boolean; meeting_id: string; user_id: string }
+        Insert: { attended?: boolean; meeting_id: string; user_id: string }
+        Update: { attended?: boolean; meeting_id?: string; user_id?: string }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_meeting_attendance_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_meetings: {
+        Row: {
+          agenda: string
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          id: string
+          meeting_date: string
+          minutes: string
+          status: Database["public"]["Enums"]["coop_meeting_status"]
+          title: string
+        }
+        Insert: {
+          agenda?: string
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          meeting_date: string
+          minutes?: string
+          status?: Database["public"]["Enums"]["coop_meeting_status"]
+          title: string
+        }
+        Update: {
+          agenda?: string
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          meeting_date?: string
+          minutes?: string
+          status?: Database["public"]["Enums"]["coop_meeting_status"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_meetings_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_opportunities: {
+        Row: {
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          deadline: string | null
+          description: string
+          id: string
+          notes: string
+          opp_type: Database["public"]["Enums"]["coop_opportunity_type"]
+          provider: string
+          status: Database["public"]["Enums"]["coop_opportunity_status"]
+          title: string
+        }
+        Insert: {
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          notes?: string
+          opp_type?: Database["public"]["Enums"]["coop_opportunity_type"]
+          provider?: string
+          status?: Database["public"]["Enums"]["coop_opportunity_status"]
+          title: string
+        }
+        Update: {
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          notes?: string
+          opp_type?: Database["public"]["Enums"]["coop_opportunity_type"]
+          provider?: string
+          status?: Database["public"]["Enums"]["coop_opportunity_status"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_opportunities_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_resolutions: {
+        Row: {
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          decided_at: string | null
+          description: string
+          id: string
+          meeting_id: string | null
+          status: Database["public"]["Enums"]["coop_resolution_status"]
+          title: string
+        }
+        Insert: {
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          decided_at?: string | null
+          description?: string
+          id?: string
+          meeting_id?: string | null
+          status?: Database["public"]["Enums"]["coop_resolution_status"]
+          title: string
+        }
+        Update: {
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          decided_at?: string | null
+          description?: string
+          id?: string
+          meeting_id?: string | null
+          status?: Database["public"]["Enums"]["coop_resolution_status"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_resolutions_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooperative_resolutions_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_votes: {
+        Row: {
+          choice: Database["public"]["Enums"]["coop_vote_choice"]
+          resolution_id: string
+          user_id: string
+          voted_at: string
+        }
+        Insert: {
+          choice: Database["public"]["Enums"]["coop_vote_choice"]
+          resolution_id: string
+          user_id?: string
+          voted_at?: string
+        }
+        Update: {
+          choice?: Database["public"]["Enums"]["coop_vote_choice"]
+          resolution_id?: string
+          user_id?: string
+          voted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_votes_resolution_id_fkey"
+            columns: ["resolution_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_resolutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cooperatives: {
         Row: {
           bio: string
@@ -662,6 +1073,9 @@ export type Database = {
     Functions: {
       accept_cooperative_invite: { Args: { _invite: string }; Returns: string }
       accept_farm_invite: { Args: { _invite: string }; Returns: string }
+      coop_can_finance: { Args: { _coop: string }; Returns: boolean }
+      coop_can_govern: { Args: { _coop: string }; Returns: boolean }
+      coop_can_manage_resources: { Args: { _coop: string }; Returns: boolean }
       coop_can_trade: { Args: { _coop: string }; Returns: boolean }
       coop_is_admin: { Args: { _coop: string }; Returns: boolean }
       coop_role_of: {
@@ -713,10 +1127,24 @@ export type Database = {
       }
     }
     Enums: {
+      coop_action_status: "open" | "done"
+      coop_asset_status: "available" | "maintenance" | "retired"
+      coop_booking_status: "requested" | "approved" | "rejected" | "completed"
+      coop_ledger_kind:
+        | "contribution"
+        | "subscription"
+        | "share_capital"
+        | "loan"
+        | "expense"
+        | "other"
       coop_listing_status: "available" | "sold" | "cancelled"
+      coop_meeting_status: "scheduled" | "held" | "cancelled"
       coop_member_status: "pending" | "active" | "left" | "removed"
+      coop_opportunity_status: "open" | "applied" | "awarded" | "rejected" | "closed"
+      coop_opportunity_type: "funding" | "grant" | "training" | "mentorship" | "other"
       coop_order_status: "draft" | "confirmed" | "delivered" | "cancelled"
       coop_request_status: "open" | "ordered" | "cancelled"
+      coop_resolution_status: "proposed" | "passed" | "rejected"
       coop_role:
         | "administrator"
         | "chairperson"
@@ -726,6 +1154,7 @@ export type Database = {
         | "operations_manager"
         | "member"
         | "auditor"
+      coop_vote_choice: "for" | "against" | "abstain"
       farm_role: "owner" | "manager" | "worker" | "viewer"
     }
     CompositeTypes: {
@@ -854,10 +1283,26 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      coop_action_status: ["open", "done"],
+      coop_asset_status: ["available", "maintenance", "retired"],
+      coop_booking_status: ["requested", "approved", "rejected", "completed"],
+      coop_ledger_kind: [
+        "contribution",
+        "subscription",
+        "share_capital",
+        "loan",
+        "expense",
+        "other",
+      ],
       coop_listing_status: ["available", "sold", "cancelled"],
+      coop_meeting_status: ["scheduled", "held", "cancelled"],
       coop_member_status: ["pending", "active", "left", "removed"],
+      coop_opportunity_status: ["open", "applied", "awarded", "rejected", "closed"],
+      coop_opportunity_type: ["funding", "grant", "training", "mentorship", "other"],
       coop_order_status: ["draft", "confirmed", "delivered", "cancelled"],
       coop_request_status: ["open", "ordered", "cancelled"],
+      coop_resolution_status: ["proposed", "passed", "rejected"],
+      coop_vote_choice: ["for", "against", "abstain"],
       coop_role: [
         "administrator",
         "chairperson",

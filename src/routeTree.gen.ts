@@ -34,7 +34,11 @@ import { Route as ApiVetCheckRouteImport } from './routes/api/vet-check'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
 import { Route as CoopIndexRouteImport } from './routes/coop.index'
 import { Route as CoopCoopIdRouteImport } from './routes/coop.$coopId'
+import { Route as CoopCoopIdFinanceRouteImport } from './routes/coop.$coopId.finance'
+import { Route as CoopCoopIdGovernanceRouteImport } from './routes/coop.$coopId.governance'
+import { Route as CoopCoopIdOpportunitiesRouteImport } from './routes/coop.$coopId.opportunities'
 import { Route as CoopCoopIdPurchasingRouteImport } from './routes/coop.$coopId.purchasing'
+import { Route as CoopCoopIdResourcesRouteImport } from './routes/coop.$coopId.resources'
 import { Route as CoopCoopIdSalesRouteImport } from './routes/coop.$coopId.sales'
 
 const IndexRoute = IndexRouteImport.update({
@@ -162,9 +166,29 @@ const CoopCoopIdRoute = CoopCoopIdRouteImport.update({
   path: '/coop/$coopId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoopCoopIdFinanceRoute = CoopCoopIdFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => CoopCoopIdRoute,
+} as any)
+const CoopCoopIdGovernanceRoute = CoopCoopIdGovernanceRouteImport.update({
+  id: '/governance',
+  path: '/governance',
+  getParentRoute: () => CoopCoopIdRoute,
+} as any)
+const CoopCoopIdOpportunitiesRoute = CoopCoopIdOpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => CoopCoopIdRoute,
+} as any)
 const CoopCoopIdPurchasingRoute = CoopCoopIdPurchasingRouteImport.update({
   id: '/purchasing',
   path: '/purchasing',
+  getParentRoute: () => CoopCoopIdRoute,
+} as any)
+const CoopCoopIdResourcesRoute = CoopCoopIdResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
   getParentRoute: () => CoopCoopIdRoute,
 } as any)
 const CoopCoopIdSalesRoute = CoopCoopIdSalesRouteImport.update({
@@ -199,7 +223,11 @@ export interface FileRoutesByFullPath {
   '/app/$appId': typeof AppAppIdRoute
   '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
   '/coop/': typeof CoopIndexRoute
+  '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
+  '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
+  '/coop/$coopId/opportunities': typeof CoopCoopIdOpportunitiesRoute
   '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
+  '/coop/$coopId/resources': typeof CoopCoopIdResourcesRoute
   '/coop/$coopId/sales': typeof CoopCoopIdSalesRoute
 }
 export interface FileRoutesByTo {
@@ -228,7 +256,11 @@ export interface FileRoutesByTo {
   '/app/$appId': typeof AppAppIdRoute
   '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
   '/coop': typeof CoopIndexRoute
+  '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
+  '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
+  '/coop/$coopId/opportunities': typeof CoopCoopIdOpportunitiesRoute
   '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
+  '/coop/$coopId/resources': typeof CoopCoopIdResourcesRoute
   '/coop/$coopId/sales': typeof CoopCoopIdSalesRoute
 }
 export interface FileRoutesById {
@@ -258,7 +290,11 @@ export interface FileRoutesById {
   '/app/$appId': typeof AppAppIdRoute
   '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
   '/coop/': typeof CoopIndexRoute
+  '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
+  '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
+  '/coop/$coopId/opportunities': typeof CoopCoopIdOpportunitiesRoute
   '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
+  '/coop/$coopId/resources': typeof CoopCoopIdResourcesRoute
   '/coop/$coopId/sales': typeof CoopCoopIdSalesRoute
 }
 export interface FileRouteTypes {
@@ -289,7 +325,11 @@ export interface FileRouteTypes {
     | '/app/$appId'
     | '/coop/$coopId'
     | '/coop/'
+    | '/coop/$coopId/finance'
+    | '/coop/$coopId/governance'
+    | '/coop/$coopId/opportunities'
     | '/coop/$coopId/purchasing'
+    | '/coop/$coopId/resources'
     | '/coop/$coopId/sales'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -318,7 +358,11 @@ export interface FileRouteTypes {
     | '/app/$appId'
     | '/coop/$coopId'
     | '/coop'
+    | '/coop/$coopId/finance'
+    | '/coop/$coopId/governance'
+    | '/coop/$coopId/opportunities'
     | '/coop/$coopId/purchasing'
+    | '/coop/$coopId/resources'
     | '/coop/$coopId/sales'
   id:
     | '__root__'
@@ -347,7 +391,11 @@ export interface FileRouteTypes {
     | '/app/$appId'
     | '/coop/$coopId'
     | '/coop/'
+    | '/coop/$coopId/finance'
+    | '/coop/$coopId/governance'
+    | '/coop/$coopId/opportunities'
     | '/coop/$coopId/purchasing'
+    | '/coop/$coopId/resources'
     | '/coop/$coopId/sales'
   fileRoutesById: FileRoutesById
 }
@@ -556,11 +604,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoopCoopIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coop/$coopId/finance': {
+      id: '/coop/$coopId/finance'
+      path: '/finance'
+      fullPath: '/coop/$coopId/finance'
+      preLoaderRoute: typeof CoopCoopIdFinanceRouteImport
+      parentRoute: typeof CoopCoopIdRoute
+    }
+    '/coop/$coopId/governance': {
+      id: '/coop/$coopId/governance'
+      path: '/governance'
+      fullPath: '/coop/$coopId/governance'
+      preLoaderRoute: typeof CoopCoopIdGovernanceRouteImport
+      parentRoute: typeof CoopCoopIdRoute
+    }
+    '/coop/$coopId/opportunities': {
+      id: '/coop/$coopId/opportunities'
+      path: '/opportunities'
+      fullPath: '/coop/$coopId/opportunities'
+      preLoaderRoute: typeof CoopCoopIdOpportunitiesRouteImport
+      parentRoute: typeof CoopCoopIdRoute
+    }
     '/coop/$coopId/purchasing': {
       id: '/coop/$coopId/purchasing'
       path: '/purchasing'
       fullPath: '/coop/$coopId/purchasing'
       preLoaderRoute: typeof CoopCoopIdPurchasingRouteImport
+      parentRoute: typeof CoopCoopIdRoute
+    }
+    '/coop/$coopId/resources': {
+      id: '/coop/$coopId/resources'
+      path: '/resources'
+      fullPath: '/coop/$coopId/resources'
+      preLoaderRoute: typeof CoopCoopIdResourcesRouteImport
       parentRoute: typeof CoopCoopIdRoute
     }
     '/coop/$coopId/sales': {
@@ -574,12 +650,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface CoopCoopIdRouteChildren {
+  CoopCoopIdFinanceRoute: typeof CoopCoopIdFinanceRoute
+  CoopCoopIdGovernanceRoute: typeof CoopCoopIdGovernanceRoute
+  CoopCoopIdOpportunitiesRoute: typeof CoopCoopIdOpportunitiesRoute
   CoopCoopIdPurchasingRoute: typeof CoopCoopIdPurchasingRoute
+  CoopCoopIdResourcesRoute: typeof CoopCoopIdResourcesRoute
   CoopCoopIdSalesRoute: typeof CoopCoopIdSalesRoute
 }
 
 const CoopCoopIdRouteChildren: CoopCoopIdRouteChildren = {
+  CoopCoopIdFinanceRoute: CoopCoopIdFinanceRoute,
+  CoopCoopIdGovernanceRoute: CoopCoopIdGovernanceRoute,
+  CoopCoopIdOpportunitiesRoute: CoopCoopIdOpportunitiesRoute,
   CoopCoopIdPurchasingRoute: CoopCoopIdPurchasingRoute,
+  CoopCoopIdResourcesRoute: CoopCoopIdResourcesRoute,
   CoopCoopIdSalesRoute: CoopCoopIdSalesRoute,
 }
 

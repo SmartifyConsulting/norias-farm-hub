@@ -50,6 +50,20 @@
       "when": 1791950000000,
       "tag": "0006_cooperative_trade",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792000000000,
+      "tag": "0007_cooperative_governance_finance",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792010000000,
+      "tag": "0008_cooperative_resources_development",
+      "breakpoints": true
     }
   ]
 }

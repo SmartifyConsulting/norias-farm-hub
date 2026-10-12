@@ -18,8 +18,19 @@ const btn =
 
 function CoopDetail() {
   const { coopId } = Route.useParams();
-  const { user, coop, role, pending, isAdmin, members, requests, invites, loading, reload } =
-    useCooperative(coopId);
+  const {
+    user,
+    coop,
+    role,
+    pending,
+    isAdmin,
+    canFinance,
+    members,
+    requests,
+    invites,
+    loading,
+    reload,
+  } = useCooperative(coopId);
   const [email, setEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<CoopRole>("member");
   const [requesting, setRequesting] = useState(false);
@@ -185,8 +196,8 @@ function CoopDetail() {
 
           {isMember && (
             <section className="rounded-2xl border bg-card p-4">
-              <h2 className="mb-2 font-semibold">Buying &amp; selling</h2>
-              <div className="flex gap-2 text-sm">
+              <h2 className="mb-2 font-semibold">Co-operative tools</h2>
+              <div className="flex flex-wrap gap-2 text-sm">
                 <Link to="/coop/$coopId/purchasing" params={{ coopId }} className={btn}>
                   Collective purchasing
                 </Link>
@@ -197,6 +208,36 @@ function CoopDetail() {
                 >
                   Collective sales
                 </Link>
+                <Link
+                  to="/coop/$coopId/governance"
+                  params={{ coopId }}
+                  className="rounded-xl border px-4 py-2 font-semibold"
+                >
+                  Governance
+                </Link>
+                <Link
+                  to="/coop/$coopId/resources"
+                  params={{ coopId }}
+                  className="rounded-xl border px-4 py-2 font-semibold"
+                >
+                  Shared resources
+                </Link>
+                <Link
+                  to="/coop/$coopId/opportunities"
+                  params={{ coopId }}
+                  className="rounded-xl border px-4 py-2 font-semibold"
+                >
+                  Development &amp; funding
+                </Link>
+                {canFinance && (
+                  <Link
+                    to="/coop/$coopId/finance"
+                    params={{ coopId }}
+                    className="rounded-xl border px-4 py-2 font-semibold"
+                  >
+                    Finance
+                  </Link>
+                )}
               </div>
             </section>
           )}
