@@ -24,6 +24,7 @@ import {
   Stethoscope,
   GraduationCap,
   Users,
+  Users2,
   type LucideIcon,
 } from "lucide-react";
 import { MINI_APPS } from "@/lib/farm";
@@ -186,6 +187,14 @@ const MINI_APP_CATEGORY: Record<string, CategoryId> = {
 };
 
 const EXTRA_DEFS: Omit<RegistryApp, "tone">[] = [
+  {
+    id: "cooperative",
+    name: "Co-operatives",
+    blurb: "Register or join a co-operative and manage its members and governance",
+    icon: Users2,
+    to: "/coop",
+    category: "cooperatives",
+  },
   {
     id: "team",
     name: "Farm Team",

@@ -79,6 +79,124 @@ export type Database = {
           },
         ]
       }
+      cooperative_invites: {
+        Row: {
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          email: string
+          id: string
+          role: Database["public"]["Enums"]["coop_role"]
+        }
+        Insert: {
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          email: string
+          id?: string
+          role?: Database["public"]["Enums"]["coop_role"]
+        }
+        Update: {
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          email?: string
+          id?: string
+          role?: Database["public"]["Enums"]["coop_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_invites_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_members: {
+        Row: {
+          cooperative_id: string
+          email: string
+          joined_at: string
+          role: Database["public"]["Enums"]["coop_role"]
+          status: Database["public"]["Enums"]["coop_member_status"]
+          user_id: string
+        }
+        Insert: {
+          cooperative_id: string
+          email?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["coop_role"]
+          status?: Database["public"]["Enums"]["coop_member_status"]
+          user_id: string
+        }
+        Update: {
+          cooperative_id?: string
+          email?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["coop_role"]
+          status?: Database["public"]["Enums"]["coop_member_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_members_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperatives: {
+        Row: {
+          bio: string
+          commodities: string
+          contact_email: string
+          contact_phone: string
+          coop_type: string
+          created_at: string
+          id: string
+          location: string
+          name: string
+          owner_id: string
+          province: string
+          registration_number: string
+          sector: string
+        }
+        Insert: {
+          bio?: string
+          commodities?: string
+          contact_email?: string
+          contact_phone?: string
+          coop_type?: string
+          created_at?: string
+          id?: string
+          location?: string
+          name: string
+          owner_id?: string
+          province?: string
+          registration_number?: string
+          sector?: string
+        }
+        Update: {
+          bio?: string
+          commodities?: string
+          contact_email?: string
+          contact_phone?: string
+          coop_type?: string
+          created_at?: string
+          id?: string
+          location?: string
+          name?: string
+          owner_id?: string
+          province?: string
+          registration_number?: string
+          sector?: string
+        }
+        Relationships: []
+      }
       farm_invites: {
         Row: {
           created_at: string
@@ -264,14 +382,50 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_cooperative_invite: { Args: { _invite: string }; Returns: string }
       accept_farm_invite: { Args: { _invite: string }; Returns: string }
+      coop_is_admin: { Args: { _coop: string }; Returns: boolean }
+      coop_role_of: {
+        Args: { _coop: string }
+        Returns: Database["public"]["Enums"]["coop_role"]
+      }
+      create_cooperative: {
+        Args: {
+          _bio?: string
+          _commodities?: string
+          _contact_email?: string
+          _contact_phone?: string
+          _coop_type?: string
+          _location?: string
+          _name: string
+          _province?: string
+          _registration_number?: string
+          _sector?: string
+        }
+        Returns: string
+      }
       create_farm: { Args: { _name: string }; Returns: string }
       farm_role_of: {
         Args: { _farm: string }
         Returns: Database["public"]["Enums"]["farm_role"]
       }
+      request_join_cooperative: { Args: { _coop: string }; Returns: undefined }
+      review_join_request: {
+        Args: { _approve: boolean; _coop: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
+      coop_member_status: "pending" | "active" | "left" | "removed"
+      coop_role:
+        | "administrator"
+        | "chairperson"
+        | "board_member"
+        | "treasurer"
+        | "secretary"
+        | "operations_manager"
+        | "member"
+        | "auditor"
       farm_role: "owner" | "manager" | "worker" | "viewer"
     }
     CompositeTypes: {
@@ -400,6 +554,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      coop_member_status: ["pending", "active", "left", "removed"],
+      coop_role: [
+        "administrator",
+        "chairperson",
+        "board_member",
+        "treasurer",
+        "secretary",
+        "operations_manager",
+        "member",
+        "auditor",
+      ],
       farm_role: ["owner", "manager", "worker", "viewer"],
     },
   },
