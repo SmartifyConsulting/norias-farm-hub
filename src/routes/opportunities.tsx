@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { addToPipeline } from "@/lib/network";
-import { CheckCircle2, AlertTriangle, Megaphone } from "lucide-react";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { useShared } from "@/lib/shared";
 import {
@@ -12,7 +12,7 @@ import {
   type Opportunity,
   type OppType,
 } from "@/lib/agri";
-import { SPONSORED_ADS } from "@/lib/sponsoredAds";
+import { SponsoredBanner } from "@/components/SponsoredBanner";
 
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
@@ -73,7 +73,7 @@ function OpportunitiesPage() {
       </div>
       {tab === "matches" ? (
         <>
-          <SponsoredStrip />
+          <SponsoredBanner className="mb-4" />
           {!hasPassport && (
             <p className="mb-3 rounded-2xl border bg-card p-3 text-sm">
               Fill in your{" "}
@@ -108,40 +108,6 @@ function OpportunitiesPage() {
         <DemandBoard demand={demand} setDemand={setDemand} />
       )}
     </Screen>
-  );
-}
-
-function SponsoredStrip() {
-  return (
-    <div className="mb-4">
-      <p className="mb-2 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-        <Megaphone className="h-3.5 w-3.5" />
-        Sponsored
-      </p>
-      <div className="flex gap-3 overflow-x-auto pb-1">
-        {SPONSORED_ADS.map((ad) => (
-          <article key={ad.id} className="w-64 shrink-0 rounded-2xl border bg-card p-3 text-sm">
-            <div className="flex items-center justify-between gap-2">
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-secondary-foreground">
-                {ad.tag}
-              </span>
-              <span className="text-[10px] text-muted-foreground">{ad.sponsor}</span>
-            </div>
-            <h3 className="mt-1.5 font-semibold">{ad.title}</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">{ad.blurb}</p>
-            <button
-              type="button"
-              onClick={() =>
-                toast("This is a placeholder ad — nothing to connect to yet.", { icon: "📣" })
-              }
-              className="mt-2 text-xs font-semibold text-primary"
-            >
-              {ad.cta} →
-            </button>
-          </article>
-        ))}
-      </div>
-    </div>
   );
 }
 

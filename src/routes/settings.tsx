@@ -8,7 +8,7 @@ import { UserAvatar, signOutEverywhere } from "@/components/UserMenu";
 import { profileOf, removeAvatar, saveAccountName, uploadAvatar } from "@/lib/profile";
 import { Switch } from "@/components/ui/switch";
 import { MINI_APPS, useSettings } from "@/lib/farm";
-import { NOTIFY_TYPES, ROLES, useNotifyPrefs, useRole, type Role } from "@/lib/network";
+import { NOTIFY_TYPES, useNotifyPrefs } from "@/lib/network";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -27,7 +27,6 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   const [s, update] = useSettings();
-  const [role, setRole] = useRole();
   const [prefs, setPrefs] = useNotifyPrefs();
   const { user } = useUser();
   const qc = useQueryClient();
@@ -124,13 +123,19 @@ function SettingsPage() {
   return (
     <Screen title="Settings">
       <div className="md:grid md:grid-cols-2 md:gap-4 md:[&>*]:mt-0 md:[&>*]:mb-0">
-        <section className="mb-4 rounded-2xl border bg-card p-4">
-          <p className="text-sm font-medium">Account</p>
-          {user ? (
-            <div className="mt-2 flex items-center justify-between gap-2">
-              <p className="truncate text-xs text-muted-foreground">
-                {user.email} · Records back up to your account
-              </p>
+        {user ? (
+          <section
+            id="profile"
+            className="mb-4 space-y-3 rounded-2xl border bg-card p-4 md:col-span-2"
+          >
+            <div className="flex items-center gap-4">
+              <UserAvatar className="h-16 w-16" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">
+                  {profileOf(user).full || "Your account"}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              </div>
               <button
                 onClick={signOut}
                 className="shrink-0 rounded-xl bg-secondary px-3 py-1.5 text-xs font-semibold text-secondary-foreground"
@@ -138,72 +143,62 @@ function SettingsPage() {
                 Log out
               </button>
             </div>
-          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="cursor-pointer rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
+                {uploading ? "Uploading…" : "Upload photo"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => {
+                    onPhoto(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {profileOf(user).avatar && (
+                <button
+                  onClick={async () => {
+                    await removeAvatar();
+                    toast("Photo removed");
+                  }}
+                  className="rounded-xl border px-3 py-1.5 text-xs font-semibold"
+                >
+                  Remove
+                </button>
+              )}
+              <span className="text-xs text-muted-foreground">JPG, PNG or WebP, up to 5 MB.</span>
+            </div>
+            <label className="block text-sm font-medium">
+              Your name
+              <input
+                className={input}
+                value={s.owner}
+                onChange={(e) => update({ owner: e.target.value })}
+                onBlur={() => s.owner.trim() && saveAccountName(s.owner)}
+              />
+            </label>
+          </section>
+        ) : (
+          <section id="profile" className="mb-4 rounded-2xl border bg-card p-4 md:col-span-2">
+            <p className="text-sm font-medium">Profile</p>
+            <label className="mt-2 block text-sm font-medium">
+              Your name
+              <input
+                className={input}
+                value={s.owner}
+                onChange={(e) => update({ owner: e.target.value })}
+              />
+            </label>
             <Link
               to="/auth"
-              className="mt-2 block rounded-xl bg-primary py-2 text-center text-sm font-semibold text-primary-foreground"
+              className="mt-3 block rounded-xl bg-primary py-2 text-center text-sm font-semibold text-primary-foreground"
             >
               Sign in to sync
             </Link>
-          )}
-        </section>
-        {user && (
-          <section
-            id="profile"
-            className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4"
-          >
-            <UserAvatar className="h-16 w-16" />
-            <div className="flex-1 space-y-2">
-              <p className="text-sm font-medium">Profile photo</p>
-              <div className="flex flex-wrap gap-2">
-                <label className="cursor-pointer rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
-                  {uploading ? "Uploading…" : "Upload photo"}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={(e) => {
-                      onPhoto(e.target.files?.[0]);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-                {profileOf(user).avatar && (
-                  <button
-                    onClick={async () => {
-                      await removeAvatar();
-                      toast("Photo removed");
-                    }}
-                    className="rounded-xl border px-3 py-1.5 text-xs font-semibold"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">JPG, PNG or WebP, up to 5 MB.</p>
-            </div>
           </section>
         )}
-        <section className="space-y-3 rounded-2xl border bg-card p-4">
-          <label className="block text-sm font-medium">
-            Farm name
-            <input
-              className={input}
-              value={s.farmName}
-              onChange={(e) => update({ farmName: e.target.value })}
-            />
-          </label>
-          <label className="block text-sm font-medium">
-            Your name
-            <input
-              className={input}
-              value={s.owner}
-              onChange={(e) => update({ owner: e.target.value })}
-              onBlur={() => user && s.owner.trim() && saveAccountName(s.owner)}
-            />
-          </label>
-        </section>
         <section className="mt-4 space-y-3 rounded-2xl border bg-card p-4">
           <p className="text-sm font-medium">Weather location</p>
           <p className="text-xs text-muted-foreground">
@@ -275,24 +270,6 @@ function SettingsPage() {
             </p>
           </div>
           <Switch checked={s.autoSync} onCheckedChange={(v) => update({ autoSync: v })} />
-        </section>
-        <section className="mt-4 space-y-2 rounded-2xl border bg-card p-4">
-          <label className="block text-sm font-medium">
-            Your role
-            <select
-              className={input}
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-            >
-              {ROLES.map((r) => (
-                <option key={r}>{r}</option>
-              ))}
-            </select>
-          </label>
-          <p className="text-xs text-muted-foreground">
-            Shapes which opportunities you see. Your private farm, financial and commercial data is
-            never shown to others.
-          </p>
         </section>
         <section className="mt-4 space-y-2 rounded-2xl border bg-card p-4">
           <p className="text-sm font-medium">Notifications</p>

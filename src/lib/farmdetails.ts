@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { Role } from "@/lib/network";
 
 export type FarmDetails = {
   address: string;
@@ -8,6 +9,8 @@ export type FarmDetails = {
   /** Geocoded from the address, so the farm map can open locked onto this location every time. */
   lat?: number | undefined;
   lon?: number | undefined;
+  /** Your role on this farm — set per farm instead of once globally in Settings. */
+  role?: Role | undefined;
 };
 
 const EMPTY: FarmDetails = { address: "", sizeHa: "", mainProduction: "", subCategory: "" };

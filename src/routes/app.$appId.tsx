@@ -37,6 +37,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ROLES, useRole } from "@/lib/network";
 
 export const Route = createFileRoute("/app/$appId")({
   loader: ({ params }) => {
@@ -90,6 +91,7 @@ function MiniAppPage() {
   const [newSizeHa, setNewSizeHa] = useState("");
   const [newMainProduction, setNewMainProduction] = useState("");
   const [newSubCategory, setNewSubCategory] = useState("");
+  const [newRole, setNewRole] = useState<(typeof ROLES)[number]>(ROLES[0]!);
   const [queuedAssets, setQueuedAssets] = useState<
     { title: string; detail: string; qty: string }[]
   >([]);
@@ -102,6 +104,7 @@ function MiniAppPage() {
     setNewSizeHa("");
     setNewMainProduction("");
     setNewSubCategory("");
+    setNewRole(ROLES[0]!);
     setQueuedAssets([]);
     setAssetTitle("");
     setAssetDetail("");
@@ -135,6 +138,7 @@ function MiniAppPage() {
         sizeHa: newSizeHa.trim(),
         mainProduction: newMainProduction,
         subCategory: newSubCategory,
+        role: newRole,
         lat: geocoded?.lat,
         lon: geocoded?.lon,
       });
@@ -170,11 +174,18 @@ function MiniAppPage() {
   const farmDetails = useFarmDetails(effectiveFarmId);
   const [editingDetails, setEditingDetails] = useState(false);
   const [detailsForm, setDetailsForm] = useState<FarmDetails>(farmDetails);
+  const [, setGlobalRole] = useRole();
   useEffect(() => {
     setDetailsForm(farmDetails);
     setEditingDetails(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveFarmId]);
+  useEffect(() => {
+    // Opportunities matching reads one global "your role" — keep it in step with whichever
+    // farm is selected here, since role is now captured per farm instead of once in Settings.
+    if (farmDetails.role) setGlobalRole(farmDetails.role);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [farmDetails.role]);
   const { canWrite, canDelete } = permissions(current?.role);
   const fields = useRecords("fields").records;
   const crops = useRecords("crops").records;
@@ -465,6 +476,18 @@ function MiniAppPage() {
                     ))}
                   </select>
                 </div>
+                <label className="block text-sm font-medium">
+                  Your role on this farm
+                  <select
+                    className={input}
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value as (typeof ROLES)[number])}
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r}>{r}</option>
+                    ))}
+                  </select>
+                </label>
 
                 <div className="rounded-2xl border p-3">
                   <p className="mb-2 text-sm font-semibold">Assets (optional)</p>
@@ -630,6 +653,23 @@ function MiniAppPage() {
                     ))}
                   </select>
                 </div>
+                <label className="block text-sm font-medium">
+                  Your role on this farm
+                  <select
+                    className={input}
+                    value={detailsForm.role ?? ROLES[0]}
+                    onChange={(e) =>
+                      setDetailsForm({
+                        ...detailsForm,
+                        role: e.target.value as (typeof ROLES)[number],
+                      })
+                    }
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r}>{r}</option>
+                    ))}
+                  </select>
+                </label>
                 <p className="text-xs text-muted-foreground">
                   Add buildings, equipment and other assets in the Assets section below — they'll
                   show up as icons you can drag onto the farm map.
@@ -656,6 +696,7 @@ function MiniAppPage() {
                   farmDetails.address,
                   farmDetails.sizeHa && `${farmDetails.sizeHa} ha`,
                   [farmDetails.mainProduction, farmDetails.subCategory].filter(Boolean).join(" · "),
+                  farmDetails.role && `You: ${farmDetails.role}`,
                 ]
                   .filter(Boolean)
                   .join(" · ")}

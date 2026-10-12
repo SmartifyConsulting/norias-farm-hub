@@ -89,11 +89,13 @@ function AppTile({ app, dragging }: { app: RegistryApp; dragging?: boolean }) {
 function DraggableApp({
   app,
   onRemove,
+  removeLabel = "Remove",
   favourite,
   onToggleFavourite,
 }: {
   app: RegistryApp;
   onRemove?: () => void;
+  removeLabel?: string;
   favourite: boolean;
   onToggleFavourite: () => void;
 }) {
@@ -137,7 +139,7 @@ function DraggableApp({
       {onRemove && (
         <button
           type="button"
-          aria-label="Remove from folder"
+          aria-label={removeLabel}
           onClick={onRemove}
           className="absolute right-2 bottom-2 rounded-full bg-background/80 p-1 text-muted-foreground hover:text-brand-red"
         >
@@ -217,8 +219,8 @@ function Apps() {
   const {
     layout,
     moveApp,
+    removeApp,
     groupIntoNewFolder,
-    showFolder,
     createFolder,
     renameFolder,
     deleteFolder,
@@ -245,6 +247,20 @@ function Apps() {
     [favIds],
   );
   const expandedFolder = layout.folders.find((f) => f.id === expanded);
+  // An app counts as "installed" only while it's actually visible in Your Apps — top level, or
+  // inside a folder that's currently shown there (not one still tucked away unopened).
+  const installedIds = useMemo(() => {
+    const s = new Set<string>();
+    for (const e of layout.order) {
+      if (e.kind === "app") {
+        s.add(e.id);
+      } else {
+        const f = layout.folders.find((x) => x.id === e.id);
+        if (f) for (const id of f.appIds) s.add(id);
+      }
+    }
+    return s;
+  }, [layout]);
 
   const dragApp = activeId?.startsWith("app:") ? appById(activeId.slice(4)) : undefined;
 
@@ -349,6 +365,7 @@ function Apps() {
                     favourite={isFavourite(a.id)}
                     onToggleFavourite={() => toggleFavourite(a.id)}
                     onRemove={() => moveApp(a.id, null)}
+                    removeLabel="Remove from folder"
                   />
                 );
               })}
@@ -411,6 +428,8 @@ function Apps() {
                     app={a}
                     favourite={isFavourite(a.id)}
                     onToggleFavourite={() => toggleFavourite(a.id)}
+                    onRemove={() => removeApp(a.id)}
+                    removeLabel="Remove from Your Apps"
                   />
                 );
               })}
@@ -421,30 +440,6 @@ function Apps() {
             Drag an app onto another to make a folder, or onto a folder to add it in. Drag an app
             out of a folder's "×" to move it back here.
           </p>
-          {(() => {
-            const hidden = layout.folders.filter(
-              (f) => !layout.order.some((e) => e.kind === "folder" && e.id === f.id),
-            );
-            if (hidden.length === 0) return null;
-            return (
-              <div className="mt-5 border-t pt-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  More categories
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {hidden.map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => showFolder(f.id)}
-                      className="rounded-full border px-3 py-1.5 text-sm font-semibold hover:bg-muted"
-                    >
-                      + {f.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
 
           <div className="mt-8 border-t pt-6">
             <h2 className="mb-3 font-display text-lg font-semibold">Explore More Apps</h2>
@@ -470,25 +465,50 @@ function Apps() {
                         <p className="text-sm text-muted-foreground">No apps yet.</p>
                       ) : (
                         <div className="space-y-2">
-                          {apps.map((a) => (
-                            <AppLink
-                              key={a.id}
-                              app={a}
-                              className="flex items-center gap-3 rounded-xl border bg-background p-3 hover:shadow-sm"
-                            >
-                              <span
-                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${appTone(a.tone)}`}
+                          {apps.map((a) => {
+                            const installed = installedIds.has(a.id);
+                            return (
+                              <div
+                                key={a.id}
+                                className={`flex items-center gap-3 rounded-xl border p-3 ${installed ? "bg-muted/60" : "bg-background hover:shadow-sm"}`}
                               >
-                                <a.icon className="h-5 w-5" />
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-semibold text-foreground">
-                                  {a.name}
-                                </p>
-                                <p className="truncate text-xs text-muted-foreground">{a.blurb}</p>
+                                <AppLink app={a} className="flex min-w-0 flex-1 items-center gap-3">
+                                  <span
+                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${installed ? "bg-muted text-muted-foreground" : appTone(a.tone)}`}
+                                  >
+                                    <a.icon className="h-5 w-5" />
+                                  </span>
+                                  <div className="min-w-0 flex-1">
+                                    <p
+                                      className={`truncate text-sm font-semibold ${installed ? "text-muted-foreground" : "text-foreground"}`}
+                                    >
+                                      {a.name}
+                                    </p>
+                                    <p className="truncate text-xs text-muted-foreground">
+                                      {a.blurb}
+                                    </p>
+                                  </div>
+                                </AppLink>
+                                {installed ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeApp(a.id)}
+                                    className="shrink-0 rounded-full bg-brand-red px-3 py-1 text-xs font-semibold text-background hover:opacity-90"
+                                  >
+                                    Uninstall
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => moveApp(a.id, null)}
+                                    className="shrink-0 rounded-full bg-brand-green px-3 py-1 text-xs font-semibold text-background hover:opacity-90"
+                                  >
+                                    Install
+                                  </button>
+                                )}
                               </div>
-                            </AppLink>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </AccordionContent>

@@ -4,26 +4,25 @@ import { APP_REGISTRY, CATEGORIES, type CategoryId } from "@/lib/app-registry";
 export type Folder = { id: string; name: string; appIds: string[] };
 /** Top-level entries: a folder, or an app not (yet) placed in any folder. One level of folders only — folders never contain folders. */
 export type TopEntry = { kind: "folder"; id: string } | { kind: "app"; id: string };
-export type Layout = { folders: Folder[]; order: TopEntry[] };
+/** `knownIds` is every app id this layout has ever seen placed somewhere (or deliberately
+ * removed). It's how reconcile() tells "a new app was added to the registry since last save, put
+ * it somewhere visible" apart from "the user removed this app on purpose, leave it removed". */
+export type Layout = { folders: Folder[]; order: TopEntry[]; knownIds?: string[] | undefined };
 
 const STORAGE_KEY = "farmerplus:layout";
 const EVENT = "farmerplus:layout-change";
 
-/** New users start with just My Farm visible — everything else still exists (in `folders`) and can be added back from the App Store. */
+/** New users start with just My Farm visible — everything else still exists (in the App Store)
+ * and can be added back from Explore More Apps. A category is only used to group apps for
+ * browsing there; it's never used to auto-create or auto-fill a folder — folders in Your Apps
+ * are always ones the user made themselves (by dragging apps together or "New folder"). */
 const DEFAULT_VISIBLE: CategoryId[] = ["my-farm"];
 
 function defaultLayout(): Layout {
-  const folders: Folder[] = CATEGORIES.map((c) => ({
-    id: c.id,
-    name: c.name,
-    appIds: APP_REGISTRY.filter((a) => a.category === c.id).map((a) => a.id),
-  }));
-  return {
-    folders,
-    order: folders
-      .filter((f) => DEFAULT_VISIBLE.includes(f.id as CategoryId))
-      .map((f) => ({ kind: "folder", id: f.id })),
-  };
+  const order: TopEntry[] = APP_REGISTRY.filter((a) => DEFAULT_VISIBLE.includes(a.category)).map(
+    (a) => ({ kind: "app", id: a.id }),
+  );
+  return { folders: [], order, knownIds: APP_REGISTRY.map((a) => a.id) };
 }
 
 function reconcile(layout: Layout): Layout {
@@ -59,11 +58,16 @@ function reconcile(layout: Layout): Layout {
   ];
   for (const e of order) if (e.kind === "app") placed.add(e.id);
 
-  // Any app added to the registry since last save (or missing from both folders and order) lands at the top level, unsorted.
-  const missing = APP_REGISTRY.filter((a) => !placed.has(a.id)).map((a) => a.id);
+  // Only an app that's genuinely new to the registry (never seen before in this layout) gets
+  // auto-added, unsorted, at the top level. An app the user deliberately removed (it's in
+  // knownIds but not placed) stays removed — it's still discoverable from Explore More Apps.
+  const knownIds = new Set(layout.knownIds ?? placed);
+  const missing = APP_REGISTRY.filter((a) => !placed.has(a.id) && !knownIds.has(a.id)).map(
+    (a) => a.id,
+  );
   order = [...order, ...missing.map((id): TopEntry => ({ kind: "app", id }))];
 
-  return { folders, order };
+  return { folders, order, knownIds: Array.from(new Set([...knownIds, ...known])) };
 }
 
 function load(): Layout {
@@ -103,10 +107,17 @@ export function useLayout() {
     };
   }, []);
 
-  const save = useCallback((next: Layout) => {
-    setLayout(next);
-    persist(next);
-  }, []);
+  const save = useCallback(
+    (next: Layout) => {
+      // Every mutator below builds `next` from scratch without necessarily carrying `knownIds`
+      // forward — preserve it here so a plain moveApp/reorder etc. never silently drops the record
+      // of which apps have already been seen (that record is what keeps a removed app removed).
+      const withKnown: Layout = { ...next, knownIds: next.knownIds ?? layout.knownIds };
+      setLayout(withKnown);
+      persist(withKnown);
+    },
+    [layout.knownIds],
+  );
 
   const folderOf = useCallback(
     (appId: string) => layout.folders.find((f) => f.appIds.includes(appId))?.id,
@@ -168,6 +179,21 @@ export function useLayout() {
     [layout, save],
   );
 
+  /** Fully removes an app from "Your Apps" (top level or any folder) — it stays in the App
+   * Store and can be added back with "+ Add" from Explore More Apps. */
+  const removeApp = useCallback(
+    (appId: string) => {
+      save({
+        folders: layout.folders.map((f) => ({
+          ...f,
+          appIds: f.appIds.filter((id) => id !== appId),
+        })),
+        order: layout.order.filter((e) => !(e.kind === "app" && e.id === appId)),
+      });
+    },
+    [layout, save],
+  );
+
   const showFolder = useCallback(
     (folderId: string) => {
       if (layout.order.some((e) => e.kind === "folder" && e.id === folderId)) return;
@@ -218,6 +244,7 @@ export function useLayout() {
     ready,
     folderOf,
     moveApp,
+    removeApp,
     groupIntoNewFolder,
     reorderTop,
     reorderInFolder,
