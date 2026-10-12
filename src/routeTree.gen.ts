@@ -18,6 +18,7 @@ import { Route as CopilotRouteImport } from './routes/copilot'
 import { Route as FarmschoolRouteImport } from './routes/farmschool'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FundingRouteImport } from './routes/funding'
+import { Route as GovProgrammesRouteImport } from './routes/gov-programmes'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OutcomesRouteImport } from './routes/outcomes'
 import { Route as PassportRouteImport } from './routes/passport'
@@ -85,6 +86,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const FundingRoute = FundingRouteImport.update({
   id: '/funding',
   path: '/funding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GovProgrammesRoute = GovProgrammesRouteImport.update({
+  id: '/gov-programmes',
+  path: '/gov-programmes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
+  '/gov-programmes': typeof GovProgrammesRoute
   '/opportunities': typeof OpportunitiesRoute
   '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
+  '/gov-programmes': typeof GovProgrammesRoute
   '/opportunities': typeof OpportunitiesRoute
   '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
+  '/gov-programmes': typeof GovProgrammesRoute
   '/opportunities': typeof OpportunitiesRoute
   '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
@@ -318,6 +327,7 @@ export interface FileRouteTypes {
     | '/farmschool'
     | '/forgot-password'
     | '/funding'
+    | '/gov-programmes'
     | '/opportunities'
     | '/outcomes'
     | '/passport'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/farmschool'
     | '/forgot-password'
     | '/funding'
+    | '/gov-programmes'
     | '/opportunities'
     | '/outcomes'
     | '/passport'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/farmschool'
     | '/forgot-password'
     | '/funding'
+    | '/gov-programmes'
     | '/opportunities'
     | '/outcomes'
     | '/passport'
@@ -421,6 +433,7 @@ export interface RootRouteChildren {
   FarmschoolRoute: typeof FarmschoolRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   FundingRoute: typeof FundingRoute
+  GovProgrammesRoute: typeof GovProgrammesRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
   OutcomesRoute: typeof OutcomesRoute
   PassportRoute: typeof PassportRoute
@@ -502,6 +515,13 @@ declare module '@tanstack/react-router' {
       path: '/funding'
       fullPath: '/funding'
       preLoaderRoute: typeof FundingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gov-programmes': {
+      id: '/gov-programmes'
+      path: '/gov-programmes'
+      fullPath: '/gov-programmes'
+      preLoaderRoute: typeof GovProgrammesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/opportunities': {
@@ -702,6 +722,7 @@ const rootRouteChildren: RootRouteChildren = {
   FarmschoolRoute: FarmschoolRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   FundingRoute: FundingRoute,
+  GovProgrammesRoute: GovProgrammesRoute,
   OpportunitiesRoute: OpportunitiesRoute,
   OutcomesRoute: OutcomesRoute,
   PassportRoute: PassportRoute,

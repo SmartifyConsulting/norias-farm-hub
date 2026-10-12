@@ -184,6 +184,7 @@ const MINI_APP_CATEGORY: Record<string, CategoryId> = {
   maintenance: "production",
   health: "production",
   finance: "finance",
+  compliance: "government",
 };
 
 const EXTRA_DEFS: Omit<RegistryApp, "tone">[] = [
@@ -210,6 +211,14 @@ const EXTRA_DEFS: Omit<RegistryApp, "tone">[] = [
     icon: GraduationCap,
     to: "/farmschool",
     category: "knowledge",
+  },
+  {
+    id: "gov-programmes",
+    name: "Government Programmes",
+    blurb: "Funding, support and compliance programmes for your country",
+    icon: Landmark,
+    to: "/gov-programmes",
+    category: "government",
   },
 ];
 

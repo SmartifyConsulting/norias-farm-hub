@@ -45,8 +45,13 @@ function SettingsPage() {
     { name: string; admin1?: string; country?: string; latitude: number; longitude: number }[]
   >([]);
   const [uploading, setUploading] = useState(false);
-  const setPlace = (lat: number, lon: number, placeName: string) => {
-    update({ lat: +lat.toFixed(3), lon: +lon.toFixed(3), placeName });
+  const setPlace = (lat: number, lon: number, placeName: string, country?: string) => {
+    update({
+      lat: +lat.toFixed(3),
+      lon: +lon.toFixed(3),
+      placeName,
+      ...(country ? { country } : {}),
+    });
     toast.success(`Weather location set to ${placeName}`);
   };
   const locate = () => {
@@ -59,6 +64,7 @@ function SettingsPage() {
       async (p) => {
         const { latitude: lat, longitude: lon } = p.coords;
         let name = `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+        let country: string | undefined;
         try {
           const r = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&lat=${lat}&lon=${lon}`,
@@ -66,9 +72,10 @@ function SettingsPage() {
           const j = await r.json();
           const a = j.address ?? {};
           name = a.city || a.town || a.village || a.municipality || a.county || name;
+          country = a.country;
         } catch {}
         setLocating(false);
-        setPlace(lat, lon, name);
+        setPlace(lat, lon, name, country);
       },
       (err) => {
         setLocating(false);
@@ -228,7 +235,7 @@ function SettingsPage() {
                 <li key={`${h.latitude},${h.longitude}`}>
                   <button
                     onClick={() => {
-                      setPlace(h.latitude, h.longitude, h.name);
+                      setPlace(h.latitude, h.longitude, h.name, h.country);
                       setHits([]);
                       setTown("");
                     }}
