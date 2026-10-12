@@ -36,8 +36,7 @@ export type CategoryId =
   | "cooperatives"
   | "finance"
   | "knowledge"
-  | "government"
-  | "business";
+  | "government";
 
 export const CATEGORIES: { id: CategoryId; name: string; blurb: string }[] = [
   { id: "my-farm", name: "My Farm", blurb: "Your farm's profile, land and day-to-day records" },
@@ -58,11 +57,6 @@ export const CATEGORIES: { id: CategoryId; name: string; blurb: string }[] = [
     id: "government",
     name: "Government & Development",
     blurb: "Programmes, compliance and development support",
-  },
-  {
-    id: "business",
-    name: "My Business & Administration",
-    blurb: "Your account, tracking and reports",
   },
 ];
 
@@ -135,7 +129,7 @@ const INTEL_DEFS: Omit<RegistryApp, "tone">[] = [
     blurb: "Decide, commit, act and record what happened",
     icon: RouteIcon,
     to: "/outcomes",
-    category: "business",
+    category: "marketplace",
   },
   {
     id: "traceability",
@@ -185,6 +179,10 @@ const MINI_APP_CATEGORY: Record<string, CategoryId> = {
   health: "production",
   finance: "finance",
   compliance: "government",
+  grants: "government",
+  "land-applications": "government",
+  extension: "government",
+  returns: "government",
 };
 
 const EXTRA_DEFS: Omit<RegistryApp, "tone">[] = [

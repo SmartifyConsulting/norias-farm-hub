@@ -20,22 +20,43 @@ function defaultLayout(): Layout {
   }));
   return {
     folders,
-    order: folders.filter((f) => DEFAULT_VISIBLE.includes(f.id as CategoryId)).map((f) => ({ kind: "folder", id: f.id })),
+    order: folders
+      .filter((f) => DEFAULT_VISIBLE.includes(f.id as CategoryId))
+      .map((f) => ({ kind: "folder", id: f.id })),
   };
 }
 
 function reconcile(layout: Layout): Layout {
   const known = new Set(APP_REGISTRY.map((a) => a.id));
+  const categoryIds = new Set(CATEGORIES.map((c) => c.id as string));
+  // A folder id that isn't a user-created id (those are "folder-<timestamp>-<n>") and no longer
+  // matches a current category was a predefined category that's since been removed — release its
+  // apps back to the top level rather than leaving an orphaned folder around forever.
+  const isRemovedCategory = (id: string) => !id.startsWith("folder-") && !categoryIds.has(id);
+
   const placed = new Set<string>();
-  const folders = layout.folders.map((f) => ({
-    ...f,
-    appIds: f.appIds.filter((id) => known.has(id)),
-  }));
+  const folders = layout.folders
+    .filter((f) => !isRemovedCategory(f.id))
+    .map((f) => ({ ...f, appIds: f.appIds.filter((id) => known.has(id)) }));
   for (const f of folders) for (const id of f.appIds) placed.add(id);
 
-  let order = layout.order.filter((e) =>
-    e.kind === "folder" ? folders.some((f) => f.id === e.id) : known.has(e.id) && !placed.has(e.id),
-  );
+  const released: TopEntry[] = layout.folders
+    .filter((f) => isRemovedCategory(f.id))
+    .flatMap((f) =>
+      f.appIds
+        .filter((id) => known.has(id) && !placed.has(id))
+        .map((id): TopEntry => ({ kind: "app", id })),
+    );
+  for (const e of released) if (e.kind === "app") placed.add(e.id);
+
+  let order = [
+    ...layout.order.filter((e) =>
+      e.kind === "folder"
+        ? folders.some((f) => f.id === e.id)
+        : known.has(e.id) && !placed.has(e.id),
+    ),
+    ...released,
+  ];
   for (const e of order) if (e.kind === "app") placed.add(e.id);
 
   // Any app added to the registry since last save (or missing from both folders and order) lands at the top level, unsorted.

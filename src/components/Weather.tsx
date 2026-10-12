@@ -37,7 +37,7 @@ export function Weather({
     queryKey: ["weather", lat, lon],
     queryFn: async () => {
       const r = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7`,
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=10`,
       );
       if (!r.ok) throw new Error("weather");
       return r.json();
@@ -82,19 +82,19 @@ export function Weather({
           </div>
         </div>
         {forecast.length > 1 && (
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          <div className="grid grid-cols-5 gap-1 sm:grid-cols-10">
             {forecast.map((d, i) => {
               const [dIcon] = codes[d.code] ?? ["🌡️"];
               return (
                 <div
                   key={d.date}
-                  className="flex shrink-0 flex-col items-center gap-0.5 rounded-xl bg-muted px-2 py-1.5 text-center"
+                  className="flex min-w-0 flex-col items-center gap-0.5 rounded-lg bg-muted px-0.5 py-1 text-center"
                 >
-                  <span className="text-[10px] font-semibold text-muted-foreground">
-                    {dayLabel(d.date, i)}
+                  <span className="truncate text-[9px] font-semibold text-muted-foreground">
+                    {i === 0 ? "Td" : i === 1 ? "Tm" : dayLabel(d.date, i).slice(0, 2)}
                   </span>
-                  <span className="text-base">{dIcon}</span>
-                  <span className="text-[11px] font-semibold">
+                  <span className="text-sm leading-none">{dIcon}</span>
+                  <span className="text-[9px] font-semibold leading-tight">
                     {Math.round(d.max)}°
                     <span className="text-muted-foreground">/{Math.round(d.min)}°</span>
                   </span>

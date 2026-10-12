@@ -272,7 +272,7 @@ function Home() {
 
         {/* Apps (left) + Today / Opportunities (right) */}
         <section className="grid gap-4 md:grid-cols-12">
-          <div className="space-y-3 md:col-span-7 lg:col-span-8">
+          <div className="soft-card space-y-3 border p-4 md:col-span-7 lg:col-span-8">
             {favourites.length > 0 && (
               <>
                 <div className="flex items-center justify-between">
