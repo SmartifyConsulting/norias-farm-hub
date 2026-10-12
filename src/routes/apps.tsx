@@ -1,77 +1,507 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
 import { Screen } from "@/components/Dock";
-import { MINI_APPS } from "@/lib/farm";
-import { appTone, TONE } from "@/lib/app-colors";
-import { BadgeCheck, Handshake, Calculator, Tractor, CloudLightning, Users, ShoppingBasket, Bot, Route as RouteIcon, ScanLine, Landmark, Stethoscope, GraduationCap } from "lucide-react";
-
-const INTEL = [
-  { to: "/passport", name: "Capability Passport", blurb: "Land, infrastructure, certifications & supply record", icon: BadgeCheck },
-  { to: "/opportunities", name: "Opportunities", blurb: "Buyer demand, contracts & services matched to you", icon: Handshake },
-  { to: "/simulator", name: "Decision Simulator", blurb: "Compare crops, costs and price or yield shocks", icon: Calculator },
-  { to: "/capacity", name: "Shared Capacity", blurb: "Equipment, trucks, storage & labour near you", icon: Tractor },
-  { to: "/risks", name: "Risk & Response", blurb: "Forecast and field risks with responses you approve", icon: CloudLightning },
-  { to: "/collective", name: "Collective", blurb: "Bulk buying and combined supply lots", icon: ShoppingBasket },
-  { to: "/outcomes", name: "Opportunity → Outcome", blurb: "Decide, commit, act and record what happened", icon: RouteIcon },
-  { to: "/traceability", name: "Traceability", blurb: "Batch records from field to buyer", icon: ScanLine },
-  { to: "/funding", name: "Funding Readiness", blurb: "What a lender or funder may ask for", icon: Landmark },
-  { to: "/vet-check", name: "Animal Symptom Check", blurb: "Describe symptoms, add a photo, get care guidance", icon: Stethoscope },
-  { to: "/copilot", name: "Farm Copilot", blurb: "Ask questions about your farm data", icon: Bot },
-] as const;
+import { AppLink } from "@/components/AppLink";
+import { appById, searchApps, type RegistryApp } from "@/lib/app-registry";
+import { useLayout, type TopEntry } from "@/lib/layout";
+import { useFavourites } from "@/lib/favourites";
+import { appTone } from "@/lib/app-colors";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { FolderPlus, MoreVertical, Search, Star, X } from "lucide-react";
 
 export const Route = createFileRoute("/apps")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    folder: typeof s["folder"] === "string" ? (s["folder"] as string) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "App Store — FarmerPlus" },
-      { name: "description", content: "Browse FarmerPlus mini-apps: My Farm, My Animals, Farm Diary, Harvest, Field Mapping and Stock." },
+      {
+        name: "description",
+        content: "Browse FarmerPlus apps, grouped into folders you can organise yourself.",
+      },
       { property: "og:title", content: "App Store — FarmerPlus" },
-      { property: "og:description", content: "All the mini-apps you need to run your farm." },
+      {
+        property: "og:description",
+        content: "All the apps you need to run your farm, organised your way.",
+      },
     ],
   }),
   component: Apps,
 });
 
+function AppTile({ app, dragging }: { app: RegistryApp; dragging?: boolean }) {
+  return (
+    <div
+      className={`flex items-center gap-4 rounded-2xl border bg-card p-4 transition ${dragging ? "opacity-40" : "hover:shadow-md"}`}
+    >
+      <span
+        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(app.tone)}`}
+      >
+        <app.icon className="h-7 w-7" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-semibold text-card-foreground">{app.name}</p>
+        <p className="truncate text-sm text-muted-foreground">{app.blurb}</p>
+      </div>
+    </div>
+  );
+}
+
+function DraggableApp({
+  app,
+  onRemove,
+  favourite,
+  onToggleFavourite,
+}: {
+  app: RegistryApp;
+  onRemove?: () => void;
+  favourite: boolean;
+  onToggleFavourite: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `app:${app.id}`,
+  });
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: `app:${app.id}` });
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : undefined;
+  return (
+    <div
+      ref={setDropRef}
+      className={`relative rounded-2xl ${isOver ? "ring-2 ring-brand-green" : ""}`}
+    >
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...listeners}
+        {...attributes}
+        className="cursor-grab touch-none active:cursor-grabbing"
+      >
+        <AppLink
+          app={app}
+          className="block"
+          onClickCapture={(e) => {
+            if (isDragging) e.preventDefault();
+          }}
+        >
+          <AppTile app={app} dragging={isDragging} />
+        </AppLink>
+      </div>
+      <button
+        type="button"
+        aria-label={favourite ? "Remove from favourites" : "Add to favourites"}
+        onClick={onToggleFavourite}
+        className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-muted-foreground hover:text-brand-yellow"
+      >
+        <Star className={`h-4 w-4 ${favourite ? "fill-brand-yellow text-brand-yellow" : ""}`} />
+      </button>
+      {onRemove && (
+        <button
+          type="button"
+          aria-label="Remove from folder"
+          onClick={onRemove}
+          className="absolute right-2 bottom-2 rounded-full bg-background/80 p-1 text-muted-foreground hover:text-brand-red"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FolderTile({
+  id,
+  name,
+  apps,
+  onOpen,
+  onRename,
+  onDelete,
+}: {
+  id: string;
+  name: string;
+  apps: RegistryApp[];
+  onOpen: () => void;
+  onRename: () => void;
+  onDelete: () => void;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: `folder:${id}` });
+  const preview = apps.slice(0, 4);
+  return (
+    <div
+      ref={setNodeRef}
+      className={`group relative flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md ${isOver ? "ring-2 ring-brand-green" : ""}`}
+    >
+      <button type="button" onClick={onOpen} className="flex flex-1 items-center gap-4 text-left">
+        <span className="grid h-14 w-14 shrink-0 grid-cols-2 gap-0.5 overflow-hidden rounded-2xl bg-muted p-1">
+          {preview.length === 0 ? (
+            <FolderPlus className="col-span-2 row-span-2 m-auto h-6 w-6 text-muted-foreground" />
+          ) : (
+            preview.map((a) => (
+              <span
+                key={a.id}
+                className={`flex items-center justify-center rounded-md ${appTone(a.tone)}`}
+              >
+                <a.icon className="h-3.5 w-3.5" />
+              </span>
+            ))
+          )}
+        </span>
+        <div className="flex-1">
+          <p className="font-semibold text-card-foreground">{name}</p>
+          <p className="text-sm text-muted-foreground">
+            {apps.length} {apps.length === 1 ? "app" : "apps"}
+          </p>
+        </div>
+      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label="Folder options"
+            className="rounded-full p-1.5 text-muted-foreground opacity-0 hover:bg-muted group-hover:opacity-100 focus:opacity-100"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={onRename}>Rename</DropdownMenuItem>
+          <DropdownMenuItem onClick={onDelete} className="text-brand-red">
+            Delete folder
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
 function Apps() {
+  const { layout, moveApp, groupIntoNewFolder, createFolder, renameFolder, deleteFolder } =
+    useLayout();
+  const { ids: favIds, isFavourite, toggle: toggleFavourite } = useFavourites();
+  const search = useSearch({ from: "/apps" });
+  const nav = useNavigate();
+  const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(search["folder"] ?? null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+  );
+
+  const results = useMemo(() => searchApps(query), [query]);
+  const favourites = useMemo(
+    () => favIds.map(appById).filter((a): a is RegistryApp => !!a),
+    [favIds],
+  );
+  const expandedFolder = layout.folders.find((f) => f.id === expanded);
+
+  const dragApp = activeId?.startsWith("app:") ? appById(activeId.slice(4)) : undefined;
+
+  function onDragStart(e: DragStartEvent) {
+    setActiveId(String(e.active.id));
+  }
+  function onDragEnd(e: DragEndEvent) {
+    setActiveId(null);
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const activeId = String(active.id);
+    const overId = String(over.id);
+    if (!activeId.startsWith("app:")) return;
+    const appId = activeId.slice(4);
+
+    if (overId.startsWith("folder:")) {
+      moveApp(appId, overId.slice(7));
+      return;
+    }
+    if (overId.startsWith("app:")) {
+      const targetId = overId.slice(4);
+      if (expandedFolder) {
+        // Reordering within the open folder.
+        const ids = expandedFolder.appIds.filter((id) => id !== appId);
+        const idx = ids.indexOf(targetId);
+        ids.splice(idx < 0 ? ids.length : idx, 0, appId);
+        moveApp(appId, expandedFolder.id, ids.indexOf(appId));
+        return;
+      }
+      groupIntoNewFolder(appId, targetId);
+    }
+  }
+
+  function openFolder(id: string) {
+    setExpanded(id);
+    nav({ to: "/apps", search: { folder: id } });
+  }
+  function closeFolder() {
+    setExpanded(null);
+    nav({ to: "/apps", search: { folder: undefined } });
+  }
+
   return (
     <Screen title="App Store">
-      <Link to="/team" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-        <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(TONE.team)}`}><Users className="h-7 w-7" /></span>
-        <div className="flex-1">
-          <p className="font-semibold text-card-foreground">Farm Team</p>
-          <p className="text-sm text-muted-foreground">Share your farm and give each person owner, manager, worker or viewer access</p>
-        </div>
-      </Link>
-      <Link to="/farmschool" className="mb-4 flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-        <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(TONE.farmschool)}`}><GraduationCap className="h-7 w-7" /></span>
-        <div className="flex-1">
-          <p className="font-semibold text-card-foreground">FarmSchool</p>
-          <p className="text-sm text-muted-foreground">Farming courses and your learning progress</p>
-        </div>
-      </Link>
-      <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
-        {MINI_APPS.map((a, i) => (
-          <Link key={a.id} to="/app/$appId" params={{ appId: a.id }} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-            <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(i)}`}><a.icon className="h-7 w-7" /></span>
-            <div className="flex-1">
-              <p className="font-semibold text-card-foreground">{a.name}</p>
-              <p className="text-sm text-muted-foreground">{a.blurb}</p>
-            </div>
-            <span className="rounded-full bg-brand-green px-4 py-1 text-xs font-bold text-background">OPEN</span>
-          </Link>
-        ))}
+      <div className="mb-5 flex items-center gap-2 rounded-full border bg-card px-4 py-2.5">
+        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <input
+          aria-label="Search apps"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search all apps…"
+          className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label="Clear search"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
-      <h2 className="mb-3 mt-8 font-display text-lg font-semibold">Farm intelligence</h2>
-      <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
-        {INTEL.map((a, i) => (
-          <Link key={a.to} to={a.to} className="flex items-center gap-4 rounded-2xl border bg-card p-4 transition hover:shadow-md">
-            <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full ${appTone(i + TONE.intel)}`}><a.icon className="h-7 w-7" /></span>
-            <div className="flex-1">
-              <p className="font-semibold text-card-foreground">{a.name}</p>
-              <p className="text-sm text-muted-foreground">{a.blurb}</p>
+
+      {query ? (
+        <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
+          {results.length === 0 && (
+            <p className="text-sm text-muted-foreground">No apps match "{query}".</p>
+          )}
+          {results.map((a) => (
+            <DraggableApp
+              key={a.id}
+              app={a}
+              favourite={isFavourite(a.id)}
+              onToggleFavourite={() => toggleFavourite(a.id)}
+            />
+          ))}
+        </div>
+      ) : expandedFolder ? (
+        <div>
+          <div className="mb-4 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={closeFolder}
+              className="text-sm font-semibold text-earth-1"
+            >
+              ← All folders
+            </button>
+            <h2 className="font-display text-lg font-semibold">{expandedFolder.name}</h2>
+            <span />
+          </div>
+          <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+            <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
+              {expandedFolder.appIds.map((id) => {
+                const a = appById(id);
+                if (!a) return null;
+                return (
+                  <DraggableApp
+                    key={a.id}
+                    app={a}
+                    favourite={isFavourite(a.id)}
+                    onToggleFavourite={() => toggleFavourite(a.id)}
+                    onRemove={() => moveApp(a.id, null)}
+                  />
+                );
+              })}
+              {expandedFolder.appIds.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No apps in this folder yet — drag one in from "All folders".
+                </p>
+              )}
             </div>
-            <span className="rounded-full bg-brand-green px-4 py-1 text-xs font-bold text-background">OPEN</span>
-          </Link>
-        ))}
-      </div>
+            <DragOverlay>{dragApp && <AppTile app={dragApp} />}</DragOverlay>
+          </DndContext>
+        </div>
+      ) : (
+        <div>
+          {favourites.length > 0 && (
+            <div className="mb-6">
+              <h2 className="mb-3 font-display text-lg font-semibold">Favourites</h2>
+              <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
+                {favourites.map((a) => (
+                  <DraggableApp
+                    key={a.id}
+                    app={a}
+                    favourite
+                    onToggleFavourite={() => toggleFavourite(a.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold">Folders</h2>
+            <Button variant="outline" size="sm" onClick={() => setNewFolderOpen(true)}>
+              <FolderPlus className="mr-1.5 h-4 w-4" /> New folder
+            </Button>
+          </div>
+          <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+            <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0 lg:grid-cols-3">
+              {layout.order.map((entry: TopEntry) => {
+                if (entry.kind === "folder") {
+                  const f = layout.folders.find((x) => x.id === entry.id);
+                  if (!f) return null;
+                  const apps = f.appIds.map(appById).filter((a): a is RegistryApp => !!a);
+                  return (
+                    <FolderTile
+                      key={f.id}
+                      id={f.id}
+                      name={f.name}
+                      apps={apps}
+                      onOpen={() => openFolder(f.id)}
+                      onRename={() => setRenaming({ id: f.id, name: f.name })}
+                      onDelete={() => setDeleting({ id: f.id, name: f.name })}
+                    />
+                  );
+                }
+                const a = appById(entry.id);
+                if (!a) return null;
+                return (
+                  <DraggableApp
+                    key={a.id}
+                    app={a}
+                    favourite={isFavourite(a.id)}
+                    onToggleFavourite={() => toggleFavourite(a.id)}
+                  />
+                );
+              })}
+            </div>
+            <DragOverlay>{dragApp && <AppTile app={dragApp} />}</DragOverlay>
+          </DndContext>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Drag an app onto another to make a folder, or onto a folder to add it in. Drag an app
+            out of a folder's "×" to move it back here.
+          </p>
+        </div>
+      )}
+
+      <Dialog open={newFolderOpen} onOpenChange={setNewFolderOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New folder</DialogTitle>
+          </DialogHeader>
+          <Input
+            autoFocus
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+            placeholder="Folder name"
+            onKeyDown={(e) =>
+              e.key === "Enter" &&
+              newFolderName.trim() &&
+              (createFolder(newFolderName), setNewFolderName(""), setNewFolderOpen(false))
+            }
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewFolderOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (newFolderName.trim()) {
+                  createFolder(newFolderName);
+                  setNewFolderName("");
+                  setNewFolderOpen(false);
+                }
+              }}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!renaming} onOpenChange={(o) => !o && setRenaming(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename folder</DialogTitle>
+          </DialogHeader>
+          {renaming && (
+            <Input
+              autoFocus
+              value={renaming.name}
+              onChange={(e) => setRenaming({ ...renaming, name: e.target.value })}
+              onKeyDown={(e) =>
+                e.key === "Enter" &&
+                renaming.name.trim() &&
+                (renameFolder(renaming.id, renaming.name), setRenaming(null))
+              }
+            />
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenaming(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (renaming && renaming.name.trim()) {
+                  renameFolder(renaming.id, renaming.name);
+                  setRenaming(null);
+                }
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete "{deleting?.name}"?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Its apps move back to the top level — nothing is removed from the App Store.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleting) {
+                  deleteFolder(deleting.id);
+                  setDeleting(null);
+                  if (expanded === deleting.id) closeFolder();
+                }
+              }}
+            >
+              Delete folder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Screen>
   );
 }

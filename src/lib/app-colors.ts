@@ -1,4 +1,4 @@
-/** 25 distinct colourful frame tones. Index order: 0-11 farm apps, 12-22 Farm intelligence, 23 Farm Team, 24 FarmSchool. */
+/** 25 distinct colourful frame tones. Apps get a stable tone from `APP_REGISTRY` (src/lib/app-registry.ts) so colour never shifts when reordered or re-foldered. */
 const TONES = [
   "bg-tone-1 text-background",
   "bg-tone-2 text-brand-ink",
