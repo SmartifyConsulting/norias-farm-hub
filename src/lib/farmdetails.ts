@@ -5,9 +5,31 @@ export type FarmDetails = {
   sizeHa: string;
   mainProduction: string;
   subCategory: string;
+  /** Geocoded from the address, so the farm map can open locked onto this location every time. */
+  lat?: number | undefined;
+  lon?: number | undefined;
 };
 
 const EMPTY: FarmDetails = { address: "", sizeHa: "", mainProduction: "", subCategory: "" };
+
+/** Looks up an address via the same free geocoder the farm map's search box uses. */
+export async function geocodeAddress(
+  address: string,
+): Promise<{ lat: number; lon: number } | null> {
+  const q = address.trim();
+  if (!q) return null;
+  try {
+    const r = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=${encodeURIComponent(q)}`,
+    );
+    const data = await r.json();
+    const hit = data?.results?.[0];
+    if (!hit) return null;
+    return { lat: hit.latitude, lon: hit.longitude };
+  } catch {
+    return null;
+  }
+}
 
 /** Main production categories, each with its own production subcategories (cascading select). */
 export const PRODUCTION_CATEGORIES: Record<string, string[]> = {

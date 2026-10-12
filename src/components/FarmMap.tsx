@@ -27,8 +27,17 @@ type GeoResult = {
 };
 type Snapshot = { boundary: LatLng[]; pins: MapPin[] };
 
-/** Interactive farm boundary + pinned-record map. Leaflet is browser-only, so everything here runs client-side after mount. */
-export function FarmMap({ farmId }: { farmId: string | null }) {
+/** Interactive farm boundary + pinned-record map. Leaflet is browser-only, so everything here runs client-side after mount.
+ * `center` locks the initial view to a known location (e.g. the farm's geocoded address) when
+ * there's no boundary drawn yet; without it (and without a boundary) the map opens zoomed out to
+ * the user's country rather than a close-in view of nothing in particular. */
+export function FarmMap({
+  farmId,
+  center,
+}: {
+  farmId: string | null;
+  center?: LatLng | undefined;
+}) {
   const [settings] = useSettings();
   const [boundary, setBoundaryState] = useBoundary(farmId);
   const [pins, setPinsState] = usePins(farmId);
@@ -124,9 +133,15 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
       await import("leaflet-draw");
       if (destroyed || !mapRef.current || leafletMap.current) return;
 
-      const center: [number, number] =
-        boundaryRef.current.length > 0 ? boundaryRef.current[0]! : [settings.lat, settings.lon];
-      const map = L.map(mapRef.current).setView(center, boundaryRef.current.length > 0 ? 15 : 12);
+      // Lock onto the drawn boundary first, then the farm's geocoded address, then fall back to a
+      // country-wide view of the user's own location rather than zooming close on nothing.
+      const [view, zoom]: [[number, number], number] =
+        boundaryRef.current.length > 0
+          ? [boundaryRef.current[0]!, 15]
+          : center
+            ? [center, 14]
+            : [[settings.lat, settings.lon], 6];
+      const map = L.map(mapRef.current).setView(view, zoom);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
         maxZoom: 19,

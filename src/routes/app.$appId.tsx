@@ -8,6 +8,7 @@ import {
   CalendarDays,
   List,
   Link2,
+  X,
 } from "lucide-react";
 import { FarmCalendar, eventsFor } from "@/components/FarmCalendar";
 import { permissions, useTeam } from "@/lib/team";
@@ -21,12 +22,21 @@ import { FarmMap } from "@/components/FarmMap";
 import { supabase } from "@/integrations/supabase/client";
 import { friendlyError } from "@/lib/errors";
 import {
+  geocodeAddress,
   MAIN_PRODUCTIONS,
   PRODUCTION_CATEGORIES,
   saveFarmDetails,
   useFarmDetails,
   type FarmDetails,
 } from "@/lib/farmdetails";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/app/$appId")({
   loader: ({ params }) => {
@@ -74,19 +84,87 @@ function MiniAppPage() {
   const [viewFarmId, setViewFarmId] = useState<string | null>(null);
   const effectiveFarmId = viewFarmId ?? current?.id ?? null;
   const [addingFarm, setAddingFarm] = useState(false);
+  const [savingFarm, setSavingFarm] = useState(false);
   const [newFarmName, setNewFarmName] = useState("");
+  const [newAddress, setNewAddress] = useState("");
+  const [newSizeHa, setNewSizeHa] = useState("");
+  const [newMainProduction, setNewMainProduction] = useState("");
+  const [newSubCategory, setNewSubCategory] = useState("");
+  const [queuedAssets, setQueuedAssets] = useState<
+    { title: string; detail: string; qty: string }[]
+  >([]);
+  const [assetTitle, setAssetTitle] = useState("");
+  const [assetDetail, setAssetDetail] = useState("");
+  const [assetQty, setAssetQty] = useState("");
+  const resetAddFarmForm = () => {
+    setNewFarmName("");
+    setNewAddress("");
+    setNewSizeHa("");
+    setNewMainProduction("");
+    setNewSubCategory("");
+    setQueuedAssets([]);
+    setAssetTitle("");
+    setAssetDetail("");
+    setAssetQty("");
+  };
+  const queueAsset = () => {
+    if (!assetTitle.trim()) return;
+    setQueuedAssets([
+      ...queuedAssets,
+      { title: assetTitle.trim(), detail: assetDetail.trim(), qty: assetQty.trim() },
+    ]);
+    setAssetTitle("");
+    setAssetDetail("");
+    setAssetQty("");
+  };
   const addFarm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFarmName.trim()) return;
+    if (!newFarmName.trim() || savingFarm) return;
+    setSavingFarm(true);
     const { data, error } = await supabase.rpc("create_farm", { _name: newFarmName.trim() });
     if (error) {
       toast.error(friendlyError(error));
+      setSavingFarm(false);
       return;
     }
-    setNewFarmName("");
+    const fid = typeof data === "string" ? data : null;
+    if (fid) {
+      const geocoded = await geocodeAddress(newAddress);
+      saveFarmDetails(fid, {
+        address: newAddress.trim(),
+        sizeHa: newSizeHa.trim(),
+        mainProduction: newMainProduction,
+        subCategory: newSubCategory,
+        lat: geocoded?.lat,
+        lon: geocoded?.lon,
+      });
+      if (queuedAssets.length) {
+        save([
+          ...queuedAssets.map((a) => ({
+            id: crypto.randomUUID(),
+            title: a.title,
+            detail: a.detail,
+            qty: a.qty,
+            date: new Date().toISOString(),
+            sync: cloud
+              ? user
+                ? "pending"
+                : "local"
+              : online && settings.autoSync
+                ? "synced"
+                : online
+                  ? "pending"
+                  : "local",
+          })),
+          ...records,
+        ] as FarmRecord[]);
+      }
+    }
+    resetAddFarmForm();
     setAddingFarm(false);
+    setSavingFarm(false);
     await reloadFarms();
-    if (typeof data === "string") setViewFarmId(data);
+    if (fid) setViewFarmId(fid);
     toast.success("Farm added");
   };
   const farmDetails = useFarmDetails(effectiveFarmId);
@@ -305,39 +383,170 @@ function MiniAppPage() {
                   {f.name}
                 </button>
               ))}
-              {addingFarm ? (
-                <form onSubmit={addFarm} className="flex items-center gap-2">
-                  <input
-                    autoFocus
-                    className="rounded-full border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="New farm name"
-                    value={newFarmName}
-                    onChange={(e) => setNewFarmName(e.target.value)}
-                  />
-                  <button className="rounded-full bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground">
-                    Add
-                  </button>
+              <button
+                type="button"
+                onClick={() => setAddingFarm(true)}
+                className="rounded-full border border-dashed px-3 py-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
+              >
+                + Add farm
+              </button>
+            </div>
+          </section>
+
+          <Dialog
+            open={addingFarm}
+            onOpenChange={(open) => {
+              if (!open && !savingFarm) {
+                setAddingFarm(false);
+                resetAddFarmForm();
+              }
+            }}
+          >
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add a farm</DialogTitle>
+                <DialogDescription>
+                  Capture the basics now — you can always fill in more later from Farm details.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={addFarm} className="space-y-3">
+                <input
+                  autoFocus
+                  className={input}
+                  placeholder="Farm name"
+                  value={newFarmName}
+                  onChange={(e) => setNewFarmName(e.target.value)}
+                />
+                <input
+                  className={input}
+                  placeholder="Address"
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                />
+                <input
+                  className={input}
+                  placeholder="Size (hectares)"
+                  value={newSizeHa}
+                  onChange={(e) => setNewSizeHa(e.target.value)}
+                />
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <select
+                    aria-label="Main production"
+                    className={input}
+                    value={newMainProduction}
+                    onChange={(e) => {
+                      setNewMainProduction(e.target.value);
+                      setNewSubCategory("");
+                    }}
+                  >
+                    <option value="">Main production</option>
+                    {MAIN_PRODUCTIONS.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Production subcategory"
+                    className={input}
+                    value={newSubCategory}
+                    onChange={(e) => setNewSubCategory(e.target.value)}
+                    disabled={!newMainProduction}
+                  >
+                    <option value="">
+                      {newMainProduction
+                        ? "Production subcategory"
+                        : "Choose main production first"}
+                    </option>
+                    {(PRODUCTION_CATEGORIES[newMainProduction] ?? []).map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="rounded-2xl border p-3">
+                  <p className="mb-2 text-sm font-semibold">Assets (optional)</p>
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    Buildings, equipment or anything else — these show up as map icons.
+                  </p>
+                  {queuedAssets.length > 0 && (
+                    <ul className="mb-2 space-y-1">
+                      {queuedAssets.map((a, i) => (
+                        <li
+                          key={i}
+                          className="flex items-center justify-between rounded-xl bg-muted px-3 py-1.5 text-sm"
+                        >
+                          <span>
+                            {a.title}
+                            {a.detail && (
+                              <span className="text-muted-foreground"> · {a.detail}</span>
+                            )}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${a.title}`}
+                            onClick={() => setQueuedAssets(queuedAssets.filter((_, x) => x !== i))}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      className={`${input} max-w-[10rem]`}
+                      placeholder="Asset name"
+                      value={assetTitle}
+                      onChange={(e) => setAssetTitle(e.target.value)}
+                    />
+                    <input
+                      className={`${input} max-w-[9rem]`}
+                      placeholder="Notes"
+                      value={assetDetail}
+                      onChange={(e) => setAssetDetail(e.target.value)}
+                    />
+                    <input
+                      className={`${input} max-w-[7rem]`}
+                      placeholder="Value"
+                      value={assetQty}
+                      onChange={(e) => setAssetQty(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={queueAsset}
+                      disabled={!assetTitle.trim()}
+                      className="rounded-xl border px-3 py-2 text-sm font-semibold disabled:opacity-50"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                </div>
+
+                <DialogFooter>
                   <button
                     type="button"
                     onClick={() => {
                       setAddingFarm(false);
-                      setNewFarmName("");
+                      resetAddFarmForm();
                     }}
-                    className="text-sm text-muted-foreground"
+                    className="rounded-xl bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground"
                   >
                     Cancel
                   </button>
-                </form>
-              ) : (
-                <button
-                  onClick={() => setAddingFarm(true)}
-                  className="rounded-full border border-dashed px-3 py-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
-                >
-                  + Add farm
-                </button>
-              )}
-            </div>
-          </section>
+                  <button
+                    disabled={!newFarmName.trim() || savingFarm}
+                    className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                  >
+                    {savingFarm ? "Adding…" : "Add farm"}
+                  </button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
           <section>
             <div className="mb-2 flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold">Farm details</h2>
@@ -353,9 +562,17 @@ function MiniAppPage() {
             </div>
             {editingDetails ? (
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  saveFarmDetails(effectiveFarmId, detailsForm);
+                  const addressChanged = detailsForm.address.trim() !== farmDetails.address.trim();
+                  const geocoded = addressChanged
+                    ? await geocodeAddress(detailsForm.address)
+                    : { lat: detailsForm.lat, lon: detailsForm.lon };
+                  saveFarmDetails(effectiveFarmId, {
+                    ...detailsForm,
+                    lat: geocoded?.lat,
+                    lon: geocoded?.lon,
+                  });
                   setEditingDetails(false);
                 }}
                 className="space-y-2 rounded-2xl border bg-card p-4"
@@ -449,7 +666,14 @@ function MiniAppPage() {
           </section>
           <section>
             <h2 className="mb-2 font-display text-lg font-semibold">Farm map</h2>
-            <FarmMap farmId={effectiveFarmId} />
+            <FarmMap
+              farmId={effectiveFarmId}
+              center={
+                farmDetails.lat != null && farmDetails.lon != null
+                  ? [farmDetails.lat, farmDetails.lon]
+                  : undefined
+              }
+            />
           </section>
           <section>
             <h2 className="mb-2 font-display text-lg font-semibold">Assets</h2>
