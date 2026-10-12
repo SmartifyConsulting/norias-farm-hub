@@ -43,6 +43,13 @@
       "when": 1791900000000,
       "tag": "0005_cooperatives",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791950000000,
+      "tag": "0006_cooperative_trade",
+      "breakpoints": true
     }
   ]
 }

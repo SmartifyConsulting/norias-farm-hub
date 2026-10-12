@@ -149,6 +149,284 @@ export type Database = {
           },
         ]
       }
+      cooperative_purchase_allocations: {
+        Row: {
+          cost: number
+          delivered: boolean
+          order_id: string
+          paid: boolean
+          qty: number
+          user_id: string
+        }
+        Insert: {
+          cost: number
+          delivered?: boolean
+          order_id: string
+          paid?: boolean
+          qty: number
+          user_id: string
+        }
+        Update: {
+          cost?: number
+          delivered?: boolean
+          order_id?: string
+          paid?: boolean
+          qty?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_purchase_allocations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_purchase_orders: {
+        Row: {
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          id: string
+          item: string
+          status: Database["public"]["Enums"]["coop_order_status"]
+          supplier_name: string
+          unit: string
+          unit_price: number
+        }
+        Insert: {
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          item: string
+          status?: Database["public"]["Enums"]["coop_order_status"]
+          supplier_name?: string
+          unit?: string
+          unit_price?: number
+        }
+        Update: {
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          item?: string
+          status?: Database["public"]["Enums"]["coop_order_status"]
+          supplier_name?: string
+          unit?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_purchase_orders_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_purchase_requests: {
+        Row: {
+          category: string
+          cooperative_id: string
+          created_at: string
+          id: string
+          item: string
+          needed_by: string | null
+          notes: string
+          order_id: string | null
+          qty: number
+          status: Database["public"]["Enums"]["coop_request_status"]
+          unit: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          cooperative_id: string
+          created_at?: string
+          id?: string
+          item: string
+          needed_by?: string | null
+          notes?: string
+          order_id?: string | null
+          qty: number
+          status?: Database["public"]["Enums"]["coop_request_status"]
+          unit?: string
+          user_id?: string
+        }
+        Update: {
+          category?: string
+          cooperative_id?: string
+          created_at?: string
+          id?: string
+          item?: string
+          needed_by?: string | null
+          notes?: string
+          order_id?: string | null
+          qty?: number
+          status?: Database["public"]["Enums"]["coop_request_status"]
+          unit?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_purchase_requests_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooperative_purchase_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_sale_allocations: {
+        Row: {
+          delivered: boolean
+          order_id: string
+          paid: boolean
+          proceeds: number
+          qty: number
+          user_id: string
+        }
+        Insert: {
+          delivered?: boolean
+          order_id: string
+          paid?: boolean
+          proceeds: number
+          qty: number
+          user_id: string
+        }
+        Update: {
+          delivered?: boolean
+          order_id?: string
+          paid?: boolean
+          proceeds?: number
+          qty?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_sale_allocations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_sale_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_sale_listings: {
+        Row: {
+          available_from: string | null
+          commodity: string
+          cooperative_id: string
+          created_at: string
+          grade: string
+          id: string
+          notes: string
+          order_id: string | null
+          qty: number
+          status: Database["public"]["Enums"]["coop_listing_status"]
+          unit: string
+          user_id: string
+        }
+        Insert: {
+          available_from?: string | null
+          commodity: string
+          cooperative_id: string
+          created_at?: string
+          grade?: string
+          id?: string
+          notes?: string
+          order_id?: string | null
+          qty: number
+          status?: Database["public"]["Enums"]["coop_listing_status"]
+          unit?: string
+          user_id?: string
+        }
+        Update: {
+          available_from?: string | null
+          commodity?: string
+          cooperative_id?: string
+          created_at?: string
+          grade?: string
+          id?: string
+          notes?: string
+          order_id?: string | null
+          qty?: number
+          status?: Database["public"]["Enums"]["coop_listing_status"]
+          unit?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_sale_listings_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooperative_sale_listings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cooperative_sale_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cooperative_sale_orders: {
+        Row: {
+          buyer_name: string
+          commodity: string
+          cooperative_id: string
+          created_at: string
+          created_by: string
+          id: string
+          status: Database["public"]["Enums"]["coop_order_status"]
+          unit: string
+          unit_price: number
+        }
+        Insert: {
+          buyer_name?: string
+          commodity: string
+          cooperative_id: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          status?: Database["public"]["Enums"]["coop_order_status"]
+          unit?: string
+          unit_price?: number
+        }
+        Update: {
+          buyer_name?: string
+          commodity?: string
+          cooperative_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          status?: Database["public"]["Enums"]["coop_order_status"]
+          unit?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_sale_orders_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cooperatives: {
         Row: {
           bio: string
@@ -384,6 +662,7 @@ export type Database = {
     Functions: {
       accept_cooperative_invite: { Args: { _invite: string }; Returns: string }
       accept_farm_invite: { Args: { _invite: string }; Returns: string }
+      coop_can_trade: { Args: { _coop: string }; Returns: boolean }
       coop_is_admin: { Args: { _coop: string }; Returns: boolean }
       coop_role_of: {
         Args: { _coop: string }
@@ -405,6 +684,24 @@ export type Database = {
         Returns: string
       }
       create_farm: { Args: { _name: string }; Returns: string }
+      create_purchase_order: {
+        Args: {
+          _coop: string
+          _request_ids: string[]
+          _supplier_name: string
+          _unit_price: number
+        }
+        Returns: string
+      }
+      create_sale_order: {
+        Args: {
+          _buyer_name: string
+          _coop: string
+          _listing_ids: string[]
+          _unit_price: number
+        }
+        Returns: string
+      }
       farm_role_of: {
         Args: { _farm: string }
         Returns: Database["public"]["Enums"]["farm_role"]
@@ -416,7 +713,10 @@ export type Database = {
       }
     }
     Enums: {
+      coop_listing_status: "available" | "sold" | "cancelled"
       coop_member_status: "pending" | "active" | "left" | "removed"
+      coop_order_status: "draft" | "confirmed" | "delivered" | "cancelled"
+      coop_request_status: "open" | "ordered" | "cancelled"
       coop_role:
         | "administrator"
         | "chairperson"
@@ -554,7 +854,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      coop_listing_status: ["available", "sold", "cancelled"],
       coop_member_status: ["pending", "active", "left", "removed"],
+      coop_order_status: ["draft", "confirmed", "delivered", "cancelled"],
+      coop_request_status: ["open", "ordered", "cancelled"],
       coop_role: [
         "administrator",
         "chairperson",

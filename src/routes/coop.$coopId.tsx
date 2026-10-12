@@ -183,6 +183,24 @@ function CoopDetail() {
             )}
           </section>
 
+          {isMember && (
+            <section className="rounded-2xl border bg-card p-4">
+              <h2 className="mb-2 font-semibold">Buying &amp; selling</h2>
+              <div className="flex gap-2 text-sm">
+                <Link to="/coop/$coopId/purchasing" params={{ coopId }} className={btn}>
+                  Collective purchasing
+                </Link>
+                <Link
+                  to="/coop/$coopId/sales"
+                  params={{ coopId }}
+                  className="rounded-xl border px-4 py-2 font-semibold"
+                >
+                  Collective sales
+                </Link>
+              </div>
+            </section>
+          )}
+
           {isAdmin && requests.length > 0 && (
             <section className="rounded-2xl border bg-card p-4">
               <h2 className="mb-2 font-semibold">Join requests</h2>

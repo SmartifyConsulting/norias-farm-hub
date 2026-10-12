@@ -158,5 +158,19 @@ export function useCooperative(id: string | undefined) {
     load();
   }, [load]);
   const isAdmin = role === "administrator" || role === "chairperson" || role === "secretary";
-  return { user, coop, role, pending, isAdmin, members, requests, invites, loading, reload: load };
+  const canTrade =
+    role === "administrator" || role === "chairperson" || role === "operations_manager";
+  return {
+    user,
+    coop,
+    role,
+    pending,
+    isAdmin,
+    canTrade,
+    members,
+    requests,
+    invites,
+    loading,
+    reload: load,
+  };
 }

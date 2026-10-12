@@ -14,7 +14,6 @@ import { Route as AppsRouteImport } from './routes/apps'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CapacityRouteImport } from './routes/capacity'
 import { Route as CollectiveRouteImport } from './routes/collective'
-import { Route as CoopRouteImport } from './routes/coop'
 import { Route as CopilotRouteImport } from './routes/copilot'
 import { Route as FarmschoolRouteImport } from './routes/farmschool'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -33,7 +32,10 @@ import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as ApiCopilotRouteImport } from './routes/api/copilot'
 import { Route as ApiVetCheckRouteImport } from './routes/api/vet-check'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
+import { Route as CoopIndexRouteImport } from './routes/coop.index'
 import { Route as CoopCoopIdRouteImport } from './routes/coop.$coopId'
+import { Route as CoopCoopIdPurchasingRouteImport } from './routes/coop.$coopId.purchasing'
+import { Route as CoopCoopIdSalesRouteImport } from './routes/coop.$coopId.sales'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,11 +60,6 @@ const CapacityRoute = CapacityRouteImport.update({
 const CollectiveRoute = CollectiveRouteImport.update({
   id: '/collective',
   path: '/collective',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoopRoute = CoopRouteImport.update({
-  id: '/coop',
-  path: '/coop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CopilotRoute = CopilotRouteImport.update({
@@ -155,10 +152,25 @@ const AppAppIdRoute = AppAppIdRouteImport.update({
   path: '/app/$appId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoopIndexRoute = CoopIndexRouteImport.update({
+  id: '/coop/',
+  path: '/coop/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoopCoopIdRoute = CoopCoopIdRouteImport.update({
-  id: '/$coopId',
-  path: '/$coopId',
-  getParentRoute: () => CoopRoute,
+  id: '/coop/$coopId',
+  path: '/coop/$coopId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoopCoopIdPurchasingRoute = CoopCoopIdPurchasingRouteImport.update({
+  id: '/purchasing',
+  path: '/purchasing',
+  getParentRoute: () => CoopCoopIdRoute,
+} as any)
+const CoopCoopIdSalesRoute = CoopCoopIdSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => CoopCoopIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -167,7 +179,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
-  '/coop': typeof CoopRouteWithChildren
   '/copilot': typeof CopilotRoute
   '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -186,7 +197,10 @@ export interface FileRoutesByFullPath {
   '/api/copilot': typeof ApiCopilotRoute
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
-  '/coop/$coopId': typeof CoopCoopIdRoute
+  '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
+  '/coop/': typeof CoopIndexRoute
+  '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
+  '/coop/$coopId/sales': typeof CoopCoopIdSalesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -194,7 +208,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
-  '/coop': typeof CoopRouteWithChildren
   '/copilot': typeof CopilotRoute
   '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -213,7 +226,10 @@ export interface FileRoutesByTo {
   '/api/copilot': typeof ApiCopilotRoute
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
-  '/coop/$coopId': typeof CoopCoopIdRoute
+  '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
+  '/coop': typeof CoopIndexRoute
+  '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
+  '/coop/$coopId/sales': typeof CoopCoopIdSalesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -222,7 +238,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
   '/collective': typeof CollectiveRoute
-  '/coop': typeof CoopRouteWithChildren
   '/copilot': typeof CopilotRoute
   '/farmschool': typeof FarmschoolRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -241,7 +256,10 @@ export interface FileRoutesById {
   '/api/copilot': typeof ApiCopilotRoute
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
-  '/coop/$coopId': typeof CoopCoopIdRoute
+  '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
+  '/coop/': typeof CoopIndexRoute
+  '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
+  '/coop/$coopId/sales': typeof CoopCoopIdSalesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,7 +269,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capacity'
     | '/collective'
-    | '/coop'
     | '/copilot'
     | '/farmschool'
     | '/forgot-password'
@@ -271,6 +288,9 @@ export interface FileRouteTypes {
     | '/api/vet-check'
     | '/app/$appId'
     | '/coop/$coopId'
+    | '/coop/'
+    | '/coop/$coopId/purchasing'
+    | '/coop/$coopId/sales'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -278,7 +298,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capacity'
     | '/collective'
-    | '/coop'
     | '/copilot'
     | '/farmschool'
     | '/forgot-password'
@@ -298,6 +317,9 @@ export interface FileRouteTypes {
     | '/api/vet-check'
     | '/app/$appId'
     | '/coop/$coopId'
+    | '/coop'
+    | '/coop/$coopId/purchasing'
+    | '/coop/$coopId/sales'
   id:
     | '__root__'
     | '/'
@@ -305,7 +327,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capacity'
     | '/collective'
-    | '/coop'
     | '/copilot'
     | '/farmschool'
     | '/forgot-password'
@@ -325,6 +346,9 @@ export interface FileRouteTypes {
     | '/api/vet-check'
     | '/app/$appId'
     | '/coop/$coopId'
+    | '/coop/'
+    | '/coop/$coopId/purchasing'
+    | '/coop/$coopId/sales'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -333,7 +357,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CapacityRoute: typeof CapacityRoute
   CollectiveRoute: typeof CollectiveRoute
-  CoopRoute: typeof CoopRouteWithChildren
   CopilotRoute: typeof CopilotRoute
   FarmschoolRoute: typeof FarmschoolRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -352,6 +375,8 @@ export interface RootRouteChildren {
   ApiCopilotRoute: typeof ApiCopilotRoute
   ApiVetCheckRoute: typeof ApiVetCheckRoute
   AppAppIdRoute: typeof AppAppIdRoute
+  CoopCoopIdRoute: typeof CoopCoopIdRouteWithChildren
+  CoopIndexRoute: typeof CoopIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -389,13 +414,6 @@ declare module '@tanstack/react-router' {
       path: '/collective'
       fullPath: '/collective'
       preLoaderRoute: typeof CollectiveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coop': {
-      id: '/coop'
-      path: '/coop'
-      fullPath: '/coop'
-      preLoaderRoute: typeof CoopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/copilot': {
@@ -524,25 +542,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coop/': {
+      id: '/coop/'
+      path: '/coop'
+      fullPath: '/coop/'
+      preLoaderRoute: typeof CoopIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coop/$coopId': {
       id: '/coop/$coopId'
-      path: '/$coopId'
+      path: '/coop/$coopId'
       fullPath: '/coop/$coopId'
       preLoaderRoute: typeof CoopCoopIdRouteImport
-      parentRoute: typeof CoopRoute
+      parentRoute: typeof rootRouteImport
+    }
+    '/coop/$coopId/purchasing': {
+      id: '/coop/$coopId/purchasing'
+      path: '/purchasing'
+      fullPath: '/coop/$coopId/purchasing'
+      preLoaderRoute: typeof CoopCoopIdPurchasingRouteImport
+      parentRoute: typeof CoopCoopIdRoute
+    }
+    '/coop/$coopId/sales': {
+      id: '/coop/$coopId/sales'
+      path: '/sales'
+      fullPath: '/coop/$coopId/sales'
+      preLoaderRoute: typeof CoopCoopIdSalesRouteImport
+      parentRoute: typeof CoopCoopIdRoute
     }
   }
 }
 
-interface CoopRouteChildren {
-  CoopCoopIdRoute: typeof CoopCoopIdRoute
+interface CoopCoopIdRouteChildren {
+  CoopCoopIdPurchasingRoute: typeof CoopCoopIdPurchasingRoute
+  CoopCoopIdSalesRoute: typeof CoopCoopIdSalesRoute
 }
 
-const CoopRouteChildren: CoopRouteChildren = {
-  CoopCoopIdRoute: CoopCoopIdRoute,
+const CoopCoopIdRouteChildren: CoopCoopIdRouteChildren = {
+  CoopCoopIdPurchasingRoute: CoopCoopIdPurchasingRoute,
+  CoopCoopIdSalesRoute: CoopCoopIdSalesRoute,
 }
 
-const CoopRouteWithChildren = CoopRoute._addFileChildren(CoopRouteChildren)
+const CoopCoopIdRouteWithChildren = CoopCoopIdRoute._addFileChildren(
+  CoopCoopIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -550,7 +593,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CapacityRoute: CapacityRoute,
   CollectiveRoute: CollectiveRoute,
-  CoopRoute: CoopRouteWithChildren,
   CopilotRoute: CopilotRoute,
   FarmschoolRoute: FarmschoolRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
@@ -569,6 +611,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCopilotRoute: ApiCopilotRoute,
   ApiVetCheckRoute: ApiVetCheckRoute,
   AppAppIdRoute: AppAppIdRoute,
+  CoopCoopIdRoute: CoopCoopIdRouteWithChildren,
+  CoopIndexRoute: CoopIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

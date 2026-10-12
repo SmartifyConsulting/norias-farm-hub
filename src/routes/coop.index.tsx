@@ -6,7 +6,7 @@ import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
 import { useMyCooperatives } from "@/lib/coop";
 
-export const Route = createFileRoute("/coop")({
+export const Route = createFileRoute("/coop/")({
   head: () => ({
     meta: [
       { title: "Co-operatives — FarmerPlus" },
