@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { ChevronLeft } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,7 +58,7 @@ function Governance() {
       agenda: agenda.trim(),
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setMeetingTitle("");
@@ -76,7 +77,7 @@ function Governance() {
       description: resDescription.trim(),
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setResTitle("");
@@ -90,7 +91,7 @@ function Governance() {
       .from("cooperative_votes")
       .upsert({ resolution_id: resolutionId, user_id: user.id, choice });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     await reload();
@@ -113,7 +114,7 @@ function Governance() {
       due_date: actionDue || null,
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setActionDescription("");
@@ -212,7 +213,7 @@ function Governance() {
                     </span>
                     <button
                       onClick={() => toggleAction(a.id, a.status)}
-                      className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize"
+                      className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground"
                     >
                       {a.status}
                     </button>
@@ -253,7 +254,7 @@ function Governance() {
                   <li key={r.id} className="rounded-xl border p-3">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">{r.title}</span>
-                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
                         {r.status}
                       </span>
                     </div>

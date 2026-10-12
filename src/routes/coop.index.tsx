@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { Check, ExternalLink, Users2 } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,7 +47,7 @@ function CoopDirectory() {
   const acceptInvite = async (id: string) => {
     const { error } = await supabase.rpc("accept_cooperative_invite", { _invite: id });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     await reload();
@@ -97,7 +98,7 @@ function CoopDirectory() {
                           className="flex items-center justify-between hover:text-earth-3"
                         >
                           <span>{m.cooperatives.name}</span>
-                          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">
+                          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
                             {m.role.replace("_", " ")}
                           </span>
                         </Link>

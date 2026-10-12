@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { ChevronLeft } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,7 +55,7 @@ function Opportunities() {
       description: description.trim(),
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setTitle("");
@@ -138,7 +139,7 @@ function Opportunities() {
             <article key={o.id} className="rounded-2xl border bg-card p-4">
               <div className="flex items-center justify-between">
                 <p className="font-semibold">{o.title}</p>
-                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
                   {o.opp_type}
                 </span>
               </div>
@@ -163,7 +164,7 @@ function Opportunities() {
                   ))}
                 </select>
               ) : (
-                <span className="mt-2 inline-block rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">
+                <span className="mt-2 inline-block rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
                   {o.status}
                 </span>
               )}

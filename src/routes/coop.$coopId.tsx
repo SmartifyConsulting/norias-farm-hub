@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { ChevronLeft, Trash2, UserCheck, UserX } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +65,7 @@ function CoopDetail() {
     const { error } = await supabase.rpc("request_join_cooperative", { _coop: coopId });
     setRequesting(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     await reload();
@@ -78,7 +79,7 @@ function CoopDetail() {
       .from("cooperative_invites")
       .insert({ cooperative_id: coopId, email: email.trim().toLowerCase(), role: inviteRole });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setEmail("");
@@ -93,7 +94,7 @@ function CoopDetail() {
       _approve: approve,
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     await reload();
@@ -106,7 +107,7 @@ function CoopDetail() {
       .eq("cooperative_id", coopId)
       .eq("user_id", userId);
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     await reload();
@@ -351,7 +352,7 @@ function CoopDetail() {
                     </button>
                   </span>
                 ) : (
-                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs">
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
                     {ROLE_LABEL[m.role]}
                   </span>
                 )}

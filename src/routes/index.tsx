@@ -4,7 +4,6 @@ import { Weather } from "@/components/Weather";
 import { toast } from "sonner";
 import {
   CloudUpload,
-  Database,
   CalendarClock,
   TriangleAlert,
   ChevronRight,
@@ -68,7 +67,7 @@ function Home() {
       toast("Records need an account to sync to the cloud", {
         action: { label: "Sign in", onClick: () => (window.location.href = "/auth") },
       });
-    else toast.error(r.error ?? "Sync failed");
+    else toast.error("Couldn't sync your records — check your connection and try again.");
   };
   const [counts, setCounts] = useState({ total: 0, pending: 0 });
   useEffect(() => {
@@ -96,7 +95,6 @@ function Home() {
   if (!loading && !user && !guest) return <AuthLanding initial="signin" />;
 
   const stats = [
-    { label: "Records", value: counts.total, icon: Database, tone: appTone(7) },
     { label: "Waiting to sync", value: counts.pending, icon: CloudUpload, tone: appTone(1) },
     { label: "Due soon", value: tasksDue, icon: CalendarClock, tone: appTone(2) },
     { label: "Active risks", value: activeRisks, icon: TriangleAlert, tone: appTone(5) },
@@ -224,8 +222,9 @@ function Home() {
           </div>
         </section>
 
-        {/* Stats + weather */}
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        {/* Weather + stats */}
+        <Weather lat={s.lat} lon={s.lon} place={s.placeName} compact />
+        <section className="grid grid-cols-3 gap-3">
           {stats.map((st) => (
             <div key={st.label} className="soft-card flex items-center gap-3 border p-4">
               <span
@@ -239,7 +238,6 @@ function Home() {
               </div>
             </div>
           ))}
-          <Weather lat={s.lat} lon={s.lon} place={s.placeName} compact />
         </section>
 
         {/* Apps (left) + Today / Opportunities (right) */}

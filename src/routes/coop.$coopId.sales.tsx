@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { ChevronLeft } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +63,7 @@ function Sales() {
       available_from: availableFrom || null,
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setCommodity("");
@@ -85,7 +86,7 @@ function Sales() {
       _unit_price: Number(unitPrice),
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setSelected({});
@@ -179,7 +180,7 @@ function Sales() {
                       <span>
                         {l.commodity} — {l.qty} {l.unit}
                       </span>
-                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
                         {l.status}
                       </span>
                     </li>
@@ -255,7 +256,7 @@ function Sales() {
                       {o.commodity}
                       {o.buyer_name && ` — ${o.buyer_name}`}
                     </span>
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
                       {o.status}
                     </span>
                   </div>

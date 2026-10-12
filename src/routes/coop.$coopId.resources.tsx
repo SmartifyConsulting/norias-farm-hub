@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { ChevronLeft } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,7 +52,7 @@ function Resources() {
       description: description.trim(),
     });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setName("");
@@ -68,7 +69,7 @@ function Resources() {
       .from("cooperative_asset_bookings")
       .insert({ asset_id: bookingFor, start_date: startDate, end_date: endDate });
     if (error) {
-      toast.error(error.message);
+      toast.error(friendlyError(error));
       return;
     }
     setBookingFor(null);
@@ -131,7 +132,7 @@ function Resources() {
             <article key={a.id} className="rounded-2xl border bg-card p-4">
               <div className="flex items-center justify-between">
                 <p className="font-semibold">{a.name}</p>
-                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize">
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs capitalize text-secondary-foreground">
                   {a.status}
                 </span>
               </div>
@@ -160,7 +161,7 @@ function Resources() {
                         </button>
                       </span>
                     ) : (
-                      <span className="rounded-full bg-secondary px-2 py-0.5 capitalize">
+                      <span className="rounded-full bg-secondary px-2 py-0.5 capitalize text-secondary-foreground">
                         {b.status}
                       </span>
                     )}

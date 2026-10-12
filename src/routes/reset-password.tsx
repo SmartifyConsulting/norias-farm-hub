@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { friendlyError } from "@/lib/errors";
 import { Screen } from "@/components/Dock";
 import { PasswordInput } from "@/components/PasswordInput";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,24 +24,40 @@ function Reset() {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     if (window.location.hash.includes("type=recovery")) setReady(true);
-    const { data } = supabase.auth.onAuthStateChange((e) => { if (e === "PASSWORD_RECOVERY") setReady(true); });
+    const { data } = supabase.auth.onAuthStateChange((e) => {
+      if (e === "PASSWORD_RECOVERY") setReady(true);
+    });
     return () => data.subscription.unsubscribe();
   }, []);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await supabase.auth.updateUser({ password });
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("Password updated");
     nav({ to: "/" });
   };
   return (
     <Screen title="Set new password">
       {!ready ? (
-        <p className="rounded-2xl border bg-card p-4 text-sm text-muted-foreground">Open this page from the reset link in your email.</p>
+        <p className="rounded-2xl border bg-card p-4 text-sm text-muted-foreground">
+          Open this page from the reset link in your email.
+        </p>
       ) : (
         <form onSubmit={submit} className="space-y-3 rounded-2xl border bg-card p-4">
-          <PasswordInput required minLength={6} autoComplete="new-password" placeholder="New password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">Update password</button>
+          <PasswordInput
+            required
+            minLength={6}
+            autoComplete="new-password"
+            placeholder="New password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">
+            Update password
+          </button>
         </form>
       )}
     </Screen>

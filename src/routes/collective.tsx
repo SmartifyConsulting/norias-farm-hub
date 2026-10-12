@@ -113,7 +113,7 @@ function CollectivePage() {
           <button
             key={m}
             onClick={() => setTab(m)}
-            className={`rounded-full px-4 py-1.5 ${tab === m ? "bg-primary text-primary-foreground" : ""}`}
+            className={`rounded-full px-4 py-1.5 ${tab === m ? "bg-primary text-primary-foreground" : "text-secondary-foreground"}`}
           >
             {m === "buying" ? "Collective buying" : "Collective supply"}
           </button>
