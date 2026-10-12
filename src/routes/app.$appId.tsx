@@ -119,6 +119,144 @@ function MiniAppPage() {
 
   const input =
     "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+  const isFarm = app.id === "farm";
+  const recordsGrid = (
+    <div className="md:grid md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] md:items-start md:gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+      <form onSubmit={add} className="space-y-2 rounded-2xl border bg-card p-4 md:sticky md:top-24">
+        <input
+          className={input}
+          placeholder={app.titleLabel}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          className={input}
+          placeholder={app.detailLabel}
+          value={detail}
+          onChange={(e) => setDetail(e.target.value)}
+        />
+        {app.qtyLabel && (
+          <input
+            className={input}
+            placeholder={app.qtyLabel}
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
+          />
+        )}
+        <ExtraInputs
+          app={app}
+          v={extra}
+          set={setExtra}
+          fields={fields}
+          crops={crops}
+          animals={animals}
+        />
+        {!canWrite && (
+          <p className="text-center text-xs text-muted-foreground">
+            You have view-only access to {current?.name}.
+          </p>
+        )}
+        <button
+          disabled={!canWrite}
+          className="w-full disabled:opacity-50 rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground"
+        >
+          Add record
+        </button>
+        {cloud && !user && (
+          <p className="text-center text-xs text-muted-foreground">
+            Saved on this device.{" "}
+            <Link to="/auth" className="font-semibold text-primary">
+              Sign in
+            </Link>{" "}
+            to back up and sync across devices.
+          </p>
+        )}
+        {!online && (
+          <p className="text-center text-xs text-muted-foreground">
+            You're offline — records save on this device.
+          </p>
+        )}
+      </form>
+      <div className="mt-4 md:mt-0">
+        {current && (
+          <p className="mb-2 text-xs text-muted-foreground">
+            Working in shared farm <b>{current.name}</b> ({current.role}) ·{" "}
+            <Link to="/team" className="text-primary">
+              Team
+            </Link>
+          </p>
+        )}
+        {app.dates && (
+          <div className="mb-3 inline-flex rounded-full border bg-card p-1 text-sm">
+            <button
+              onClick={() => setView("list")}
+              className={`rounded-full px-3 py-1 ${view === "list" ? "bg-primary text-primary-foreground" : ""}`}
+            >
+              <List className="mr-1 inline h-4 w-4" />
+              List
+            </button>
+            <button
+              onClick={() => setView("calendar")}
+              className={`rounded-full px-3 py-1 ${view === "calendar" ? "bg-primary text-primary-foreground" : ""}`}
+            >
+              <CalendarDays className="mr-1 inline h-4 w-4" />
+              Calendar
+            </button>
+          </div>
+        )}
+        {view === "calendar" ? (
+          <FarmCalendar events={eventsFor(app, records)} />
+        ) : (
+          <ul className="space-y-2 md:mt-0 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0">
+            {records.length === 0 && (
+              <li className="py-8 text-center xl:col-span-2 text-sm text-muted-foreground">
+                No records yet.
+              </li>
+            )}
+            {records.map((r) => (
+              <RecordItem
+                key={r.id}
+                r={r}
+                app={app}
+                cloud={cloud}
+                fields={fields}
+                crops={crops}
+                animals={animals}
+                canWrite={canWrite}
+                canDelete={canDelete}
+                onSave={(u) => {
+                  save(
+                    records.map((x) =>
+                      x.id === r.id
+                        ? {
+                            ...x,
+                            ...u,
+                            sync: cloud
+                              ? user
+                                ? "pending"
+                                : "local"
+                              : x.sync === "synced" && online
+                                ? "synced"
+                                : "pending",
+                            syncError: undefined,
+                          }
+                        : x,
+                    ),
+                  );
+                  setTimeout(kick, 0);
+                }}
+                onDelete={() => {
+                  if (cloud && r.sync === "synced") markDeleted(r.id, app.id);
+                  save(records.filter((x) => x.id !== r.id));
+                  setTimeout(kick, 0);
+                }}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
   return (
     <Screen title={app.name}>
       <Link
@@ -129,146 +267,9 @@ function MiniAppPage() {
         <ChevronLeft className="h-4 w-4" />
         App Store
       </Link>
-      <div className="md:grid md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] md:items-start md:gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
-        <form
-          onSubmit={add}
-          className="space-y-2 rounded-2xl border bg-card p-4 md:sticky md:top-24"
-        >
-          <input
-            className={input}
-            placeholder={app.titleLabel}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <input
-            className={input}
-            placeholder={app.detailLabel}
-            value={detail}
-            onChange={(e) => setDetail(e.target.value)}
-          />
-          {app.qtyLabel && (
-            <input
-              className={input}
-              placeholder={app.qtyLabel}
-              value={qty}
-              onChange={(e) => setQty(e.target.value)}
-            />
-          )}
-          <ExtraInputs
-            app={app}
-            v={extra}
-            set={setExtra}
-            fields={fields}
-            crops={crops}
-            animals={animals}
-          />
-          {!canWrite && (
-            <p className="text-center text-xs text-muted-foreground">
-              You have view-only access to {current?.name}.
-            </p>
-          )}
-          <button
-            disabled={!canWrite}
-            className="w-full disabled:opacity-50 rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground"
-          >
-            Add record
-          </button>
-          {cloud && !user && (
-            <p className="text-center text-xs text-muted-foreground">
-              Saved on this device.{" "}
-              <Link to="/auth" className="font-semibold text-primary">
-                Sign in
-              </Link>{" "}
-              to back up and sync across devices.
-            </p>
-          )}
-          {!online && (
-            <p className="text-center text-xs text-muted-foreground">
-              You're offline — records save on this device.
-            </p>
-          )}
-        </form>
-        <div className="mt-4 md:mt-0">
-          {current && (
-            <p className="mb-2 text-xs text-muted-foreground">
-              Working in shared farm <b>{current.name}</b> ({current.role}) ·{" "}
-              <Link to="/team" className="text-primary">
-                Team
-              </Link>
-            </p>
-          )}
-          {app.dates && (
-            <div className="mb-3 inline-flex rounded-full border bg-card p-1 text-sm">
-              <button
-                onClick={() => setView("list")}
-                className={`rounded-full px-3 py-1 ${view === "list" ? "bg-primary text-primary-foreground" : ""}`}
-              >
-                <List className="mr-1 inline h-4 w-4" />
-                List
-              </button>
-              <button
-                onClick={() => setView("calendar")}
-                className={`rounded-full px-3 py-1 ${view === "calendar" ? "bg-primary text-primary-foreground" : ""}`}
-              >
-                <CalendarDays className="mr-1 inline h-4 w-4" />
-                Calendar
-              </button>
-            </div>
-          )}
-          {view === "calendar" ? (
-            <FarmCalendar events={eventsFor(app, records)} />
-          ) : (
-            <ul className="space-y-2 md:mt-0 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0">
-              {records.length === 0 && (
-                <li className="py-8 text-center xl:col-span-2 text-sm text-muted-foreground">
-                  No records yet.
-                </li>
-              )}
-              {records.map((r) => (
-                <RecordItem
-                  key={r.id}
-                  r={r}
-                  app={app}
-                  cloud={cloud}
-                  fields={fields}
-                  crops={crops}
-                  animals={animals}
-                  canWrite={canWrite}
-                  canDelete={canDelete}
-                  onSave={(u) => {
-                    save(
-                      records.map((x) =>
-                        x.id === r.id
-                          ? {
-                              ...x,
-                              ...u,
-                              sync: cloud
-                                ? user
-                                  ? "pending"
-                                  : "local"
-                                : x.sync === "synced" && online
-                                  ? "synced"
-                                  : "pending",
-                              syncError: undefined,
-                            }
-                          : x,
-                      ),
-                    );
-                    setTimeout(kick, 0);
-                  }}
-                  onDelete={() => {
-                    if (cloud && r.sync === "synced") markDeleted(r.id, app.id);
-                    save(records.filter((x) => x.id !== r.id));
-                    setTimeout(kick, 0);
-                  }}
-                />
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-      {app.id === "farm" && (
-        <div className="mt-8 space-y-6">
+      {!isFarm && recordsGrid}
+      {isFarm && (
+        <div className="space-y-6">
           <section>
             <h2 className="mb-2 font-display text-lg font-semibold">Your farms</h2>
             <div className="flex flex-wrap items-center gap-2">
@@ -325,6 +326,10 @@ function MiniAppPage() {
           <section>
             <h2 className="mb-2 font-display text-lg font-semibold">Farm map</h2>
             <FarmMap farmId={effectiveFarmId} />
+          </section>
+          <section>
+            <h2 className="mb-2 font-display text-lg font-semibold">Assets</h2>
+            {recordsGrid}
           </section>
           <FieldsSection />
         </div>
