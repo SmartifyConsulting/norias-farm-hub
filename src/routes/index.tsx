@@ -234,9 +234,24 @@ function Home() {
         </section>
 
         {/* Weather + AI overview */}
-        <section className="grid gap-3 md:grid-cols-3">
-          <div className="md:col-span-2">
+        <section className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-3">
             <Weather lat={s.lat} lon={s.lon} place={s.placeName} compact />
+            <div className="grid grid-cols-2 gap-3">
+              {stats.map((st) => (
+                <div key={st.label} className="soft-card flex items-center gap-3 border p-4">
+                  <span
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${st.tone}`}
+                  >
+                    <st.icon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="font-display text-2xl font-bold leading-none">{st.value}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{st.label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="soft-card flex flex-col gap-2 border p-4">
             <h2 className="flex items-center gap-1.5 font-display text-sm font-semibold">
@@ -253,21 +268,6 @@ function Home() {
               </p>
             )}
           </div>
-        </section>
-        <section className="grid grid-cols-2 gap-3">
-          {stats.map((st) => (
-            <div key={st.label} className="soft-card flex items-center gap-3 border p-4">
-              <span
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${st.tone}`}
-              >
-                <st.icon className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="font-display text-2xl font-bold leading-none">{st.value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{st.label}</p>
-              </div>
-            </div>
-          ))}
         </section>
 
         {/* Apps (left) + Today / Opportunities (right) */}
