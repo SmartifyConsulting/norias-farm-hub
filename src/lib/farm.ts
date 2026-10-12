@@ -44,7 +44,7 @@ export const MINI_APPS: MiniApp[] = [
   { id: "health", name: "Animal Health", emoji: "💉", icon: Syringe, blurb: "Vaccinations, treatments & checkups", titleLabel: "Vaccination / treatment / checkup", detailLabel: "Product, dose or vet notes", dates: ["Next due"], links: ["animal"], recurring: true },
   { id: "diary", name: "Farm Diary", emoji: "📔", icon: NotebookPen, blurb: "Daily notes & tasks", titleLabel: "Entry", detailLabel: "What happened" },
   { id: "harvest", name: "Harvest", emoji: "🌾", icon: Wheat, blurb: "Yields by crop & season", titleLabel: "Crop", detailLabel: "Field / notes", qtyLabel: "Yield (kg)" },
-  { id: "fields", name: "Field Mapping", emoji: "🗺️", icon: Map, blurb: "Plots, sizes & rotations", titleLabel: "Field name", detailLabel: "Crop / rotation", qtyLabel: "Area (ha)" },
+  { id: "fields", name: "Fields", emoji: "🗺️", icon: Map, blurb: "Plots, sizes & rotations — now part of My Farm", titleLabel: "Field name", detailLabel: "Crop / rotation", qtyLabel: "Area (ha)" },
   { id: "stock", name: "Stock", emoji: "📦", icon: Package, blurb: "Feed, seed & supplies", titleLabel: "Item", detailLabel: "Location", qtyLabel: "Quantity" },
   { id: "tasks", name: "Tasks", emoji: "✅", icon: ListTodo, blurb: "Jobs, assignees & due dates", titleLabel: "Task", detailLabel: "Field / assignee / notes", dates: ["Due date"], links: ["field", "crop"] },
   { id: "crops", name: "Crop Cycles", emoji: "🌱", icon: Sprout, blurb: "Plantings from sowing to harvest", titleLabel: "Crop & field", detailLabel: "Variety / stage", qtyLabel: "Area (ha)", dates: ["Planting date", "Harvest date"], links: ["field"] },
@@ -108,6 +108,17 @@ export function useOnline() {
     return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
   }, []);
   return online;
+}
+
+export function useLastSynced() {
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
+  useEffect(() => {
+    const u = () => setLastSynced(localStorage.getItem("farmerplus:lastSynced"));
+    u();
+    window.addEventListener("farmerplus:change", u);
+    return () => window.removeEventListener("farmerplus:change", u);
+  }, []);
+  return lastSynced;
 }
 
 type FarmSettings = { farmName: string; owner: string; units: string; autoSync: boolean; lat: number; lon: number; placeName?: string };

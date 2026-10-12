@@ -93,6 +93,7 @@ export function syncAll() {
         for (const d of docs ?? []) if (!stillDirty.has(d.key)) localStorage.setItem(d.key, JSON.stringify(d.value));
       } finally { w.__fpPull = false; }
 
+      localStorage.setItem("farmerplus:lastSynced", new Date().toISOString());
       window.dispatchEvent(new Event("farmerplus:change"));
       return { ok: true };
     } catch (e) {

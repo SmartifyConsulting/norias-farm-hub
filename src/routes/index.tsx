@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import { Weather } from "@/components/Weather";
 import { toast } from "sonner";
 import {
-  CloudUpload,
   CalendarClock,
   TriangleAlert,
   ChevronRight,
   Settings as SettingsIcon,
 } from "lucide-react";
-import { allRecordCounts, syncAll, useOnline, useSettings } from "@/lib/farm";
+import { allRecordCounts, syncAll, useLastSynced, useOnline, useSettings } from "@/lib/farm";
 import { appById, type RegistryApp } from "@/lib/app-registry";
 import { AppLink } from "@/components/AppLink";
 import { useLayout } from "@/lib/layout";
@@ -17,7 +16,7 @@ import { useFavourites } from "@/lib/favourites";
 import { Star, Folder as FolderIcon } from "lucide-react";
 import { useGuest, useUser } from "@/lib/auth";
 import { AuthLanding } from "@/components/AuthLanding";
-import { ActionDashboard, OpportunitiesPanel } from "@/components/ActionDashboard";
+import { ActionDashboard } from "@/components/ActionDashboard";
 import { NotificationBell } from "@/components/NotificationBell";
 import { UserMenu } from "@/components/UserMenu";
 import { FarmSchoolCard } from "@/components/FarmSchool";
@@ -52,6 +51,7 @@ function Home() {
   const { layout } = useLayout();
   const { ids: favIds, toggle: toggleFavourite } = useFavourites();
   const online = useOnline();
+  const lastSynced = useLastSynced();
   const { user, loading } = useUser();
   const [guest] = useGuest();
   const { notices } = useNotices();
@@ -95,7 +95,6 @@ function Home() {
   if (!loading && !user && !guest) return <AuthLanding initial="signin" />;
 
   const stats = [
-    { label: "Waiting to sync", value: counts.pending, icon: CloudUpload, tone: appTone(1) },
     { label: "Due soon", value: tasksDue, icon: CalendarClock, tone: appTone(2) },
     { label: "Active risks", value: activeRisks, icon: TriangleAlert, tone: appTone(5) },
   ];
@@ -188,6 +187,16 @@ function Home() {
               />
               {online ? "Online" : "Offline — saving locally"}
             </span>
+            <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-muted-foreground">
+              {lastSynced
+                ? `Last synced ${new Date(lastSynced).toLocaleString("en-ZA", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`
+                : "Not synced yet"}
+              {counts.pending > 0 && (
+                <span className="rounded-full bg-brand-yellow px-1.5 py-0.5 text-[10px] font-bold text-brand-ink">
+                  {counts.pending} to sync
+                </span>
+              )}
+            </span>
             {!user && (
               <Link
                 to="/auth"
@@ -224,7 +233,7 @@ function Home() {
 
         {/* Weather + stats */}
         <Weather lat={s.lat} lon={s.lon} place={s.placeName} compact />
-        <section className="grid grid-cols-3 gap-3">
+        <section className="grid grid-cols-2 gap-3">
           {stats.map((st) => (
             <div key={st.label} className="soft-card flex items-center gap-3 border p-4">
               <span
@@ -274,7 +283,7 @@ function Home() {
           <div className="space-y-4 md:col-span-5 lg:col-span-4">
             <div className="soft-card border p-4">
               <div className="mb-2 flex items-center justify-between">
-                <h2 className="font-display text-base font-semibold">Today</h2>
+                <h2 className="font-display text-base font-semibold">Opportunities</h2>
                 <span className="rounded-full bg-earth-6 px-2.5 py-0.5 text-xs font-semibold text-brand-ink">
                   {notices.length} items
                 </span>
@@ -300,7 +309,6 @@ function Home() {
                 </ul>
               )}
             </div>
-            <OpportunitiesPanel />
           </div>
         </section>
 

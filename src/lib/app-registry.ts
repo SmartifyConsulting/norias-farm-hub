@@ -215,7 +215,9 @@ const EXTRA_DEFS: Omit<RegistryApp, "tone">[] = [
 
 /** Every app the App Store shows, in one place, each with a stable tone so colours never shift when reordered or re-foldered. */
 export const APP_REGISTRY: RegistryApp[] = (() => {
-  const mini: Omit<RegistryApp, "tone">[] = MINI_APPS.map((a) => ({
+  // "fields" is merged into My Farm's map (drawing + record pins) rather than shown as its own
+  // App Store tile — its data and app.$appId route stay intact so existing field links still work.
+  const mini: Omit<RegistryApp, "tone">[] = MINI_APPS.filter((a) => a.id !== "fields").map((a) => ({
     id: a.id,
     name: a.name,
     icon: a.icon,

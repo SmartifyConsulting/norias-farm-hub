@@ -17,6 +17,7 @@ import { MINI_APPS, read, useOnline, useRecords, useSettings } from "@/lib/farm"
 import { markDeleted, syncAnimals } from "@/lib/animal-sync";
 import { useUser } from "@/lib/auth";
 import { toast } from "sonner";
+import { FarmMap } from "@/components/FarmMap";
 
 export const Route = createFileRoute("/app/$appId")({
   loader: ({ params }) => {
@@ -60,7 +61,9 @@ function MiniAppPage() {
   const [qty, setQty] = useState("");
   const [extra, setExtra] = useState<Extra>(EMPTY);
   const [view, setView] = useState<"list" | "calendar">("list");
-  const { current } = useTeam();
+  const { current, farms } = useTeam();
+  const [viewFarmId, setViewFarmId] = useState<string | null>(null);
+  const effectiveFarmId = viewFarmId ?? current?.id ?? null;
   const { canWrite, canDelete } = permissions(current?.role);
   const fields = useRecords("fields").records;
   const crops = useRecords("crops").records;
@@ -246,7 +249,92 @@ function MiniAppPage() {
           )}
         </div>
       </div>
+      {app.id === "farm" && (
+        <div className="mt-8 space-y-6">
+          {farms.length > 1 && (
+            <section>
+              <h2 className="mb-2 font-display text-lg font-semibold">Your farms</h2>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setViewFarmId(null)}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${effectiveFarmId === null ? "bg-primary text-primary-foreground" : ""}`}
+                >
+                  Just me (private)
+                </button>
+                {farms.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setViewFarmId(f.id)}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${effectiveFarmId === f.id ? "bg-primary text-primary-foreground" : ""}`}
+                  >
+                    {f.name}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+          <section>
+            <h2 className="mb-2 font-display text-lg font-semibold">Farm map</h2>
+            <FarmMap farmId={effectiveFarmId} />
+          </section>
+          <FieldsSection />
+        </div>
+      )}
     </Screen>
+  );
+}
+
+/** Fields, merged into My Farm: a simple list, with precise location now handled by pinning a field to the farm map above. */
+function FieldsSection() {
+  const { records, save } = useRecords("fields");
+  const [title, setTitle] = useState("");
+  const [detail, setDetail] = useState("");
+  const [qty, setQty] = useState("");
+  const input =
+    "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+  const add = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    save([
+      { id: crypto.randomUUID(), title: title.trim(), detail: detail.trim(), qty: qty.trim(), date: new Date().toISOString(), sync: "local" },
+      ...records,
+    ]);
+    setTitle("");
+    setDetail("");
+    setQty("");
+  };
+  return (
+    <section>
+      <h2 className="mb-2 font-display text-lg font-semibold">Fields</h2>
+      <form onSubmit={add} className="mb-3 flex flex-wrap gap-2">
+        <input className={`${input} max-w-xs`} placeholder="Field name" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input className={`${input} max-w-xs`} placeholder="Crop / rotation" value={detail} onChange={(e) => setDetail(e.target.value)} />
+        <input className={`${input} max-w-[10rem]`} placeholder="Area (ha)" value={qty} onChange={(e) => setQty(e.target.value)} />
+        <button className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Add field</button>
+      </form>
+      {records.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No fields yet — add one above, then pin it on the farm map.</p>
+      ) : (
+        <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 xl:grid-cols-3">
+          {records.map((r) => (
+            <li key={r.id} className="flex items-center justify-between gap-2 rounded-2xl border bg-card p-3 text-sm">
+              <div>
+                <p className="font-semibold">{r.title}</p>
+                {r.detail && <p className="text-xs text-muted-foreground">{r.detail}</p>}
+                {r.qty && <p className="text-xs text-muted-foreground">{r.qty} ha</p>}
+              </div>
+              <button
+                aria-label="Remove field"
+                onClick={() => save(records.filter((x) => x.id !== r.id))}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -376,7 +464,7 @@ function ExtraInputs({
           onChange={(e) => set({ ...v, fieldId: e.target.value })}
         >
           <option value="">
-            {fields.length ? "Field (optional)" : "No fields yet — add one in Field Mapping"}
+            {fields.length ? "Field (optional)" : "No fields yet — add one in My Farm"}
           </option>
           {fields.map((f) => (
             <option key={f.id} value={f.id}>

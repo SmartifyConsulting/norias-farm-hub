@@ -9,13 +9,19 @@ export type Layout = { folders: Folder[]; order: TopEntry[] };
 const STORAGE_KEY = "farmerplus:layout";
 const EVENT = "farmerplus:layout-change";
 
+/** New users start with just My Farm visible — everything else still exists (in `folders`) and can be added back from the App Store. */
+const DEFAULT_VISIBLE: CategoryId[] = ["my-farm"];
+
 function defaultLayout(): Layout {
   const folders: Folder[] = CATEGORIES.map((c) => ({
     id: c.id,
     name: c.name,
     appIds: APP_REGISTRY.filter((a) => a.category === c.id).map((a) => a.id),
   }));
-  return { folders, order: folders.map((f) => ({ kind: "folder", id: f.id })) };
+  return {
+    folders,
+    order: folders.filter((f) => DEFAULT_VISIBLE.includes(f.id as CategoryId)).map((f) => ({ kind: "folder", id: f.id })),
+  };
 }
 
 function reconcile(layout: Layout): Layout {
@@ -141,6 +147,14 @@ export function useLayout() {
     [layout, save],
   );
 
+  const showFolder = useCallback(
+    (folderId: string) => {
+      if (layout.order.some((e) => e.kind === "folder" && e.id === folderId)) return;
+      save({ ...layout, order: [...layout.order, { kind: "folder", id: folderId }] });
+    },
+    [layout, save],
+  );
+
   const createFolder = useCallback(
     (name: string) => {
       const folder: Folder = { id: newFolderId(), name: name.trim() || "New Folder", appIds: [] };
@@ -186,6 +200,7 @@ export function useLayout() {
     groupIntoNewFolder,
     reorderTop,
     reorderInFolder,
+    showFolder,
     createFolder,
     renameFolder,
     deleteFolder,

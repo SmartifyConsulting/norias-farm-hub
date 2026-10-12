@@ -202,7 +202,7 @@ function FolderTile({
 }
 
 function Apps() {
-  const { layout, moveApp, groupIntoNewFolder, createFolder, renameFolder, deleteFolder } =
+  const { layout, moveApp, groupIntoNewFolder, showFolder, createFolder, renameFolder, deleteFolder } =
     useLayout();
   const { ids: favIds, isFavourite, toggle: toggleFavourite } = useFavourites();
   const search = useSearch({ from: "/apps" });
@@ -402,6 +402,30 @@ function Apps() {
             Drag an app onto another to make a folder, or onto a folder to add it in. Drag an app
             out of a folder's "×" to move it back here.
           </p>
+          {(() => {
+            const hidden = layout.folders.filter(
+              (f) => !layout.order.some((e) => e.kind === "folder" && e.id === f.id),
+            );
+            if (hidden.length === 0) return null;
+            return (
+              <div className="mt-5 border-t pt-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  More categories
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {hidden.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => showFolder(f.id)}
+                      className="rounded-full border px-3 py-1.5 text-sm font-semibold hover:bg-muted"
+                    >
+                      + {f.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
