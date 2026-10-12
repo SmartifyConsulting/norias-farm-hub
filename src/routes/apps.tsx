@@ -14,7 +14,19 @@ import {
 } from "@dnd-kit/core";
 import { Screen } from "@/components/Dock";
 import { AppLink } from "@/components/AppLink";
-import { appById, searchApps, type RegistryApp } from "@/lib/app-registry";
+import {
+  APP_REGISTRY,
+  CATEGORIES,
+  appById,
+  searchApps,
+  type RegistryApp,
+} from "@/lib/app-registry";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useLayout, type TopEntry } from "@/lib/layout";
 import { useFavourites } from "@/lib/favourites";
 import { appTone } from "@/lib/app-colors";
@@ -202,8 +214,15 @@ function FolderTile({
 }
 
 function Apps() {
-  const { layout, moveApp, groupIntoNewFolder, showFolder, createFolder, renameFolder, deleteFolder } =
-    useLayout();
+  const {
+    layout,
+    moveApp,
+    groupIntoNewFolder,
+    showFolder,
+    createFolder,
+    renameFolder,
+    deleteFolder,
+  } = useLayout();
   const { ids: favIds, isFavourite, toggle: toggleFavourite } = useFavourites();
   const search = useSearch({ from: "/apps" });
   const nav = useNavigate();
@@ -313,7 +332,7 @@ function Apps() {
               onClick={closeFolder}
               className="text-sm font-semibold text-earth-1"
             >
-              ← All folders
+              ← Your Apps
             </button>
             <h2 className="font-display text-lg font-semibold">{expandedFolder.name}</h2>
             <span />
@@ -335,7 +354,7 @@ function Apps() {
               })}
               {expandedFolder.appIds.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  No apps in this folder yet — drag one in from "All folders".
+                  No apps in this folder yet — drag one in from "Your Apps".
                 </p>
               )}
             </div>
@@ -360,7 +379,7 @@ function Apps() {
             </div>
           )}
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold">Folders</h2>
+            <h2 className="font-display text-lg font-semibold">Your Apps</h2>
             <Button variant="outline" size="sm" onClick={() => setNewFolderOpen(true)}>
               <FolderPlus className="mr-1.5 h-4 w-4" /> New folder
             </Button>
@@ -426,6 +445,58 @@ function Apps() {
               </div>
             );
           })()}
+
+          <div className="mt-8 border-t pt-6">
+            <h2 className="mb-3 font-display text-lg font-semibold">Explore More Apps</h2>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Every app, grouped by category — browse here regardless of how you've organised "Your
+              Apps" above.
+            </p>
+            <Accordion type="multiple" className="rounded-2xl border bg-card px-4">
+              {CATEGORIES.map((c) => {
+                const apps = APP_REGISTRY.filter((a) => a.category === c.id);
+                return (
+                  <AccordionItem key={c.id} value={c.id} className="last:border-b-0">
+                    <AccordionTrigger>
+                      <span>
+                        {c.name}{" "}
+                        <span className="font-normal text-muted-foreground">
+                          · {apps.length} {apps.length === 1 ? "app" : "apps"}
+                        </span>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {apps.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No apps yet.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {apps.map((a) => (
+                            <AppLink
+                              key={a.id}
+                              app={a}
+                              className="flex items-center gap-3 rounded-xl border bg-background p-3 hover:shadow-sm"
+                            >
+                              <span
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${appTone(a.tone)}`}
+                              >
+                                <a.icon className="h-5 w-5" />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-semibold text-foreground">
+                                  {a.name}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground">{a.blurb}</p>
+                              </div>
+                            </AppLink>
+                          ))}
+                        </div>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          </div>
         </div>
       )}
 

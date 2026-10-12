@@ -4,11 +4,6 @@ import { Weather } from "@/components/Weather";
 import { toast } from "sonner";
 import { CalendarClock, TriangleAlert, ChevronRight, Settings as SettingsIcon } from "lucide-react";
 import { allRecordCounts, syncAll, useLastSynced, useOnline, useSettings } from "@/lib/farm";
-import { appById, type RegistryApp } from "@/lib/app-registry";
-import { AppLink } from "@/components/AppLink";
-import { useLayout } from "@/lib/layout";
-import { useFavourites } from "@/lib/favourites";
-import { Star, Folder as FolderIcon } from "lucide-react";
 import { useGuest, useUser } from "@/lib/auth";
 import { AuthLanding } from "@/components/AuthLanding";
 import { ActionDashboard } from "@/components/ActionDashboard";
@@ -21,6 +16,8 @@ import { useRisks } from "@/lib/network";
 import { useAiOverview } from "@/lib/aioverview";
 import { Sparkles } from "lucide-react";
 import { appTone } from "@/lib/app-colors";
+import { FarmMap } from "@/components/FarmMap";
+import { useTeam } from "@/lib/team";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -45,8 +42,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const [s] = useSettings();
-  const { layout } = useLayout();
-  const { ids: favIds, toggle: toggleFavourite } = useFavourites();
+  const { active: activeFarmId } = useTeam();
   const online = useOnline();
   const lastSynced = useLastSynced();
   const { user, loading } = useUser();
@@ -100,70 +96,6 @@ function Home() {
     { label: "Due soon", value: tasksDue, icon: CalendarClock, tone: appTone(2) },
     { label: "Active risks", value: activeRisks, icon: TriangleAlert, tone: appTone(5) },
   ];
-  const favourites = favIds
-    .map(appById)
-    .filter((a): a is RegistryApp => !!a)
-    .slice(0, 6);
-  const topFolders = layout.folders
-    .map((f) => ({ ...f, id: f.id }))
-    .filter((f) => layout.order.some((e) => e.kind === "folder" && e.id === f.id))
-    .sort(
-      (a, b) =>
-        layout.order.findIndex((e) => e.kind === "folder" && e.id === a.id) -
-        layout.order.findIndex((e) => e.kind === "folder" && e.id === b.id),
-    )
-    .slice(0, 8);
-  const FavTile = ({ a }: { a: RegistryApp }) => (
-    <AppLink
-      app={a}
-      className="relative flex flex-col items-center justify-center gap-2 rounded-2xl border bg-card px-2 py-4 transition hover:-translate-y-0.5 hover:shadow-md"
-    >
-      <span
-        className={`flex h-14 w-14 items-center justify-center rounded-full ${appTone(a.tone)}`}
-      >
-        <a.icon className="h-7 w-7" />
-      </span>
-      <span className="text-center text-xs font-semibold leading-tight">{a.name}</span>
-      <button
-        type="button"
-        aria-label="Remove from favourites"
-        onClick={(e) => {
-          e.preventDefault();
-          toggleFavourite(a.id);
-        }}
-        className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-brand-yellow"
-      >
-        <Star className="h-3.5 w-3.5 fill-brand-yellow" />
-      </button>
-    </AppLink>
-  );
-  const FolderTile = ({ f }: { f: (typeof topFolders)[number] }) => (
-    <Link
-      to="/apps"
-      search={{ folder: f.id }}
-      className="flex flex-col items-center justify-center gap-2 rounded-2xl border bg-card px-2 py-4 transition hover:-translate-y-0.5 hover:shadow-md"
-    >
-      <span className="grid h-14 w-14 grid-cols-2 gap-0.5 overflow-hidden rounded-2xl bg-muted p-1">
-        {f.appIds.length === 0 ? (
-          <FolderIcon className="col-span-2 row-span-2 m-auto h-6 w-6 text-muted-foreground" />
-        ) : (
-          f.appIds.slice(0, 4).map((id) => {
-            const a = appById(id);
-            if (!a) return null;
-            return (
-              <span
-                key={id}
-                className={`flex items-center justify-center rounded-md ${appTone(a.tone)}`}
-              >
-                <a.icon className="h-3.5 w-3.5" />
-              </span>
-            );
-          })
-        )}
-      </span>
-      <span className="text-center text-xs font-semibold leading-tight">{f.name}</span>
-    </Link>
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -270,36 +202,20 @@ function Home() {
           </div>
         </section>
 
-        {/* Apps (left) + Today / Opportunities (right) */}
+        {/* Farm map (left) + Opportunities (right) */}
         <section className="grid gap-4 md:grid-cols-12">
-          <div className="soft-card space-y-3 border p-4 md:col-span-7 lg:col-span-8">
-            {favourites.length > 0 && (
-              <>
-                <div className="flex items-center justify-between">
-                  <h2 className="font-display text-lg font-semibold">Favourites</h2>
-                </div>
-                <div className="grid grid-cols-3 gap-3 md:grid-cols-4 md:gap-4 lg:grid-cols-4 xl:grid-cols-6">
-                  {favourites.map((a) => (
-                    <FavTile key={a.id} a={a} />
-                  ))}
-                </div>
-              </>
-            )}
+          <div className="soft-card space-y-2 border p-4 md:col-span-7 lg:col-span-8">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">Your apps</h2>
+              <h2 className="font-display text-lg font-semibold">Farm map</h2>
               <Link
-                to="/apps"
-                search={{ folder: undefined }}
+                to="/app/$appId"
+                params={{ appId: "farm" }}
                 className="text-sm font-semibold text-earth-1"
               >
-                See all
+                Open My Farm
               </Link>
             </div>
-            <div className="grid grid-cols-3 gap-3 md:grid-cols-4 md:gap-4 lg:grid-cols-4 xl:grid-cols-6">
-              {topFolders.map((f) => (
-                <FolderTile key={f.id} f={f} />
-              ))}
-            </div>
+            <FarmMap farmId={activeFarmId} />
           </div>
           <div className="space-y-4 md:col-span-5 lg:col-span-4">
             <div className="soft-card border p-4">

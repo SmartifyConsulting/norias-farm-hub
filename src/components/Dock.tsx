@@ -1,6 +1,16 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Home, LayoutGrid, Wallet, Settings, Search, Sprout, LogIn } from "lucide-react";
+import {
+  Home,
+  LayoutGrid,
+  Wallet,
+  Settings,
+  Search,
+  Sprout,
+  LogIn,
+  Handshake,
+  ListTodo,
+} from "lucide-react";
 import { useGuest, useUser } from "@/lib/auth";
 import { useOnline } from "@/lib/farm";
 import { APP_REGISTRY } from "@/lib/app-registry";
@@ -8,9 +18,11 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { UserMenu } from "@/components/UserMenu";
 
 const items = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/apps", label: "Apps", icon: LayoutGrid },
-  { to: "/wallet", label: "Wallet", icon: Wallet },
+  { to: "/", label: "Home", icon: Home, params: undefined },
+  { to: "/apps", label: "My Apps", icon: LayoutGrid, params: undefined },
+  { to: "/opportunities", label: "Opportunities", icon: Handshake, params: undefined },
+  { to: "/app/$appId", label: "Tasks", icon: ListTodo, params: { appId: "tasks" } },
+  { to: "/wallet", label: "Wallet", icon: Wallet, params: undefined },
 ] as const;
 
 /** Navigation is hidden on the signed-out landing and the auth page (full-screen sign-in layout). */
@@ -26,12 +38,15 @@ export function Dock() {
   if (useNavHidden()) return null;
   return (
     <nav className="glass fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 gap-1 rounded-3xl p-2 md:hidden">
-      {items.map(({ to, label, icon: Icon }) => (
+      {items.map(({ to, label, icon: Icon, params }) => (
         <Link
           key={to}
-          to={to}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          to={to as any}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          params={(params ?? {}) as any}
           activeOptions={{ exact: to === "/" }}
-          className="flex w-16 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium text-foreground/80 transition-colors hover:bg-muted"
+          className="flex w-14 flex-col items-center gap-0.5 rounded-2xl py-2 text-[10px] font-medium text-foreground/80 transition-colors hover:bg-muted"
           activeProps={{ className: "!bg-card !text-foreground" }}
         >
           <Icon className="h-5 w-5" />
@@ -53,8 +68,8 @@ export function TopNav() {
   const go = (e: React.FormEvent) => {
     e.preventDefault();
     const hit = APP_REGISTRY.find((a) => a.name.toLowerCase().includes(q.trim().toLowerCase()));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (hit && q.trim()) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       nav({ to: hit.to as any, params: (hit.params ?? {}) as any });
       setQ("");
     }
@@ -66,10 +81,13 @@ export function TopNav() {
           <Sprout className="h-5 w-5" /> FarmerPlus
         </Link>
         <nav className="flex items-center gap-1">
-          {items.map(({ to, label, icon: Icon }) => (
+          {items.map(({ to, label, icon: Icon, params }) => (
             <Link
               key={to}
-              to={to}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              to={to as any}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              params={(params ?? {}) as any}
               activeOptions={{ exact: to === "/" }}
               className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-primary-foreground/75 hover:!bg-muted hover:!text-foreground"
               activeProps={{ className: "!bg-card !text-foreground font-semibold" }}
