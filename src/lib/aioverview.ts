@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const todayKey = () => `farmerplus:aiOverview:${new Date().toISOString().slice(0, 10)}`;
+const todayKey = () => `farmerplus:aiOverview:v2:${new Date().toISOString().slice(0, 10)}`;
 
 /**
  * A short, real AI-generated summary of the day — weather + what's due — refreshed once per day
@@ -32,7 +32,7 @@ export function useAiOverview(context: Record<string, unknown> | null) {
               {
                 role: "user",
                 content:
-                  "Give a friendly, practical 2-sentence overview of today for this farm, weaving together what's due, active risks and the top opportunity below. No headings, no bullet points, no greeting — just the 2 sentences.",
+                  "Give today's overview for this farm as a short bullet list — 3 to 5 bullets, only the key things this farmer should be informed about right now (what's due, active risks, the top opportunity, anything urgent). Each bullet on its own line, starting with '- ', no more than ~12 words each. No heading, no greeting, no intro sentence — just the bullets. Skip anything not worth the farmer's attention.",
               },
             ],
             context: JSON.stringify(context),

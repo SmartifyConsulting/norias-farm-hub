@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const codes: Record<number, [string, string]> = {
   0: ["☀️", "Clear"],
@@ -33,11 +35,12 @@ export function Weather({
   compact?: boolean;
   place?: string | undefined;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const { data, isError } = useQuery({
     queryKey: ["weather", lat, lon],
     queryFn: async () => {
       const r = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=10`,
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=14`,
       );
       if (!r.ok) throw new Error("weather");
       return r.json();
@@ -62,6 +65,7 @@ export function Weather({
   };
   if (compact) {
     const rain = data?.daily?.precipitation_probability_max?.[0];
+    const shown = expanded ? forecast : forecast.slice(0, 7);
     return (
       <div
         className="soft-card space-y-3 border p-4"
@@ -82,8 +86,8 @@ export function Weather({
           </div>
         </div>
         {forecast.length > 1 && (
-          <div className="grid grid-cols-5 gap-1 sm:grid-cols-10">
-            {forecast.map((d, i) => {
+          <div className="grid grid-cols-7 gap-1">
+            {shown.map((d, i) => {
               const [dIcon] = codes[d.code] ?? ["🌡️"];
               return (
                 <div
@@ -102,6 +106,25 @@ export function Weather({
               );
             })}
           </div>
+        )}
+        {forecast.length > 7 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="flex w-full items-center justify-center gap-1 text-xs font-semibold text-primary"
+          >
+            {expanded ? (
+              <>
+                <ChevronUp className="h-3.5 w-3.5" />
+                Show 1 week only
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-3.5 w-3.5" />
+                Show extended forecast ({forecast.length} days)
+              </>
+            )}
+          </button>
         )}
       </div>
     );

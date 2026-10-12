@@ -193,7 +193,18 @@ function Home() {
             {overviewLoading ? (
               <p className="text-sm text-muted-foreground">Thinking…</p>
             ) : overview ? (
-              <p className="text-sm text-muted-foreground">{overview}</p>
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                {overview
+                  .split("\n")
+                  .map((line) => line.replace(/^[-•*]\s*/, "").trim())
+                  .filter(Boolean)
+                  .map((line, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      <span>{line}</span>
+                    </li>
+                  ))}
+              </ul>
             ) : (
               <p className="text-sm text-muted-foreground">
                 Nothing to flag right now — check back later.

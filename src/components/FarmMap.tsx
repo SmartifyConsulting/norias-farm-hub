@@ -9,6 +9,7 @@ import {
   ICONS,
   isLightIcon,
   useBoundary,
+  useCustomObjects,
   usePins,
   type DistributiveOmit,
   type IconKey,
@@ -45,6 +46,19 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeoResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const {
+    items: customObjects,
+    add: addCustomObject,
+    remove: removeCustomObject,
+  } = useCustomObjects();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerLabel, setPickerLabel] = useState("");
+  const [pickerIcon, setPickerIcon] = useState<IconKey>("package");
+
+  // Drawing an object's area (polygon outline) rather than dropping a point pin.
+  const drawingRef = useRef<DistributiveOmit<MapPin, "id" | "lat" | "lon"> | null>(null);
+  const polygonHandlerRef = useRef<Leaflet.Draw.Polygon | null>(null);
+  const [drawingLabel, setDrawingLabel] = useState<string | null>(null);
 
   // Undo/redo over the combined {boundary, pins} state.
   const historyRef = useRef<Snapshot[]>([]);
@@ -148,6 +162,21 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
 
       map.on(L.Draw.Event.CREATED, (e: Leaflet.LeafletEvent) => {
         const { layer, layerType } = e as unknown as { layer: Leaflet.Layer; layerType: string };
+        if (drawingRef.current) {
+          const latlngs = (
+            layerType === "rectangle"
+              ? (layer as Leaflet.Rectangle).getLatLngs()[0]
+              : (layer as Leaflet.Polygon).getLatLngs()[0]
+          ) as Leaflet.LatLng[];
+          const area: LatLng[] = latlngs.map((p) => [p.lat, p.lng]);
+          const [lat, lon] = centroidOf(area);
+          const pin = { ...drawingRef.current, id: crypto.randomUUID(), lat, lon, area } as MapPin;
+          commit({ pins: [...pinsRef.current, pin] });
+          drawingRef.current = null;
+          polygonHandlerRef.current = null;
+          setDrawingLabel(null);
+          return;
+        }
         drawn.clearLayers();
         if (layerType === "rectangle") {
           const corners = (layer as Leaflet.Rectangle).getLatLngs()[0] as Leaflet.LatLng[];
@@ -159,6 +188,11 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
       });
       map.on(L.Draw.Event.EDITED, () => commit({ boundary: boundaryFromLayer() }));
       map.on(L.Draw.Event.DELETED, () => commit({ boundary: boundaryFromLayer() }));
+      map.on(L.Draw.Event.DRAWSTOP, () => {
+        drawingRef.current = null;
+        polygonHandlerRef.current = null;
+        setDrawingLabel(null);
+      });
 
       map.on("click", (e: Leaflet.LeafletMouseEvent) => {
         if (!placingRef.current) return;
@@ -191,19 +225,41 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
           ? `<div style="background:#bfe3c0;color:#1a3a20;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.2);border:1px solid #8fcf93">${emoji} ${escapeHtml(p.label)}</div>`
           : `<div style="background:#111;color:#fff;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3)">${emoji} ${escapeHtml(p.label)}</div>`;
         const icon = L.divIcon({ className: "", html, iconSize: [0, 0] });
-        const marker = L.marker([p.lat, p.lon], { icon }).addTo(markersLayer.current!);
-        const delId = `del-${p.id}`;
-        marker.bindPopup(
-          `<div style="font-size:13px"><b>${escapeHtml(p.label)}</b><br/><button id="${delId}" style="margin-top:6px;color:#b91c1c;font-weight:600;font-size:12px;cursor:pointer;border:none;background:none;padding:0">Delete</button></div>`,
+
+        let areaLayer: Leaflet.Polygon | undefined;
+        if (p.area && p.area.length >= 3) {
+          areaLayer = L.polygon(p.area, areaStyle(light)).addTo(markersLayer.current!);
+        }
+        const marker = L.marker([p.lat, p.lon], { icon, draggable: true }).addTo(
+          markersLayer.current!,
         );
-        marker.on("popupopen", () => {
-          const btn = document.getElementById(delId);
-          if (btn)
-            btn.onclick = () => {
-              commit({ pins: pinsRef.current.filter((x) => x.id !== p.id) });
-              leafletMap.current?.closePopup();
-            };
+        // Dragging an object moves it; if it has a drawn area, the whole shape shifts with it.
+        marker.on("dragend", () => {
+          const ll = marker.getLatLng();
+          const dLat = ll.lat - p.lat;
+          const dLon = ll.lng - p.lon;
+          const nextArea = p.area?.map(([la, lo]) => [la + dLat, lo + dLon] as LatLng);
+          commit({
+            pins: pinsRef.current.map((x) =>
+              x.id === p.id ? { ...x, lat: ll.lat, lon: ll.lng, area: nextArea } : x,
+            ),
+          });
         });
+        const delId = `del-${p.id}`;
+        const popupHtml = `<div style="font-size:13px"><b>${escapeHtml(p.label)}</b><br/><button id="${delId}" style="margin-top:6px;color:#b91c1c;font-weight:600;font-size:12px;cursor:pointer;border:none;background:none;padding:0">Delete</button></div>`;
+        const wireDelete = (layer: Leaflet.Layer) => {
+          layer.bindPopup(popupHtml);
+          layer.on("popupopen", () => {
+            const btn = document.getElementById(delId);
+            if (btn)
+              btn.onclick = () => {
+                commit({ pins: pinsRef.current.filter((x) => x.id !== p.id) });
+                leafletMap.current?.closePopup();
+              };
+          });
+        };
+        wireDelete(marker);
+        if (areaLayer) wireDelete(areaLayer);
       }
     })();
     return () => {
@@ -262,6 +318,28 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
     commit({ pins: [...pinsRef.current, { ...pin, id: crypto.randomUUID(), lat, lon } as MapPin] });
   };
 
+  // Draw an object's outline (polygon, 3+ nodes) instead of dropping a single point pin, so its
+  // extent — a crop area, a field, powerlines, anything — shows on the map.
+  const startDrawingArea = async (pin: DistributiveOmit<MapPin, "id" | "lat" | "lon" | "area">) => {
+    if (!leafletMap.current) return;
+    setPlacing(false);
+    const L = (await import("leaflet")).default;
+    drawingRef.current = pin as DistributiveOmit<MapPin, "id" | "lat" | "lon">;
+    setDrawingLabel(pin.label);
+    const icon = "icon" in pin ? pin.icon : undefined;
+    const handler = new L.Draw.Polygon(leafletMap.current as unknown as Leaflet.DrawMap, {
+      shapeOptions: { color: icon && isLightIcon(icon) ? "#5fae66" : "#374151" },
+    });
+    polygonHandlerRef.current = handler;
+    handler.enable();
+  };
+  const cancelDrawing = () => {
+    polygonHandlerRef.current?.disable();
+    drawingRef.current = null;
+    polygonHandlerRef.current = null;
+    setDrawingLabel(null);
+  };
+
   const dropOnMap = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!leafletMap.current || !mapRef.current) return;
@@ -301,6 +379,9 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
         kind: "annotation",
         icon: customIcon,
       });
+      addCustomObject(customIcon, customLabel);
+      setPickerOpen(false);
+      setPickerLabel("");
     }
   };
 
@@ -310,10 +391,6 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
     () => assets.slice(0, 12).map((a) => ({ ...a, icon: guessIcon(a.title) })),
     [assets],
   );
-
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerLabel, setPickerLabel] = useState("");
-  const [pickerIcon, setPickerIcon] = useState<IconKey>("package");
 
   return (
     <div className="space-y-2">
@@ -358,7 +435,8 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
           Draw a rectangle or polygon, top-left — drag its corners or use the edit tool's midpoint
-          handles to add more nodes. Drag an icon onto the map, or click a pin to delete it.
+          handles to add more nodes. Drag an object onto the map to drop a pin, click an object to
+          draw its outline, drag a pin to move it, or click a pin to delete it.
         </p>
         <div className="flex shrink-0 items-center gap-1.5">
           <button
@@ -390,14 +468,33 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
         </div>
       </div>
 
+      {drawingLabel && (
+        <div className="flex items-center justify-between gap-2 rounded-xl border bg-accent/30 px-3 py-2 text-xs font-semibold">
+          <span>
+            Drawing the outline for "{drawingLabel}" — click to add corners, double-click (or click
+            the first corner again) to finish.
+          </span>
+          <button
+            type="button"
+            onClick={cancelDrawing}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2 rounded-2xl border bg-card p-2">
         {ICON_KEYS.slice(0, 5).map((k) => (
           <div
             key={k}
             draggable
             onDragStart={(e) => e.dataTransfer.setData("text/annotation", k)}
+            onClick={() =>
+              startDrawingArea({ label: ICON_LABELS[k] ?? k, kind: "annotation", icon: k })
+            }
             className={`flex cursor-grab items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold active:cursor-grabbing ${isLightIcon(k) ? "bg-[#bfe3c0] text-[#1a3a20]" : "bg-secondary text-secondary-foreground"}`}
-            title={`Drag onto the map to place: ${ICON_LABELS[k]}`}
+            title={`Drag onto the map to place, or click to draw its outline: ${ICON_LABELS[k]}`}
           >
             <span>{ICONS[k]}</span>
             {ICON_LABELS[k]}
@@ -412,6 +509,41 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
         </button>
       </div>
 
+      {customObjects.length > 0 && (
+        <div className="flex flex-wrap gap-2 rounded-2xl border bg-card p-2">
+          <span className="self-center pl-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Your objects
+          </span>
+          {customObjects.map((c) => (
+            <div
+              key={c.id}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData("text/custom-label", c.label);
+                e.dataTransfer.setData("text/custom-icon", c.icon);
+              }}
+              onClick={() => startDrawingArea({ label: c.label, kind: "annotation", icon: c.icon })}
+              className={`flex cursor-grab items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold active:cursor-grabbing ${isLightIcon(c.icon) ? "bg-[#bfe3c0] text-[#1a3a20]" : "bg-secondary text-secondary-foreground"}`}
+              title={`Drag onto the map to place, or click to draw its outline: ${c.label}`}
+            >
+              <span>{ICONS[c.icon]}</span>
+              {c.label}
+              <button
+                type="button"
+                aria-label={`Remove ${c.label} from your objects`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeCustomObject(c.id);
+                }}
+                className="ml-0.5 opacity-60 hover:opacity-100"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {assetChips.length > 0 && (
         <div className="flex flex-wrap gap-2 rounded-2xl border bg-card p-2">
           <span className="self-center pl-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -422,8 +554,17 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
               key={a.id}
               draggable
               onDragStart={(e) => e.dataTransfer.setData("text/asset-record", a.id)}
+              onClick={() =>
+                startDrawingArea({
+                  label: a.title,
+                  kind: "record",
+                  objectApp: "farm",
+                  objectId: a.id,
+                  icon: a.icon,
+                })
+              }
               className="flex cursor-grab items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-secondary-foreground active:cursor-grabbing"
-              title={`Drag onto the map to place: ${a.title}`}
+              title={`Drag onto the map to place, or click to draw its outline: ${a.title}`}
             >
               <span>{ICONS[a.icon]}</span>
               {a.title}
@@ -460,16 +601,33 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
               </button>
             ))}
           </div>
-          <div
-            draggable={!!pickerLabel.trim()}
-            onDragStart={(e) => {
-              e.dataTransfer.setData("text/custom-label", pickerLabel.trim());
-              e.dataTransfer.setData("text/custom-icon", pickerIcon);
-            }}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${pickerLabel.trim() ? "cursor-grab bg-secondary text-secondary-foreground active:cursor-grabbing" : "cursor-not-allowed bg-muted text-muted-foreground"}`}
-          >
-            <span>{ICONS[pickerIcon]}</span>
-            {pickerLabel.trim() || "Enter a label, then drag me onto the map"}
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              draggable={!!pickerLabel.trim()}
+              onDragStart={(e) => {
+                e.dataTransfer.setData("text/custom-label", pickerLabel.trim());
+                e.dataTransfer.setData("text/custom-icon", pickerIcon);
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${pickerLabel.trim() ? "cursor-grab bg-secondary text-secondary-foreground active:cursor-grabbing" : "cursor-not-allowed bg-muted text-muted-foreground"}`}
+            >
+              <span>{ICONS[pickerIcon]}</span>
+              {pickerLabel.trim() || "Enter a label, then drag me onto the map"}
+            </div>
+            {pickerLabel.trim() && (
+              <button
+                type="button"
+                onClick={() => {
+                  const label = pickerLabel.trim();
+                  addCustomObject(pickerIcon, label);
+                  setPickerOpen(false);
+                  setPickerLabel("");
+                  void startDrawingArea({ label, kind: "annotation", icon: pickerIcon });
+                }}
+                className="rounded-full border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              >
+                Draw its outline instead
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -534,7 +692,31 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
             >
               Pin it
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                const record = objectRecords.find((r) => r.id === objectId);
+                if (!record) return;
+                setPendingLatLng(null);
+                setObjectId("");
+                setPlacing(false);
+                void startDrawingArea({
+                  label: record.title,
+                  kind: "record",
+                  objectApp,
+                  objectId,
+                  icon: guessIcon(record.title),
+                });
+              }}
+              disabled={!objectId}
+              className="rounded-xl border px-4 py-2 text-sm font-semibold disabled:opacity-50"
+            >
+              Draw its shape instead
+            </button>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            E.g. draw a field's boundary so its full extent shows on the map, not just a pin.
+          </p>
         </div>
       )}
       {pins.length > 0 && (
@@ -559,6 +741,19 @@ export function FarmMap({ farmId }: { farmId: string | null }) {
       )}
     </div>
   );
+}
+
+function centroidOf(pts: LatLng[]): LatLng {
+  const n = pts.length || 1;
+  const lat = pts.reduce((s, p) => s + p[0], 0) / n;
+  const lon = pts.reduce((s, p) => s + p[1], 0) / n;
+  return [lat, lon];
+}
+
+function areaStyle(light: boolean) {
+  return light
+    ? { color: "#5fae66", weight: 2, fillColor: "#bfe3c0", fillOpacity: 0.35 }
+    : { color: "#374151", weight: 2, fillColor: "#9ca3af", fillOpacity: 0.3 };
 }
 
 const ICON_LABELS: Record<string, string> = {

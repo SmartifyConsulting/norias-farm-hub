@@ -1,5 +1,5 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Trash2,
   ChevronLeft,
@@ -20,6 +20,13 @@ import { toast } from "sonner";
 import { FarmMap } from "@/components/FarmMap";
 import { supabase } from "@/integrations/supabase/client";
 import { friendlyError } from "@/lib/errors";
+import {
+  MAIN_PRODUCTIONS,
+  PRODUCTION_CATEGORIES,
+  saveFarmDetails,
+  useFarmDetails,
+  type FarmDetails,
+} from "@/lib/farmdetails";
 
 export const Route = createFileRoute("/app/$appId")({
   loader: ({ params }) => {
@@ -82,6 +89,14 @@ function MiniAppPage() {
     if (typeof data === "string") setViewFarmId(data);
     toast.success("Farm added");
   };
+  const farmDetails = useFarmDetails(effectiveFarmId);
+  const [editingDetails, setEditingDetails] = useState(false);
+  const [detailsForm, setDetailsForm] = useState<FarmDetails>(farmDetails);
+  useEffect(() => {
+    setDetailsForm(farmDetails);
+    setEditingDetails(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveFarmId]);
   const { canWrite, canDelete } = permissions(current?.role);
   const fields = useRecords("fields").records;
   const crops = useRecords("crops").records;
@@ -322,6 +337,115 @@ function MiniAppPage() {
                 </button>
               )}
             </div>
+          </section>
+          <section>
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="font-display text-lg font-semibold">Farm details</h2>
+              {!editingDetails && (
+                <button
+                  type="button"
+                  onClick={() => setEditingDetails(true)}
+                  className="text-sm font-semibold text-primary"
+                >
+                  {farmDetails.address || farmDetails.mainProduction ? "Edit" : "+ Add details"}
+                </button>
+              )}
+            </div>
+            {editingDetails ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  saveFarmDetails(effectiveFarmId, detailsForm);
+                  setEditingDetails(false);
+                }}
+                className="space-y-2 rounded-2xl border bg-card p-4"
+              >
+                <input
+                  className={input}
+                  placeholder="Address"
+                  value={detailsForm.address}
+                  onChange={(e) => setDetailsForm({ ...detailsForm, address: e.target.value })}
+                />
+                <input
+                  className={input}
+                  placeholder="Size (hectares)"
+                  value={detailsForm.sizeHa}
+                  onChange={(e) => setDetailsForm({ ...detailsForm, sizeHa: e.target.value })}
+                />
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <select
+                    aria-label="Main production"
+                    className={input}
+                    value={detailsForm.mainProduction}
+                    onChange={(e) =>
+                      setDetailsForm({
+                        ...detailsForm,
+                        mainProduction: e.target.value,
+                        subCategory: "",
+                      })
+                    }
+                  >
+                    <option value="">Main production</option>
+                    {MAIN_PRODUCTIONS.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Production subcategory"
+                    className={input}
+                    value={detailsForm.subCategory}
+                    onChange={(e) =>
+                      setDetailsForm({ ...detailsForm, subCategory: e.target.value })
+                    }
+                    disabled={!detailsForm.mainProduction}
+                  >
+                    <option value="">
+                      {detailsForm.mainProduction
+                        ? "Production subcategory"
+                        : "Choose main production first"}
+                    </option>
+                    {(PRODUCTION_CATEGORIES[detailsForm.mainProduction] ?? []).map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Add buildings, equipment and other assets in the Assets section below — they'll
+                  show up as icons you can drag onto the farm map.
+                </p>
+                <div className="flex gap-2">
+                  <button className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+                    Save details
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDetailsForm(farmDetails);
+                      setEditingDetails(false);
+                    }}
+                    className="rounded-xl bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : farmDetails.address || farmDetails.sizeHa || farmDetails.mainProduction ? (
+              <p className="text-sm text-muted-foreground">
+                {[
+                  farmDetails.address,
+                  farmDetails.sizeHa && `${farmDetails.sizeHa} ha`,
+                  [farmDetails.mainProduction, farmDetails.subCategory].filter(Boolean).join(" · "),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">No details captured yet.</p>
+            )}
           </section>
           <section>
             <h2 className="mb-2 font-display text-lg font-semibold">Farm map</h2>

@@ -48,6 +48,8 @@ export function guessIcon(title: string): IconKey {
 /**
  * A single pin on the farm map. Either linked to an existing record in another mini-app
  * (kind "record"), or a freeform annotation dropped from the icon palette (kind "annotation").
+ * `lat`/`lon` place the icon marker; `area`, when present, is a drawn polygon outline (3+ nodes)
+ * showing the object's extent — any object can be dropped as a point or drawn as an area.
  */
 export type MapPin =
   | {
@@ -58,9 +60,18 @@ export type MapPin =
       kind: "record";
       objectApp: string;
       objectId: string;
-      icon?: IconKey;
+      icon?: IconKey | undefined;
+      area?: LatLng[] | undefined;
     }
-  | { id: string; lat: number; lon: number; label: string; kind: "annotation"; icon: IconKey };
+  | {
+      id: string;
+      lat: number;
+      lon: number;
+      label: string;
+      kind: "annotation";
+      icon: IconKey;
+      area?: LatLng[] | undefined;
+    };
 
 /** Distributive Omit — plain `Omit` over a union collapses to only the common keys, which drops each variant's own fields. */
 export type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
@@ -95,6 +106,38 @@ export function useBoundary(farmId: string | null) {
     [k],
   );
   return [boundary, setBoundary] as const;
+}
+
+/** A user-defined object (e.g. "Powerlines") saved from the map's "+ Add object" picker, so it
+ * stays on the palette for reuse across farms instead of being a one-off drag. */
+export type CustomObject = { id: string; icon: IconKey; label: string };
+const CUSTOM_OBJECTS_KEY = "farmerplus:custom-objects";
+
+export function useCustomObjects() {
+  const [items, setItems] = useState<CustomObject[]>([]);
+  useEffect(() => {
+    const load = () => setItems(read<CustomObject[]>(CUSTOM_OBJECTS_KEY, []));
+    load();
+    window.addEventListener("farmerplus:change", load);
+    return () => window.removeEventListener("farmerplus:change", load);
+  }, []);
+  const add = useCallback((icon: IconKey, label: string) => {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const current = read<CustomObject[]>(CUSTOM_OBJECTS_KEY, []);
+    if (current.some((c) => c.label.toLowerCase() === trimmed.toLowerCase())) return;
+    const next = [...current, { id: crypto.randomUUID(), icon, label: trimmed }];
+    localStorage.setItem(CUSTOM_OBJECTS_KEY, JSON.stringify(next));
+    setItems(next);
+    window.dispatchEvent(new Event("farmerplus:change"));
+  }, []);
+  const remove = useCallback((id: string) => {
+    const next = read<CustomObject[]>(CUSTOM_OBJECTS_KEY, []).filter((c) => c.id !== id);
+    localStorage.setItem(CUSTOM_OBJECTS_KEY, JSON.stringify(next));
+    setItems(next);
+    window.dispatchEvent(new Event("farmerplus:change"));
+  }, []);
+  return { items, add, remove };
 }
 
 export function usePins(farmId: string | null) {
