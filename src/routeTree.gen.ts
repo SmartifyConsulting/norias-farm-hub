@@ -36,6 +36,7 @@ import { Route as CoopIndexRouteImport } from './routes/coop.index'
 import { Route as CoopCoopIdRouteImport } from './routes/coop.$coopId'
 import { Route as CoopCoopIdFinanceRouteImport } from './routes/coop.$coopId.finance'
 import { Route as CoopCoopIdGovernanceRouteImport } from './routes/coop.$coopId.governance'
+import { Route as CoopCoopIdIntelligenceRouteImport } from './routes/coop.$coopId.intelligence'
 import { Route as CoopCoopIdOpportunitiesRouteImport } from './routes/coop.$coopId.opportunities'
 import { Route as CoopCoopIdPurchasingRouteImport } from './routes/coop.$coopId.purchasing'
 import { Route as CoopCoopIdResourcesRouteImport } from './routes/coop.$coopId.resources'
@@ -176,6 +177,11 @@ const CoopCoopIdGovernanceRoute = CoopCoopIdGovernanceRouteImport.update({
   path: '/governance',
   getParentRoute: () => CoopCoopIdRoute,
 } as any)
+const CoopCoopIdIntelligenceRoute = CoopCoopIdIntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => CoopCoopIdRoute,
+} as any)
 const CoopCoopIdOpportunitiesRoute = CoopCoopIdOpportunitiesRouteImport.update({
   id: '/opportunities',
   path: '/opportunities',
@@ -225,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/coop/': typeof CoopIndexRoute
   '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
   '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
+  '/coop/$coopId/intelligence': typeof CoopCoopIdIntelligenceRoute
   '/coop/$coopId/opportunities': typeof CoopCoopIdOpportunitiesRoute
   '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
   '/coop/$coopId/resources': typeof CoopCoopIdResourcesRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/coop': typeof CoopIndexRoute
   '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
   '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
+  '/coop/$coopId/intelligence': typeof CoopCoopIdIntelligenceRoute
   '/coop/$coopId/opportunities': typeof CoopCoopIdOpportunitiesRoute
   '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
   '/coop/$coopId/resources': typeof CoopCoopIdResourcesRoute
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/coop/': typeof CoopIndexRoute
   '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
   '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
+  '/coop/$coopId/intelligence': typeof CoopCoopIdIntelligenceRoute
   '/coop/$coopId/opportunities': typeof CoopCoopIdOpportunitiesRoute
   '/coop/$coopId/purchasing': typeof CoopCoopIdPurchasingRoute
   '/coop/$coopId/resources': typeof CoopCoopIdResourcesRoute
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/coop/'
     | '/coop/$coopId/finance'
     | '/coop/$coopId/governance'
+    | '/coop/$coopId/intelligence'
     | '/coop/$coopId/opportunities'
     | '/coop/$coopId/purchasing'
     | '/coop/$coopId/resources'
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/coop'
     | '/coop/$coopId/finance'
     | '/coop/$coopId/governance'
+    | '/coop/$coopId/intelligence'
     | '/coop/$coopId/opportunities'
     | '/coop/$coopId/purchasing'
     | '/coop/$coopId/resources'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/coop/'
     | '/coop/$coopId/finance'
     | '/coop/$coopId/governance'
+    | '/coop/$coopId/intelligence'
     | '/coop/$coopId/opportunities'
     | '/coop/$coopId/purchasing'
     | '/coop/$coopId/resources'
@@ -618,6 +630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoopCoopIdGovernanceRouteImport
       parentRoute: typeof CoopCoopIdRoute
     }
+    '/coop/$coopId/intelligence': {
+      id: '/coop/$coopId/intelligence'
+      path: '/intelligence'
+      fullPath: '/coop/$coopId/intelligence'
+      preLoaderRoute: typeof CoopCoopIdIntelligenceRouteImport
+      parentRoute: typeof CoopCoopIdRoute
+    }
     '/coop/$coopId/opportunities': {
       id: '/coop/$coopId/opportunities'
       path: '/opportunities'
@@ -652,6 +671,7 @@ declare module '@tanstack/react-router' {
 interface CoopCoopIdRouteChildren {
   CoopCoopIdFinanceRoute: typeof CoopCoopIdFinanceRoute
   CoopCoopIdGovernanceRoute: typeof CoopCoopIdGovernanceRoute
+  CoopCoopIdIntelligenceRoute: typeof CoopCoopIdIntelligenceRoute
   CoopCoopIdOpportunitiesRoute: typeof CoopCoopIdOpportunitiesRoute
   CoopCoopIdPurchasingRoute: typeof CoopCoopIdPurchasingRoute
   CoopCoopIdResourcesRoute: typeof CoopCoopIdResourcesRoute
@@ -661,6 +681,7 @@ interface CoopCoopIdRouteChildren {
 const CoopCoopIdRouteChildren: CoopCoopIdRouteChildren = {
   CoopCoopIdFinanceRoute: CoopCoopIdFinanceRoute,
   CoopCoopIdGovernanceRoute: CoopCoopIdGovernanceRoute,
+  CoopCoopIdIntelligenceRoute: CoopCoopIdIntelligenceRoute,
   CoopCoopIdOpportunitiesRoute: CoopCoopIdOpportunitiesRoute,
   CoopCoopIdPurchasingRoute: CoopCoopIdPurchasingRoute,
   CoopCoopIdResourcesRoute: CoopCoopIdResourcesRoute,

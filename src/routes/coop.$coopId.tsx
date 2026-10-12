@@ -238,6 +238,13 @@ function CoopDetail() {
                     Finance
                   </Link>
                 )}
+                <Link
+                  to="/coop/$coopId/intelligence"
+                  params={{ coopId }}
+                  className="rounded-xl border px-4 py-2 font-semibold"
+                >
+                  Collective intelligence
+                </Link>
               </div>
             </section>
           )}

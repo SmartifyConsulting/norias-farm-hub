@@ -64,6 +64,13 @@
       "when": 1792010000000,
       "tag": "0008_cooperative_resources_development",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792020000000,
+      "tag": "0009_cooperative_intelligence",
+      "breakpoints": true
     }
   ]
 }

@@ -1077,6 +1077,26 @@ export type Database = {
       coop_can_govern: { Args: { _coop: string }; Returns: boolean }
       coop_can_manage_resources: { Args: { _coop: string }; Returns: boolean }
       coop_can_trade: { Args: { _coop: string }; Returns: boolean }
+      coop_intelligence_demand: {
+        Args: { _coop: string }
+        Returns: {
+          coop_qty: number
+          item: string
+          other_coops: number
+          other_qty: number
+          unit: string
+        }[]
+      }
+      coop_intelligence_supply: {
+        Args: { _coop: string }
+        Returns: {
+          commodity: string
+          coop_qty: number
+          other_coops: number
+          other_qty: number
+          unit: string
+        }[]
+      }
       coop_is_admin: { Args: { _coop: string }; Returns: boolean }
       coop_role_of: {
         Args: { _coop: string }
