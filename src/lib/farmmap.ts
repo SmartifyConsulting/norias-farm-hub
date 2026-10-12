@@ -1,17 +1,32 @@
 import { useCallback, useEffect, useState } from "react";
 
 export type LatLng = [number, number];
-/** A single pin on the farm map, linked to an existing record in another mini-app. */
-export type MapPin = {
-  id: string;
-  lat: number;
-  lon: number;
-  label: string;
-  objectApp: string;
-  objectId: string;
-};
+export type AnnotationIcon = "farmhouse" | "shed" | "water" | "gate" | "crop";
+/**
+ * A single pin on the farm map. Either linked to an existing record in another mini-app
+ * (kind "record"), or a freeform annotation dropped from the icon palette (kind "annotation").
+ */
+export type MapPin =
+  | {
+      id: string;
+      lat: number;
+      lon: number;
+      label: string;
+      kind: "record";
+      objectApp: string;
+      objectId: string;
+    }
+  | {
+      id: string;
+      lat: number;
+      lon: number;
+      label: string;
+      kind: "annotation";
+      icon: AnnotationIcon;
+    };
 
-const key = (prefix: string, farmId: string | null) => `farmerplus:${prefix}:${farmId ?? "personal"}`;
+const key = (prefix: string, farmId: string | null) =>
+  `farmerplus:${prefix}:${farmId ?? "personal"}`;
 
 function read<T>(k: string, fallback: T): T {
   try {
