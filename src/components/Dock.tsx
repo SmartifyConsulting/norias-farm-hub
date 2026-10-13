@@ -37,7 +37,7 @@ function useNavHidden() {
 export function Dock() {
   if (useNavHidden()) return null;
   return (
-    <nav className="glass fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 gap-1 rounded-3xl p-2 md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex justify-around border-t border-primary-foreground/10 bg-primary px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 text-primary-foreground md:hidden">
       {items.map(({ to, label, icon: Icon, params }) => (
         <Link
           key={to}
@@ -46,7 +46,7 @@ export function Dock() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           params={(params ?? {}) as any}
           activeOptions={{ exact: to === "/" }}
-          className="flex w-14 flex-col items-center gap-0.5 rounded-2xl py-2 text-[10px] font-medium text-foreground/80 transition-colors hover:bg-muted"
+          className="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-medium text-primary-foreground/80 transition-colors hover:bg-primary-foreground/10"
           activeProps={{ className: "!bg-card !text-foreground" }}
         >
           <Icon className="h-5 w-5" />
