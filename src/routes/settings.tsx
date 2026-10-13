@@ -284,6 +284,20 @@ function SettingsPage() {
             </div>
           ))}
         </section>
+        <section className="mt-4 flex items-center justify-between gap-3 rounded-2xl border bg-card p-4">
+          <div>
+            <p className="text-sm font-medium">Advertise on FarmerPlus</p>
+            <p className="text-xs text-muted-foreground">
+              Create a sponsored ad shown to farmers on the home screen and Opportunities.
+            </p>
+          </div>
+          <Link
+            to="/advertise"
+            className="shrink-0 rounded-xl bg-earth-1 px-3 py-1.5 text-xs font-semibold text-background"
+          >
+            Get started
+          </Link>
+        </section>
         <section className="mt-4 rounded-2xl border bg-card p-4">
           <p className="text-sm font-medium">Install FarmerPlus</p>
           <p className="text-xs text-muted-foreground">

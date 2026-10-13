@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdvertiseRouteImport } from './routes/advertise'
 import { Route as AppsRouteImport } from './routes/apps'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CapacityRouteImport } from './routes/capacity'
@@ -46,6 +47,11 @@ import { Route as CoopCoopIdSalesRouteImport } from './routes/coop.$coopId.sales
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvertiseRoute = AdvertiseRouteImport.update({
+  id: '/advertise',
+  path: '/advertise',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppsRoute = AppsRouteImport.update({
@@ -211,6 +217,7 @@ const CoopCoopIdSalesRoute = CoopCoopIdSalesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/advertise': typeof AdvertiseRoute
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/advertise': typeof AdvertiseRoute
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
@@ -282,6 +290,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/advertise': typeof AdvertiseRoute
   '/apps': typeof AppsRoute
   '/auth': typeof AuthRoute
   '/capacity': typeof CapacityRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/advertise'
     | '/apps'
     | '/auth'
     | '/capacity'
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/advertise'
     | '/apps'
     | '/auth'
     | '/capacity'
@@ -389,6 +400,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/advertise'
     | '/apps'
     | '/auth'
     | '/capacity'
@@ -425,6 +437,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdvertiseRoute: typeof AdvertiseRoute
   AppsRoute: typeof AppsRoute
   AuthRoute: typeof AuthRoute
   CapacityRoute: typeof CapacityRoute
@@ -459,6 +472,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/advertise': {
+      id: '/advertise'
+      path: '/advertise'
+      fullPath: '/advertise'
+      preLoaderRoute: typeof AdvertiseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/apps': {
@@ -714,6 +734,7 @@ const CoopCoopIdRouteWithChildren = CoopCoopIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdvertiseRoute: AdvertiseRoute,
   AppsRoute: AppsRoute,
   AuthRoute: AuthRoute,
   CapacityRoute: CapacityRoute,
