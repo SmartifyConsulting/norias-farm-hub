@@ -237,7 +237,7 @@ function Home() {
             <div className="soft-card overflow-hidden border">
               <div className="flex items-center justify-between bg-brand-red px-4 py-2.5">
                 <h2 className="font-display text-base font-semibold text-background">
-                  Opportunities
+                  Trades
                 </h2>
                 <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-background">
                   {notices.length} items

@@ -85,7 +85,7 @@ const INTEL_DEFS: Omit<RegistryApp, "tone">[] = [
   },
   {
     id: "opportunities",
-    name: "Opportunities",
+    name: "Trades",
     blurb: "Buyer demand, contracts & services matched to you",
     icon: Handshake,
     to: "/opportunities",

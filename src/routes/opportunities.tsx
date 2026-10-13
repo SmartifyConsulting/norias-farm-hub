@@ -17,13 +17,13 @@ import { SponsoredBanner } from "@/components/SponsoredBanner";
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
     meta: [
-      { title: "Opportunities — FarmerPlus" },
+      { title: "Trades — FarmerPlus" },
       {
         name: "description",
         content:
           "Buyer demand, contracts, funding, equipment, storage and transport matched to your farm's capabilities.",
       },
-      { property: "og:title", content: "Opportunities — FarmerPlus" },
+      { property: "og:title", content: "Trades — FarmerPlus" },
       {
         property: "og:description",
         content:
@@ -59,7 +59,7 @@ function OpportunitiesPage() {
   const hasPassport = Object.values(p).some((c) => c.value);
 
   return (
-    <Screen title="Opportunities">
+    <Screen title="Trades">
       <div className="mb-4 flex gap-2 rounded-full bg-secondary p-1 md:max-w-sm">
         {(["matches", "demand"] as const).map((t) => (
           <button
@@ -161,7 +161,7 @@ function OppCard({ o, m }: { o: Opportunity; m: ReturnType<typeof matchOpportuni
         <dd>{o.participant}</dd>
       </dl>
       <div
-        className={`mt-3 rounded-xl p-3 ${m.label === "Potential Match" ? "bg-blue-600 text-white" : "bg-secondary/60 text-secondary-foreground"}`}
+        className={`mt-3 rounded-xl p-3 ${m.label === "Potential Match" ? "bg-blue-600 text-white" : m.label === "Requirements Identified" ? "bg-sky-100 text-black" : "bg-secondary/60 text-secondary-foreground"}`}
       >
         <p className="text-xs font-semibold">
           {m.label} · {m.score}% fit
@@ -378,16 +378,16 @@ function DemandBoard({
                 {o.quality ? ` · ${o.quality}` : ""}
               </p>
               <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
-                <div className="rounded-xl bg-secondary p-2 text-secondary-foreground">
-                  <p className="text-muted-foreground">Demand</p>
+                <div className="rounded-xl bg-black p-2 text-white">
+                  <p className="text-white">Demand</p>
                   <p className="font-semibold">{req.toLocaleString()} t</p>
                 </div>
-                <div className="rounded-xl bg-secondary p-2 text-secondary-foreground">
-                  <p className="text-muted-foreground">Potential supply</p>
+                <div className="rounded-xl bg-black p-2 text-white">
+                  <p className="text-white">Potential supply</p>
                   <p className="font-semibold">{matched.toLocaleString()} t</p>
                 </div>
                 <div className="rounded-xl bg-destructive/10 p-2">
-                  <p className="text-muted-foreground">Supply gap</p>
+                  <p className="text-black">Supply gap</p>
                   <p className="font-semibold text-destructive">{gap.toLocaleString()} t</p>
                 </div>
               </div>
