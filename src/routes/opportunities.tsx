@@ -160,7 +160,9 @@ function OppCard({ o, m }: { o: Opportunity; m: ReturnType<typeof matchOpportuni
         <dt className="text-muted-foreground">From</dt>
         <dd>{o.participant}</dd>
       </dl>
-      <div className="mt-3 rounded-xl bg-secondary/60 p-3 text-secondary-foreground">
+      <div
+        className={`mt-3 rounded-xl p-3 ${m.label === "Potential Match" ? "bg-blue-600 text-white" : "bg-secondary/60 text-secondary-foreground"}`}
+      >
         <p className="text-xs font-semibold">
           {m.label} · {m.score}% fit
         </p>
@@ -168,7 +170,9 @@ function OppCard({ o, m }: { o: Opportunity; m: ReturnType<typeof matchOpportuni
           <ul className="mt-1 space-y-0.5 text-xs">
             {m.reasons.map((r) => (
               <li key={r} className="flex gap-1">
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
+                <CheckCircle2
+                  className={`h-3.5 w-3.5 shrink-0 ${m.label === "Potential Match" ? "text-white" : "text-primary"}`}
+                />
                 {r}
               </li>
             ))}
@@ -178,7 +182,9 @@ function OppCard({ o, m }: { o: Opportunity; m: ReturnType<typeof matchOpportuni
           <ul className="mt-1 space-y-0.5 text-xs">
             {m.gaps.map((g) => (
               <li key={g} className="flex gap-1">
-                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-destructive" />
+                <AlertTriangle
+                  className={`h-3.5 w-3.5 shrink-0 ${m.label === "Potential Match" ? "text-amber-300" : "text-destructive"}`}
+                />
                 {g}
               </li>
             ))}
