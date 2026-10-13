@@ -9,6 +9,7 @@ import { useUser } from "@/lib/auth";
 import { uploadAdImage } from "@/lib/adImages";
 import { ImageCropper } from "@/components/ImageCropper";
 import type { Database } from "@/integrations/supabase/types";
+import { packageLabel, useAdPackages } from "@/lib/adPackages";
 
 export const Route = createFileRoute("/advertise")({
   head: () => ({
@@ -33,12 +34,6 @@ type Campaign = Database["public"]["Tables"]["ad_campaigns"]["Row"] & {
   link_url?: string;
 };
 
-const AD_PACKAGES = [
-  { id: "starter", label: "Starter — R250 (7 days)", cents: 25000 },
-  { id: "growth", label: "Growth — R500 (30 days)", cents: 50000 },
-  { id: "pro", label: "Pro Farm — R1,200 (60 days)", cents: 120000 },
-  { id: "enterprise", label: "Enterprise — R3,000 (90 days)", cents: 300000 },
-];
 
 const GRADIENT_PRESETS: { label: string; from: string; to: string }[] = [
   { label: "Green", from: "#16a34a", to: "#2f7a4f" },
@@ -334,7 +329,6 @@ function CampaignDialog({
   const today = new Date().toISOString().slice(0, 10);
   const in30Days = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
 
-  const [companyName, setCompanyName] = useState(campaign?.company_name ?? "");
   const [title, setTitle] = useState(campaign?.title ?? "");
   const [blurb, setBlurb] = useState(campaign?.blurb ?? "");
   const [cta, setCta] = useState(campaign?.cta ?? "");
@@ -345,9 +339,13 @@ function CampaignDialog({
   const [imageUrl, setImageUrl] = useState(campaign?.image_url ?? "");
   const [uploading, setUploading] = useState(false);
   const [cropping, setCropping] = useState<File | null>(null);
-  const [pkg, setPkg] = useState(
-    (campaign && AD_PACKAGES.find((p) => p.cents === campaign.budget_cents)?.id) || "growth",
-  );
+  const { packages } = useAdPackages();
+  const [pkg, setPkg] = useState("");
+  const selectedPkg =
+    packages.find((p) => p.id === pkg) ??
+    (campaign && packages.find((p) => p.price_cents === campaign.budget_cents)) ??
+    packages[1] ??
+    packages[0];
   const [startsOn, setStartsOn] = useState(campaign?.starts_on ?? today);
   const [endsOn, setEndsOn] = useState(campaign?.ends_on ?? in30Days);
   const [saving, setSaving] = useState(false);
@@ -365,7 +363,11 @@ function CampaignDialog({
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!companyName.trim() || !title.trim() || saving) return;
+    if (!title.trim() || saving) return;
+    if (!selectedPkg) {
+      toast.error("No ad packages are available yet.");
+      return;
+    }
     const trimmedLink = linkUrl.trim();
     if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
       toast.error("Website URL must start with http:// or https://");
@@ -373,7 +375,7 @@ function CampaignDialog({
     }
     setSaving(true);
     const fields = {
-      company_name: companyName.trim(),
+      company_name: campaign?.company_name ?? "",
       title: title.trim(),
       blurb: blurb.trim(),
       cta: cta.trim() || "Find out more",
@@ -383,7 +385,7 @@ function CampaignDialog({
       image_url: imageUrl,
       image_shape: imageShape,
       link_url: trimmedLink,
-      budget_cents: (AD_PACKAGES.find((p) => p.id === pkg) ?? AD_PACKAGES[1]!).cents,
+      budget_cents: selectedPkg.price_cents,
       starts_on: startsOn,
       ends_on: endsOn,
     };
@@ -428,12 +430,6 @@ function CampaignDialog({
         </div>
         <div className="grid gap-4 md:grid-cols-[1fr_22rem]">
           <form onSubmit={save} className="space-y-2">
-            <input
-              className={input}
-              placeholder="Company name"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
             <div>
               <div className="mb-2 flex gap-2 rounded-full bg-secondary p-1 text-xs">
                 {(["banner", "portrait"] as const).map((shape) => (
@@ -523,10 +519,10 @@ function CampaignDialog({
             <div className="grid grid-cols-2 gap-2">
               <label className="col-span-2 block text-xs text-muted-foreground">
                 Ad package
-                <select className={input} value={pkg} onChange={(e) => setPkg(e.target.value)}>
-                  {AD_PACKAGES.map((p) => (
+                <select className={input} value={selectedPkg?.id ?? ""} onChange={(e) => setPkg(e.target.value)}>
+                  {packages.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.label}
+                      {packageLabel(p)}
                     </option>
                   ))}
                 </select>
