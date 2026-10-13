@@ -196,7 +196,7 @@ export function FarmMap({
         drawn.clearLayers();
         if (layerType === "rectangle") {
           const corners = (layer as Leaflet.Rectangle).getLatLngs()[0] as Leaflet.LatLng[];
-          drawn.addLayer(L.polygon(corners.map((c) => [c.lat, c.lng])));
+          drawn.addLayer(L.polygon(corners.map((c) => [c.lat, c.lng] as [number, number])));
         } else {
           drawn.addLayer(layer);
         }
