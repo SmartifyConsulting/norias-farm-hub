@@ -128,6 +128,7 @@ export function FarmMap({
 
   useEffect(() => {
     let destroyed = false;
+    let resizeObs: ResizeObserver | null = null;
     (async () => {
       const L = (await import("leaflet")).default;
       await import("leaflet-draw");
@@ -656,7 +657,7 @@ export function FarmMap({
         ref={mapRef}
         onDragOver={(e) => e.preventDefault()}
         onDrop={dropOnMap}
-        className="h-80 w-full overflow-hidden rounded-2xl border md:h-96"
+        className="relative h-80 w-full max-w-full overflow-hidden rounded-2xl border [contain:paint] md:h-96"
       />
       {pendingLatLng && (
         <div className="rounded-2xl border bg-card p-4">
