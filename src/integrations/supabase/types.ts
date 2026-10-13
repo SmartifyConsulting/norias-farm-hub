@@ -27,8 +27,10 @@ export type Database = {
           gradient_from: string
           gradient_to: string
           id: string
+          image_shape: string
           image_url: string
           impressions: number
+          link_url: string
           spent_cents: number
           starts_on: string
           status: Database["public"]["Enums"]["ad_campaign_status"]
@@ -47,8 +49,10 @@ export type Database = {
           gradient_from?: string
           gradient_to?: string
           id?: string
+          image_shape?: string
           image_url?: string
           impressions?: number
+          link_url?: string
           spent_cents?: number
           starts_on?: string
           status?: Database["public"]["Enums"]["ad_campaign_status"]
@@ -67,8 +71,10 @@ export type Database = {
           gradient_from?: string
           gradient_to?: string
           id?: string
+          image_shape?: string
           image_url?: string
           impressions?: number
+          link_url?: string
           spent_cents?: number
           starts_on?: string
           status?: Database["public"]["Enums"]["ad_campaign_status"]
@@ -1163,7 +1169,9 @@ export type Database = {
           gradient_from: string | null
           gradient_to: string | null
           id: string | null
+          image_shape: string | null
           image_url: string | null
+          link_url: string | null
           tag: string | null
           title: string | null
         }
@@ -1174,7 +1182,9 @@ export type Database = {
           gradient_from?: string | null
           gradient_to?: string | null
           id?: string | null
+          image_shape?: string | null
           image_url?: string | null
+          link_url?: string | null
           tag?: string | null
           title?: string | null
         }
@@ -1185,7 +1195,9 @@ export type Database = {
           gradient_from?: string | null
           gradient_to?: string | null
           id?: string | null
+          image_shape?: string | null
           image_url?: string | null
+          link_url?: string | null
           tag?: string | null
           title?: string | null
         }
