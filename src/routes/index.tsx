@@ -167,7 +167,7 @@ function Home() {
         </section>
 
         {/* Weather + AI overview */}
-        <section className="grid gap-3 md:grid-cols-2">
+        <section className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2">
           <div className="space-y-3">
             <Weather lat={s.lat} lon={s.lon} place={s.placeName} compact />
             <div className="grid grid-cols-2 gap-3">
@@ -217,8 +217,8 @@ function Home() {
         <SponsoredBanner />
 
         {/* Farm map (left) + Opportunities (right) */}
-        <section className="grid gap-4 md:grid-cols-12">
-          <div className="soft-card space-y-2 overflow-hidden border md:col-span-7 lg:col-span-8">
+        <section className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-12">
+          <div className="soft-card min-w-0 space-y-2 overflow-hidden border md:col-span-7 lg:col-span-8">
             <div className="flex items-center justify-between rounded-t-2xl bg-brand-green px-4 py-2.5">
               <h2 className="font-display text-lg font-semibold text-background">Farm map</h2>
               <Link
@@ -233,7 +233,7 @@ function Home() {
               <FarmMap farmId={activeFarmId} />
             </div>
           </div>
-          <div className="space-y-4 md:col-span-5 lg:col-span-4">
+          <div className="min-w-0 space-y-4 md:col-span-5 lg:col-span-4">
             <div className="soft-card overflow-hidden border">
               <div className="flex items-center justify-between bg-brand-red px-4 py-2.5">
                 <h2 className="font-display text-base font-semibold text-background">

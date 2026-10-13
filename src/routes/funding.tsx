@@ -79,7 +79,7 @@ function FundingPage() {
         </section>
         <section className="rounded-2xl border bg-card p-4 md:col-span-2 lg:col-span-3">
           <p className="text-sm font-semibold">Supporting record</p>
-          <div className="mt-2 grid gap-3 text-xs md:grid-cols-3">
+          <div className="mt-2 grid grid-cols-1 gap-3 text-xs md:grid-cols-3">
             <div><p className="font-semibold">Production history</p>{harvest.length ? harvest.slice(0, 5).map((h, k) => <p key={k} className="text-muted-foreground">{h.date?.slice(0, 10)} · {h.title} {h.qty}</p>) : <p className="text-muted-foreground">No harvest records yet</p>}</div>
             <div><p className="font-semibold">Commitments</p>{commitments.length ? commitments.map((c) => <p key={c.id} className="text-muted-foreground">{c.title} · {c.expected?.volume ?? "?"} t</p>) : <p className="text-muted-foreground">None recorded</p>}</div>
             <div><p className="font-semibold">Evidence on file</p>{Object.entries(p).filter(([, c]) => c.evidence).map(([k, c]) => <p key={k} className="text-muted-foreground">{k}: {c.evidence}</p>)}{!Object.values(p).some((c) => c.evidence) && <p className="text-muted-foreground">No evidence attached in your passport</p>}</div>
