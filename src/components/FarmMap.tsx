@@ -215,9 +215,14 @@ export function FarmMap({
       });
 
       leafletMap.current = map;
+      // Keep the map sized to its frame (e.g. on phones, rotation, or layout changes).
+      resizeObs = new ResizeObserver(() => map.invalidateSize());
+      if (mapRef.current) resizeObs.observe(mapRef.current);
+      requestAnimationFrame(() => map.invalidateSize());
     })();
     return () => {
       destroyed = true;
+      resizeObs?.disconnect();
       leafletMap.current?.remove();
       leafletMap.current = null;
     };
