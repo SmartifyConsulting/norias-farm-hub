@@ -266,6 +266,7 @@ function Home() {
                 )}
               </div>
             </div>
+            <SponsoredBanner offset={1} />
           </div>
         </section>
 

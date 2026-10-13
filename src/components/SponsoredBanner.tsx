@@ -20,7 +20,15 @@ type DisplayAd = {
 /** A single, slowly auto-rotating sponsored "ad image" — a colour gradient card. Shows real,
  * paid, currently-active campaigns from the `active_ads` view first, then fills any remaining
  * rotation slots with seed placeholders so the banner is never empty. Advances every 7s. */
-export function SponsoredBanner({ className = "" }: { className?: string }) {
+export function SponsoredBanner({
+  className = "",
+  offset = 0,
+}: {
+  className?: string;
+  /** Starting index into the rotation, so two banners on the same page don't show the same ad
+   * at the same time. */
+  offset?: number;
+}) {
   const [paidAds, setPaidAds] = useState<DisplayAd[]>([]);
   useEffect(() => {
     let cancelled = false;
@@ -63,13 +71,16 @@ export function SponsoredBanner({ className = "" }: { className?: string }) {
           real: false,
         }));
 
-  const [i, setI] = useState(0);
+  const [i, setI] = useState(offset);
   useEffect(() => {
+    setI((v) => v % ads.length);
     const t = setInterval(() => setI((v) => (v + 1) % ads.length), 7000);
     return () => clearInterval(t);
   }, [ads.length]);
 
-  const ad = ads[i]!;
+  // ads.length can shrink between the offset-based initial state and the effect above catching
+  // up (e.g. real paid ads replacing a longer seed list) — guard the render itself, not just i.
+  const ad = ads[i % ads.length]!;
   const impressed = useRef(new Set<string>());
   useEffect(() => {
     if (!ad.real || impressed.current.has(ad.id)) return;
