@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Megaphone, Eye, MousePointerClick, Pause, Play, Trash2, X } from "lucide-react";
+import { Megaphone, Eye, MousePointerClick, Pause, Pencil, Play, Trash2, X } from "lucide-react";
 import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
 import { friendlyError } from "@/lib/errors";
@@ -29,7 +29,6 @@ export const Route = createFileRoute("/advertise")({
 
 type Campaign = Database["public"]["Tables"]["ad_campaigns"]["Row"];
 
-const TAGS = ["Connectivity", "Drones", "IoT", "Vehicles", "Finance", "Inputs", "Services"];
 const GRADIENT_PRESETS: { label: string; from: string; to: string }[] = [
   { label: "Green", from: "#16a34a", to: "#2f7a4f" },
   { label: "Blue", from: "#2563eb", to: "#2c4694" },
@@ -61,6 +60,7 @@ function AdvertisePage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<Campaign | null>(null);
   const [paying, setPaying] = useState<Campaign | null>(null);
 
   const load = async () => {
@@ -206,6 +206,13 @@ function AdvertisePage() {
                 )}
                 <button
                   type="button"
+                  onClick={() => setEditing(c)}
+                  className="flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Edit
+                </button>
+                <button
+                  type="button"
                   onClick={() => remove(c)}
                   className="flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold text-destructive"
                 >
@@ -218,11 +225,22 @@ function AdvertisePage() {
       )}
 
       {creating && user && (
-        <NewCampaignDialog
+        <CampaignDialog
           userId={user.id}
           onClose={() => setCreating(false)}
-          onCreated={() => {
+          onSaved={() => {
             setCreating(false);
+            load();
+          }}
+        />
+      )}
+      {editing && user && (
+        <CampaignDialog
+          userId={user.id}
+          campaign={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
             load();
           }}
         />
@@ -241,25 +259,36 @@ function AdvertisePage() {
   );
 }
 
-function NewCampaignDialog({
+function CampaignDialog({
   userId,
+  campaign,
   onClose,
-  onCreated,
+  onSaved,
 }: {
   userId: string;
+  campaign?: Campaign;
   onClose: () => void;
-  onCreated: () => void;
+  onSaved: () => void;
 }) {
-  const [companyName, setCompanyName] = useState("");
-  const [title, setTitle] = useState("");
-  const [blurb, setBlurb] = useState("");
-  const [cta, setCta] = useState("Learn more");
-  const [tag, setTag] = useState(TAGS[0]!);
-  const [gradient, setGradient] = useState(GRADIENT_PRESETS[0]!);
-  const [imageUrl, setImageUrl] = useState("");
+  const isEditing = !!campaign;
+  const gradient =
+    (campaign &&
+      GRADIENT_PRESETS.find(
+        (g) => g.from === campaign.gradient_from && g.to === campaign.gradient_to,
+      )) ||
+    GRADIENT_PRESETS[0]!;
+  const today = new Date().toISOString().slice(0, 10);
+  const in30Days = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+
+  const [companyName, setCompanyName] = useState(campaign?.company_name ?? "");
+  const [title, setTitle] = useState(campaign?.title ?? "");
+  const [blurb, setBlurb] = useState(campaign?.blurb ?? "");
+  const [cta, setCta] = useState(campaign?.cta ?? "Learn more");
+  const [imageUrl, setImageUrl] = useState(campaign?.image_url ?? "");
   const [uploading, setUploading] = useState(false);
-  const [budget, setBudget] = useState("500");
-  const [days, setDays] = useState("30");
+  const [budget, setBudget] = useState(campaign ? String(campaign.budget_cents / 100) : "500");
+  const [startsOn, setStartsOn] = useState(campaign?.starts_on ?? today);
+  const [endsOn, setEndsOn] = useState(campaign?.ends_on ?? in30Days);
   const [saving, setSaving] = useState(false);
 
   const onPhoto = async (f?: File) => {
@@ -273,165 +302,158 @@ function NewCampaignDialog({
     setUploading(false);
   };
 
-  const create = async (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName.trim() || !title.trim() || saving) return;
     setSaving(true);
-    const startsOn = new Date().toISOString().slice(0, 10);
-    const endsOn = new Date(Date.now() + Number(days || 30) * 86400000).toISOString().slice(0, 10);
-    const { error } = await supabase.from("ad_campaigns").insert({
+    const fields = {
       company_name: companyName.trim(),
       title: title.trim(),
       blurb: blurb.trim(),
       cta: cta.trim() || "Learn more",
-      tag,
+      tag: campaign?.tag ?? "Sponsored",
       gradient_from: gradient.from,
       gradient_to: gradient.to,
       image_url: imageUrl,
       budget_cents: Math.max(0, Math.round(Number(budget || 0) * 100)),
       starts_on: startsOn,
       ends_on: endsOn,
-      status: "draft",
-    });
+    };
+    const { error } = isEditing
+      ? await supabase.from("ad_campaigns").update(fields).eq("id", campaign.id)
+      : await supabase.from("ad_campaigns").insert({ ...fields, status: "draft" });
     setSaving(false);
     if (error) {
       toast.error(friendlyError(error));
       return;
     }
-    toast.success("Campaign created as a draft");
-    onCreated();
+    toast.success(isEditing ? "Campaign updated" : "Campaign created as a draft");
+    onSaved();
   };
+
+  const preview = (
+    <div
+      className="sticky top-0 rounded-2xl bg-cover bg-center bg-no-repeat p-4 text-white"
+      style={{
+        backgroundImage: imageUrl
+          ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${imageUrl})`
+          : `linear-gradient(to bottom right, ${gradient.from}, ${gradient.to})`,
+      }}
+    >
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide opacity-70">Preview</p>
+      <p className="font-display text-sm font-bold">{title || "Your ad title"}</p>
+      <p className="text-xs opacity-90">{blurb || "Your short description"}</p>
+      <span className="mt-3 inline-block rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-black">
+        {cta || "Learn more"} →
+      </span>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border bg-card p-4">
+      <div className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl border bg-card p-4">
         <div className="mb-3 flex items-center justify-between">
-          <p className="font-semibold">New ad campaign</p>
+          <p className="font-semibold">{isEditing ? "Edit ad campaign" : "New ad campaign"}</p>
           <button type="button" aria-label="Close" onClick={onClose}>
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
-        <form onSubmit={create} className="space-y-2">
-          <input
-            className={input}
-            placeholder="Company name"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-          />
-          <input
-            className={input}
-            placeholder="Ad title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <textarea
-            className={`${input} min-h-16`}
-            placeholder="Short description"
-            value={blurb}
-            onChange={(e) => setBlurb(e.target.value)}
-          />
-          <input
-            className={input}
-            placeholder="Button text (e.g. Get a quote)"
-            value={cta}
-            onChange={(e) => setCta(e.target.value)}
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <select
-              aria-label="Category"
+        <div className="grid gap-4 md:grid-cols-[1fr_22rem]">
+          <form onSubmit={save} className="space-y-2">
+            <input
               className={input}
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-            >
-              {TAGS.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
-            <select
-              aria-label="Colour"
+              placeholder="Company name"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+            />
+            <input
               className={input}
-              value={gradient.label}
-              onChange={(e) =>
-                setGradient(GRADIENT_PRESETS.find((g) => g.label === e.target.value)!)
-              }
-            >
-              {GRADIENT_PRESETS.map((g) => (
-                <option key={g.label} value={g.label}>
-                  {g.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <p className="mb-1 text-xs text-muted-foreground">
-              Ad image (optional) — shown instead of the colour above. JPG, PNG or WebP, up to 5 MB.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="cursor-pointer rounded-xl border px-3 py-1.5 text-xs font-semibold">
-                {uploading ? "Uploading…" : imageUrl ? "Replace image" : "Upload image"}
+              placeholder="Ad title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <textarea
+              className={`${input} min-h-16`}
+              placeholder="Short description"
+              value={blurb}
+              onChange={(e) => setBlurb(e.target.value)}
+            />
+            <input
+              className={input}
+              placeholder="Button text (e.g. Get a quote)"
+              value={cta}
+              onChange={(e) => setCta(e.target.value)}
+            />
+            <div>
+              <p className="mb-1 text-xs text-muted-foreground">
+                Ad image (optional) — shown instead of the colour above. JPG, PNG or WebP, up to 5
+                MB.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="cursor-pointer rounded-xl border px-3 py-1.5 text-xs font-semibold">
+                  {uploading ? "Uploading…" : imageUrl ? "Replace image" : "Upload image"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      onPhoto(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                {imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl("")}
+                    className="text-xs font-semibold text-destructive"
+                  >
+                    Remove image
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="block text-xs text-muted-foreground">
+                Budget (R)
                 <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  disabled={uploading}
-                  onChange={(e) => {
-                    onPhoto(e.target.files?.[0]);
-                    e.target.value = "";
-                  }}
+                  type="number"
+                  min="0"
+                  className={input}
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
                 />
               </label>
-              {imageUrl && (
-                <button
-                  type="button"
-                  onClick={() => setImageUrl("")}
-                  className="text-xs font-semibold text-destructive"
-                >
-                  Remove image
-                </button>
-              )}
+              <label className="block text-xs text-muted-foreground">
+                Start date
+                <input
+                  type="date"
+                  className={input}
+                  value={startsOn}
+                  onChange={(e) => setStartsOn(e.target.value)}
+                />
+              </label>
+              <label className="col-span-2 block text-xs text-muted-foreground">
+                End date
+                <input
+                  type="date"
+                  className={input}
+                  value={endsOn}
+                  min={startsOn}
+                  onChange={(e) => setEndsOn(e.target.value)}
+                />
+              </label>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <label className="block text-xs text-muted-foreground">
-              Budget (R)
-              <input
-                type="number"
-                min="0"
-                className={input}
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-              />
-            </label>
-            <label className="block text-xs text-muted-foreground">
-              Run for (days)
-              <input
-                type="number"
-                min="1"
-                className={input}
-                value={days}
-                onChange={(e) => setDays(e.target.value)}
-              />
-            </label>
-          </div>
-          <div
-            className="rounded-2xl bg-cover bg-center bg-no-repeat p-4 text-white"
-            style={{
-              backgroundImage: imageUrl
-                ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${imageUrl})`
-                : `linear-gradient(to bottom right, ${gradient.from}, ${gradient.to})`,
-            }}
-          >
-            <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{tag}</p>
-            <p className="font-display text-sm font-bold">{title || "Your ad title"}</p>
-            <p className="text-xs opacity-90">{blurb || "Your short description"}</p>
-          </div>
-          <button
-            disabled={saving || !companyName.trim() || !title.trim()}
-            className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Save as draft"}
-          </button>
-        </form>
+            <button
+              disabled={saving || !companyName.trim() || !title.trim()}
+              className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            >
+              {saving ? "Saving…" : isEditing ? "Save changes" : "Save as draft"}
+            </button>
+          </form>
+          {preview}
+        </div>
       </div>
     </div>
   );
