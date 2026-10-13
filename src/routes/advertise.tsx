@@ -28,7 +28,10 @@ export const Route = createFileRoute("/advertise")({
   component: AdvertisePage,
 });
 
-type Campaign = Database["public"]["Tables"]["ad_campaigns"]["Row"];
+type Campaign = Database["public"]["Tables"]["ad_campaigns"]["Row"] & {
+  image_shape?: string;
+  link_url?: string;
+};
 
 const AD_PACKAGES = [
   { id: "starter", label: "Starter — R250 (7 days)", cents: 25000 },
@@ -385,8 +388,8 @@ function CampaignDialog({
       ends_on: endsOn,
     };
     const { error } = isEditing
-      ? await supabase.from("ad_campaigns").update(fields).eq("id", campaign.id)
-      : await supabase.from("ad_campaigns").insert({ ...fields, status: "draft" });
+      ? await supabase.from("ad_campaigns").update(fields as never).eq("id", campaign.id)
+      : await supabase.from("ad_campaigns").insert({ ...fields, status: "draft" } as never);
     setSaving(false);
     if (error) {
       toast.error(friendlyError(error));
