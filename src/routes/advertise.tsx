@@ -175,7 +175,7 @@ function AdvertisePage() {
                   {STATUS_LABEL[c.status]}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Budget R{(c.budget_cents / 100).toFixed(0)}
+                  Package R{(c.budget_cents / 100).toFixed(0)}
                 </span>
               </div>
               <div className="mb-3 flex gap-4 text-xs text-muted-foreground">
