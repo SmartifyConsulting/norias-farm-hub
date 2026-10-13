@@ -6,6 +6,7 @@ import { Screen } from "@/components/Dock";
 import { supabase } from "@/integrations/supabase/client";
 import { friendlyError } from "@/lib/errors";
 import { useUser } from "@/lib/auth";
+import { uploadAdImage } from "@/lib/adImages";
 import type { Database } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/advertise")({
@@ -141,9 +142,11 @@ function AdvertisePage() {
           {campaigns.map((c) => (
             <article key={c.id} className="rounded-2xl border bg-card p-4">
               <div
-                className="-mx-4 -mt-4 mb-3 rounded-t-2xl bg-gradient-to-br p-4 text-white"
+                className="-mx-4 -mt-4 mb-3 rounded-t-2xl bg-cover bg-center bg-no-repeat p-4 text-white"
                 style={{
-                  backgroundImage: `linear-gradient(to bottom right, ${c.gradient_from}, ${c.gradient_to})`,
+                  backgroundImage: c.image_url
+                    ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${c.image_url})`
+                    : `linear-gradient(to bottom right, ${c.gradient_from}, ${c.gradient_to})`,
                 }}
               >
                 <p className="text-[11px] font-semibold uppercase tracking-wide opacity-80">
@@ -214,8 +217,9 @@ function AdvertisePage() {
         </div>
       )}
 
-      {creating && (
+      {creating && user && (
         <NewCampaignDialog
+          userId={user.id}
           onClose={() => setCreating(false)}
           onCreated={() => {
             setCreating(false);
@@ -237,16 +241,37 @@ function AdvertisePage() {
   );
 }
 
-function NewCampaignDialog({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+function NewCampaignDialog({
+  userId,
+  onClose,
+  onCreated,
+}: {
+  userId: string;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
   const [companyName, setCompanyName] = useState("");
   const [title, setTitle] = useState("");
   const [blurb, setBlurb] = useState("");
   const [cta, setCta] = useState("Learn more");
   const [tag, setTag] = useState(TAGS[0]!);
   const [gradient, setGradient] = useState(GRADIENT_PRESETS[0]!);
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [budget, setBudget] = useState("500");
   const [days, setDays] = useState("30");
   const [saving, setSaving] = useState(false);
+
+  const onPhoto = async (f?: File) => {
+    if (!f) return;
+    setUploading(true);
+    try {
+      setImageUrl(await uploadAdImage(userId, f));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't upload that image.");
+    }
+    setUploading(false);
+  };
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -262,6 +287,7 @@ function NewCampaignDialog({ onClose, onCreated }: { onClose: () => void; onCrea
       tag,
       gradient_from: gradient.from,
       gradient_to: gradient.to,
+      image_url: imageUrl,
       budget_cents: Math.max(0, Math.round(Number(budget || 0) * 100)),
       starts_on: startsOn,
       ends_on: endsOn,
@@ -336,6 +362,35 @@ function NewCampaignDialog({ onClose, onCreated }: { onClose: () => void; onCrea
               ))}
             </select>
           </div>
+          <div>
+            <p className="mb-1 text-xs text-muted-foreground">
+              Ad image (optional) — shown instead of the colour above. JPG, PNG or WebP, up to 5 MB.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="cursor-pointer rounded-xl border px-3 py-1.5 text-xs font-semibold">
+                {uploading ? "Uploading…" : imageUrl ? "Replace image" : "Upload image"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => {
+                    onPhoto(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {imageUrl && (
+                <button
+                  type="button"
+                  onClick={() => setImageUrl("")}
+                  className="text-xs font-semibold text-destructive"
+                >
+                  Remove image
+                </button>
+              )}
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <label className="block text-xs text-muted-foreground">
               Budget (R)
@@ -359,9 +414,11 @@ function NewCampaignDialog({ onClose, onCreated }: { onClose: () => void; onCrea
             </label>
           </div>
           <div
-            className="rounded-2xl p-4 text-white"
+            className="rounded-2xl bg-cover bg-center bg-no-repeat p-4 text-white"
             style={{
-              backgroundImage: `linear-gradient(to bottom right, ${gradient.from}, ${gradient.to})`,
+              backgroundImage: imageUrl
+                ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${imageUrl})`
+                : `linear-gradient(to bottom right, ${gradient.from}, ${gradient.to})`,
             }}
           >
             <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{tag}</p>

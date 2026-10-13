@@ -21,6 +21,7 @@ export type Database = {
           gradient_from: string;
           gradient_to: string;
           id: string;
+          image_url: string;
           impressions: number;
           spent_cents: number;
           starts_on: string;
@@ -40,6 +41,7 @@ export type Database = {
           gradient_from?: string;
           gradient_to?: string;
           id?: string;
+          image_url?: string;
           impressions?: number;
           spent_cents?: number;
           starts_on?: string;
@@ -59,6 +61,7 @@ export type Database = {
           gradient_from?: string;
           gradient_to?: string;
           id?: string;
+          image_url?: string;
           impressions?: number;
           spent_cents?: number;
           starts_on?: string;
@@ -1154,6 +1157,7 @@ export type Database = {
           gradient_from: string | null;
           gradient_to: string | null;
           id: string | null;
+          image_url: string | null;
           tag: string | null;
           title: string | null;
         };

@@ -14,6 +14,7 @@ type DisplayAd = {
   tag: string;
   from: string;
   to: string;
+  imageUrl: string;
   real: boolean;
 };
 
@@ -47,6 +48,7 @@ export function SponsoredBanner({
             tag: a.tag ?? "Sponsored",
             from: a.gradient_from ?? "#16a34a",
             to: a.gradient_to ?? "#052e14",
+            imageUrl: a.image_url ?? "",
             real: true,
           })),
       );
@@ -65,6 +67,7 @@ export function SponsoredBanner({
     tag: a.tag,
     from: a.from,
     to: a.to,
+    imageUrl: "",
     real: false,
   }));
   // Real paid ads come first, topped up with seed placeholders — guarantees at least a couple of
@@ -117,8 +120,12 @@ export function SponsoredBanner({
       </div>
       <div
         key={ad.id}
-        className="relative flex min-h-[140px] animate-in flex-col justify-between overflow-hidden rounded-2xl p-5 text-white shadow-sm fade-in duration-500"
-        style={{ backgroundImage: `linear-gradient(to bottom right, ${ad.from}, ${ad.to})` }}
+        className="relative flex min-h-[140px] animate-in flex-col justify-between overflow-hidden rounded-2xl bg-cover bg-center bg-no-repeat p-5 text-white shadow-sm fade-in duration-500"
+        style={{
+          backgroundImage: ad.imageUrl
+            ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${ad.imageUrl})`
+            : `linear-gradient(to bottom right, ${ad.from}, ${ad.to})`,
+        }}
       >
         <div className="flex items-center justify-between">
           <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
