@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export async function uploadAdImage(userId: string, file: File) {
+export async function uploadAdImage(userId: string, file: File | Blob) {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type))
     throw new Error("Please choose a JPG, PNG or WebP image.");
   if (file.size > 5 * 1024 * 1024) throw new Error("Image must be 5 MB or smaller.");

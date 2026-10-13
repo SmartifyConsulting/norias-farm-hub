@@ -15,6 +15,8 @@ type DisplayAd = {
   from: string;
   to: string;
   imageUrl: string;
+  imageShape: "banner" | "portrait";
+  linkUrl: string;
   real: boolean;
 };
 
@@ -24,11 +26,20 @@ type DisplayAd = {
 export function SponsoredBanner({
   className = "",
   offset = 0,
+  fill = false,
+  shape = "banner",
 }: {
   className?: string;
   /** Starting index into the rotation, so two banners on the same page don't show the same ad
    * at the same time. */
   offset?: number;
+  /** Stretch to fill the height of a flex parent (e.g. to match a taller card next to it) instead
+   * of sizing to its own content. */
+  fill?: boolean;
+  /** Only show ads uploaded in this shape — a wide landscape "banner" ad belongs in a frame that
+   * spans the screen width; a "portrait" ad belongs in a narrower column. Seed placeholders are
+   * landscape, so they only ever fill a "banner" slot. */
+  shape?: "banner" | "portrait";
 }) {
   const [paidAds, setPaidAds] = useState<DisplayAd[]>([]);
   useEffect(() => {
@@ -49,6 +60,8 @@ export function SponsoredBanner({
             from: a.gradient_from ?? "#16a34a",
             to: a.gradient_to ?? "#052e14",
             imageUrl: a.image_url ?? "",
+            imageShape: a.image_shape === "portrait" ? "portrait" : "banner",
+            linkUrl: a.link_url ?? "",
             real: true,
           })),
       );
@@ -68,44 +81,65 @@ export function SponsoredBanner({
     from: a.from,
     to: a.to,
     imageUrl: "",
+    imageShape: "banner",
+    linkUrl: "",
     real: false,
   }));
-  // Real paid ads come first, topped up with seed placeholders — guarantees at least a couple of
-  // distinct ads to rotate through even when there's only one live campaign, so two banners on
-  // the same page (e.g. Home) never end up stuck showing the exact same ad as each other.
-  const ads: DisplayAd[] = paidAds.length > 0 ? [...paidAds, ...seedAds] : seedAds;
+  // Only ads uploaded/sized for this slot's shape — a wide banner ad never lands in a narrow
+  // portrait slot and vice versa. Seed placeholders are landscape-only, so a portrait slot with
+  // no matching real campaigns simply has nothing to show.
+  const matchingPaid = paidAds.filter((a) => a.imageShape === shape);
+  const ads: DisplayAd[] =
+    shape === "banner"
+      ? matchingPaid.length > 0
+        ? [...matchingPaid, ...seedAds]
+        : seedAds
+      : matchingPaid;
 
   const [i, setI] = useState(offset);
   useEffect(() => {
-    setI((v) => v % ads.length);
+    setI((v) => (ads.length ? v % ads.length : 0));
+    if (ads.length === 0) return;
     const t = setInterval(() => setI((v) => (v + 1) % ads.length), 7000);
     return () => clearInterval(t);
   }, [ads.length]);
 
   // ads.length can shrink between the offset-based initial state and the effect above catching
   // up (e.g. real paid ads replacing a longer seed list) — guard the render itself, not just i.
-  const ad = ads[i % ads.length]!;
+  const ad = ads.length > 0 ? ads[i % ads.length]! : null;
   const impressed = useRef(new Set<string>());
   useEffect(() => {
-    if (!ad.real || impressed.current.has(ad.id)) return;
+    if (!ad || !ad.real || impressed.current.has(ad.id)) return;
     impressed.current.add(ad.id);
     void supabase.rpc("record_ad_event", { _campaign: ad.id, _kind: "impression" });
   }, [ad]);
 
+  if (!ad) return null;
+
   const onCtaClick = () => {
     if (ad.real) {
       void supabase.rpc("record_ad_event", { _campaign: ad.id, _kind: "click" });
+      if (ad.linkUrl) {
+        window.open(ad.linkUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
       toast(`${ad.sponsor} · ${ad.cta}`, {
         icon: "📣",
-        description: "This ad doesn't link out yet — it's shown for engagement tracking only.",
+        description: "This advertiser hasn't added a website link yet.",
       });
     } else {
       toast("This is a placeholder ad — nothing to connect to yet.", { icon: "📣" });
     }
   };
 
+  const cardSize = fill
+    ? "h-full min-h-[140px] flex-1"
+    : ad.imageUrl && ad.imageShape === "portrait"
+      ? "aspect-[4/5]"
+      : "min-h-[140px]";
+
   return (
-    <div className={className}>
+    <div className={`${fill ? "flex min-h-0 flex-1 flex-col" : ""} ${className}`}>
       <div className="mb-1.5 flex items-center justify-between">
         <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           <Megaphone className="h-3.5 w-3.5" />
@@ -120,7 +154,7 @@ export function SponsoredBanner({
       </div>
       <div
         key={ad.id}
-        className="relative flex min-h-[140px] animate-in flex-col justify-between overflow-hidden rounded-2xl bg-cover bg-center bg-no-repeat p-5 text-white shadow-sm fade-in duration-500"
+        className={`relative flex animate-in flex-col justify-between overflow-hidden rounded-2xl bg-cover bg-center bg-no-repeat p-5 text-white shadow-sm fade-in duration-500 ${cardSize}`}
         style={{
           backgroundImage: ad.imageUrl
             ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${ad.imageUrl})`

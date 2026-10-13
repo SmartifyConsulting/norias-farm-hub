@@ -46,6 +46,10 @@ export function FarmMap({
   const leafletMap = useRef<Leaflet.Map | null>(null);
   const drawnItems = useRef<Leaflet.FeatureGroup | null>(null);
   const markersLayer = useRef<Leaflet.LayerGroup | null>(null);
+  const objectAreasLayer = useRef<Leaflet.FeatureGroup | null>(null);
+  const areaLayerByPinId = useRef<Map<string, Leaflet.Polygon>>(new Map());
+  const objectEditHandler = useRef<Leaflet.EditToolbar.Edit | null>(null);
+  const [editingObjects, setEditingObjects] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [pendingLatLng, setPendingLatLng] = useState<LatLng | null>(null);
   const [objectApp, setObjectApp] = useState(MINI_APPS[0]?.id ?? "");
@@ -156,6 +160,10 @@ export function FarmMap({
       const markers = L.layerGroup().addTo(map);
       markersLayer.current = markers;
 
+      const objectAreas = new L.FeatureGroup();
+      map.addLayer(objectAreas);
+      objectAreasLayer.current = objectAreas;
+
       const drawControl = new L.Control.Draw({
         edit: { featureGroup: drawn, remove: true },
         draw: {
@@ -202,7 +210,28 @@ export function FarmMap({
         }
         commit({ boundary: boundaryFromLayer() });
       });
-      map.on(L.Draw.Event.EDITED, () => commit({ boundary: boundaryFromLayer() }));
+      map.on(L.Draw.Event.EDITED, (e: Leaflet.LeafletEvent) => {
+        const { layers } = e as unknown as { layers: Leaflet.LayerGroup };
+        let touchedBoundary = false;
+        let touchedObjects = false;
+        layers.eachLayer((layer) => {
+          if (drawn.hasLayer(layer)) touchedBoundary = true;
+          if (objectAreasLayer.current?.hasLayer(layer)) touchedObjects = true;
+        });
+        if (touchedBoundary) commit({ boundary: boundaryFromLayer() });
+        if (touchedObjects) {
+          const updated = pinsRef.current.map((p) => {
+            const layer = areaLayerByPinId.current.get(p.id);
+            if (!layer) return p;
+            const area = (layer.getLatLngs()[0] as Leaflet.LatLng[]).map(
+              (ll) => [ll.lat, ll.lng] as LatLng,
+            );
+            const [lat, lon] = centroidOf(area);
+            return { ...p, area, lat, lon };
+          });
+          commit({ pins: updated });
+        }
+      });
       map.on(L.Draw.Event.DELETED, () => commit({ boundary: boundaryFromLayer() }));
       map.on(L.Draw.Event.DRAWSTOP, () => {
         drawingRef.current = null;
@@ -236,8 +265,10 @@ export function FarmMap({
     let cancelled = false;
     (async () => {
       const L = (await import("leaflet")).default;
-      if (cancelled || !markersLayer.current) return;
+      if (cancelled || !markersLayer.current || !objectAreasLayer.current) return;
       markersLayer.current.clearLayers();
+      objectAreasLayer.current.clearLayers();
+      areaLayerByPinId.current.clear();
       for (const p of pins) {
         const iconKey = p.kind === "annotation" ? p.icon : (p.icon ?? "package");
         const emoji = ICONS[iconKey] ?? "📍";
@@ -249,7 +280,9 @@ export function FarmMap({
 
         let areaLayer: Leaflet.Polygon | undefined;
         if (p.area && p.area.length >= 3) {
-          areaLayer = L.polygon(p.area, areaStyle(light)).addTo(markersLayer.current!);
+          areaLayer = L.polygon(p.area, areaStyle(light));
+          objectAreasLayer.current!.addLayer(areaLayer);
+          areaLayerByPinId.current.set(p.id, areaLayer);
         }
         const marker = L.marker([p.lat, p.lon], { icon, draggable: true }).addTo(
           markersLayer.current!,
@@ -361,6 +394,27 @@ export function FarmMap({
     setDrawingLabel(null);
   };
 
+  // Lets you drag an object's existing nodes to move or resize its drawn area (as opposed to
+  // dragging the whole pin, which only moves it) — a second, separate edit toolbar scoped to just
+  // the object-area layers, so it never touches the farm boundary's own edit control.
+  const toggleEditObjects = async () => {
+    if (!leafletMap.current || !objectAreasLayer.current) return;
+    if (editingObjects) {
+      objectEditHandler.current?.save();
+      objectEditHandler.current?.disable();
+      objectEditHandler.current = null;
+      setEditingObjects(false);
+      return;
+    }
+    const L = (await import("leaflet")).default;
+    const handler = new L.EditToolbar.Edit(leafletMap.current as unknown as Leaflet.DrawMap, {
+      featureGroup: objectAreasLayer.current,
+    });
+    handler.enable();
+    objectEditHandler.current = handler;
+    setEditingObjects(true);
+  };
+
   const dropOnMap = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!leafletMap.current || !mapRef.current) return;
@@ -457,7 +511,8 @@ export function FarmMap({
         <p className="text-sm text-muted-foreground">
           Draw a rectangle or polygon, top-left — drag its corners or use the edit tool's midpoint
           handles to add more nodes. Drag an object onto the map to drop a pin, click an object to
-          draw its outline, drag a pin to move it, or click a pin to delete it.
+          draw its outline, drag a pin to move it, click "Edit objects" to move or resize a drawn
+          area's nodes, or click a pin to delete it.
         </p>
         <div className="flex shrink-0 items-center gap-1.5">
           <button
@@ -485,6 +540,13 @@ export function FarmMap({
           >
             <MapPinIcon className="mr-1 inline h-3.5 w-3.5" />
             {placing ? "Click the map to place" : "Pin a record"}
+          </button>
+          <button
+            type="button"
+            onClick={toggleEditObjects}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${editingObjects ? "bg-primary text-primary-foreground" : "border"}`}
+          >
+            {editingObjects ? "Done editing" : "Edit objects"}
           </button>
         </div>
       </div>

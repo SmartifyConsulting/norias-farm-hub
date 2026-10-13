@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { friendlyError } from "@/lib/errors";
 import { useUser } from "@/lib/auth";
 import { uploadAdImage } from "@/lib/adImages";
+import { ImageCropper } from "@/components/ImageCropper";
 import type { Database } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/advertise")({
@@ -62,6 +63,8 @@ function AdvertisePage() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Campaign | null>(null);
   const [paying, setPaying] = useState<Campaign | null>(null);
+  const [deleting, setDeleting] = useState<Campaign | null>(null);
+  const [deletingBusy, setDeletingBusy] = useState(false);
 
   const load = async () => {
     if (!user) return;
@@ -90,13 +93,16 @@ function AdvertisePage() {
   };
 
   const remove = async (c: Campaign) => {
-    if (!confirm(`Delete "${c.title}"? This can't be undone.`)) return;
+    setDeletingBusy(true);
     const { error } = await supabase.from("ad_campaigns").delete().eq("id", c.id);
-    if (error) toast.error(friendlyError(error));
-    else {
-      toast.success("Campaign deleted");
-      load();
+    setDeletingBusy(false);
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
     }
+    toast.success("Campaign deleted");
+    setDeleting(null);
+    load();
   };
 
   if (!loading && !user)
@@ -213,7 +219,7 @@ function AdvertisePage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => remove(c)}
+                  onClick={() => setDeleting(c)}
                   className="flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs font-semibold text-destructive"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> Delete
@@ -255,6 +261,44 @@ function AdvertisePage() {
           }}
         />
       )}
+      {deleting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-2xl border bg-card p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-semibold">Delete campaign</p>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setDeleting(null)}
+                disabled={deletingBusy}
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Delete "{deleting.title || "Untitled ad"}"? This can't be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleting(null)}
+                disabled={deletingBusy}
+                className="flex-1 rounded-xl bg-secondary py-2 text-sm font-semibold text-secondary-foreground disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => remove(deleting)}
+                disabled={deletingBusy}
+                className="flex-1 rounded-xl bg-destructive py-2 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+              >
+                {deletingBusy ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Screen>
   );
 }
@@ -284,18 +328,23 @@ function CampaignDialog({
   const [title, setTitle] = useState(campaign?.title ?? "");
   const [blurb, setBlurb] = useState(campaign?.blurb ?? "");
   const [cta, setCta] = useState(campaign?.cta ?? "Learn more");
+  const [linkUrl, setLinkUrl] = useState(campaign?.link_url ?? "");
+  const [imageShape, setImageShape] = useState<"banner" | "portrait">(
+    campaign?.image_shape === "portrait" ? "portrait" : "banner",
+  );
   const [imageUrl, setImageUrl] = useState(campaign?.image_url ?? "");
   const [uploading, setUploading] = useState(false);
+  const [cropping, setCropping] = useState<File | null>(null);
   const [budget, setBudget] = useState(campaign ? String(campaign.budget_cents / 100) : "500");
   const [startsOn, setStartsOn] = useState(campaign?.starts_on ?? today);
   const [endsOn, setEndsOn] = useState(campaign?.ends_on ?? in30Days);
   const [saving, setSaving] = useState(false);
 
-  const onPhoto = async (f?: File) => {
-    if (!f) return;
+  const onCropped = async (blob: Blob) => {
+    setCropping(null);
     setUploading(true);
     try {
-      setImageUrl(await uploadAdImage(userId, f));
+      setImageUrl(await uploadAdImage(userId, blob));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't upload that image.");
     }
@@ -305,6 +354,11 @@ function CampaignDialog({
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName.trim() || !title.trim() || saving) return;
+    const trimmedLink = linkUrl.trim();
+    if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
+      toast.error("Website URL must start with http:// or https://");
+      return;
+    }
     setSaving(true);
     const fields = {
       company_name: companyName.trim(),
@@ -315,6 +369,8 @@ function CampaignDialog({
       gradient_from: gradient.from,
       gradient_to: gradient.to,
       image_url: imageUrl,
+      image_shape: imageShape,
+      link_url: trimmedLink,
       budget_cents: Math.max(0, Math.round(Number(budget || 0) * 100)),
       starts_on: startsOn,
       ends_on: endsOn,
@@ -333,7 +389,7 @@ function CampaignDialog({
 
   const preview = (
     <div
-      className="sticky top-0 rounded-2xl bg-cover bg-center bg-no-repeat p-4 text-white"
+      className={`order-first rounded-2xl bg-cover bg-center bg-no-repeat p-4 text-white md:sticky md:top-0 md:order-last ${imageUrl && imageShape === "portrait" ? "aspect-[4/5]" : "min-h-[140px]"}`}
       style={{
         backgroundImage: imageUrl
           ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${imageUrl})`
@@ -366,6 +422,52 @@ function CampaignDialog({
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
             />
+            <div>
+              <div className="mb-2 flex gap-2 rounded-full bg-secondary p-1 text-xs">
+                {(["banner", "portrait"] as const).map((shape) => (
+                  <button
+                    key={shape}
+                    type="button"
+                    onClick={() => setImageShape(shape)}
+                    className={`flex-1 rounded-full py-1 font-semibold capitalize ${imageShape === shape ? "bg-white text-black" : "text-secondary-foreground"}`}
+                  >
+                    {shape}
+                  </button>
+                ))}
+              </div>
+              <p className="mb-2 text-xs text-muted-foreground">
+                Ad image (optional) — shown instead of the colour above. Recommended size:{" "}
+                {imageShape === "banner"
+                  ? "1200 × 400px (3:1, landscape)"
+                  : "1080 × 1350px (4:5, portrait)"}
+                . JPG, PNG or WebP, up to 5 MB.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="cursor-pointer rounded-xl border px-3 py-1.5 text-xs font-semibold">
+                  {uploading ? "Uploading…" : imageUrl ? "Replace image" : "Upload image"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) setCropping(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                {imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl("")}
+                    className="text-xs font-semibold text-destructive"
+                  >
+                    Remove image
+                  </button>
+                )}
+              </div>
+            </div>
             <input
               className={input}
               placeholder="Ad title"
@@ -384,36 +486,13 @@ function CampaignDialog({
               value={cta}
               onChange={(e) => setCta(e.target.value)}
             />
-            <div>
-              <p className="mb-1 text-xs text-muted-foreground">
-                Ad image (optional) — shown instead of the colour above. JPG, PNG or WebP, up to 5
-                MB.
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <label className="cursor-pointer rounded-xl border px-3 py-1.5 text-xs font-semibold">
-                  {uploading ? "Uploading…" : imageUrl ? "Replace image" : "Upload image"}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    disabled={uploading}
-                    onChange={(e) => {
-                      onPhoto(e.target.files?.[0]);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-                {imageUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setImageUrl("")}
-                    className="text-xs font-semibold text-destructive"
-                  >
-                    Remove image
-                  </button>
-                )}
-              </div>
-            </div>
+            <input
+              className={input}
+              type="url"
+              placeholder="Website URL (e.g. https://example.co.za) — optional"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+            />
             <div className="grid grid-cols-2 gap-2">
               <label className="block text-xs text-muted-foreground">
                 Budget (R)
@@ -455,6 +534,14 @@ function CampaignDialog({
           {preview}
         </div>
       </div>
+      {cropping && (
+        <ImageCropper
+          file={cropping}
+          shape={imageShape}
+          onCancel={() => setCropping(null)}
+          onCropped={onCropped}
+        />
+      )}
     </div>
   );
 }

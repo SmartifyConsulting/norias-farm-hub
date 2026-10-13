@@ -73,7 +73,7 @@ function OpportunitiesPage() {
       </div>
       {tab === "matches" ? (
         <>
-          <SponsoredBanner className="mb-4" />
+          <SponsoredBanner className="mb-4" shape="banner" />
           {!hasPassport && (
             <p className="mb-3 rounded-2xl border bg-card p-3 text-sm">
               Fill in your{" "}

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const codes: Record<number, [string, string]> = {
+export const WEATHER_CODES: Record<number, [string, string]> = {
   0: ["☀️", "Clear"],
   1: ["🌤️", "Mostly clear"],
   2: ["⛅", "Partly cloudy"],
@@ -48,7 +48,7 @@ export function Weather({
     staleTime: 10 * 60 * 1000,
   });
   const c = data?.current;
-  const [icon, label] = codes[c?.weather_code] ?? ["🌡️", isError ? "Offline" : "Loading…"];
+  const [icon, label] = WEATHER_CODES[c?.weather_code] ?? ["🌡️", isError ? "Offline" : "Loading…"];
   const forecast: { date: string; code: number; max: number; min: number; rain: number }[] = (
     data?.daily?.time ?? []
   ).map((date: string, i: number) => ({
@@ -88,7 +88,7 @@ export function Weather({
         {forecast.length > 1 && (
           <div className="grid grid-cols-7 gap-1">
             {shown.map((d, i) => {
-              const [dIcon] = codes[d.code] ?? ["🌡️"];
+              const [dIcon] = WEATHER_CODES[d.code] ?? ["🌡️"];
               return (
                 <div
                   key={d.date}

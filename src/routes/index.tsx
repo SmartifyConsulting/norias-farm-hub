@@ -214,7 +214,7 @@ function Home() {
           </div>
         </section>
 
-        <SponsoredBanner />
+        <SponsoredBanner shape="banner" />
 
         {/* Farm map (left) + Opportunities (right) */}
         <section className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-12">
@@ -233,7 +233,7 @@ function Home() {
               <FarmMap farmId={activeFarmId} />
             </div>
           </div>
-          <div className="min-w-0 space-y-4 md:col-span-5 lg:col-span-4">
+          <div className="flex min-w-0 flex-col gap-4 md:col-span-5 lg:col-span-4">
             <div className="soft-card overflow-hidden border">
               <div className="flex items-center justify-between bg-brand-red px-4 py-2.5">
                 <h2 className="font-display text-base font-semibold text-background">
@@ -266,7 +266,7 @@ function Home() {
                 )}
               </div>
             </div>
-            <SponsoredBanner offset={1} />
+            <SponsoredBanner offset={1} fill shape="portrait" />
           </div>
         </section>
 
