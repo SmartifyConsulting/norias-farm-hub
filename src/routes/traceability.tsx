@@ -69,7 +69,7 @@ function TracePage() {
                 {b.steps.map((st, k) => <span key={st.step} className="flex items-center gap-1"><span className={`rounded-full px-2 py-0.5 ${st.value ? LEVELS.find((l) => l.v === st.level)!.tone : "border border-dashed text-muted-foreground"}`}>{st.step}</span>{k < b.steps.length - 1 && <span className="text-muted-foreground">→</span>}</span>)}
               </div>
               {open === b.id && (
-                <div className="mt-4 grid gap-2 md:grid-cols-2">
+                <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
                   {b.steps.map((st, k) => (
                     <div key={st.step} className="flex items-center gap-2">
                       <span className="w-32 shrink-0 text-xs font-semibold">{st.step}</span>

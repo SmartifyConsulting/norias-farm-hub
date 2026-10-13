@@ -82,7 +82,7 @@ export function ActionDashboard({ hideOpportunities = false }: { hideOpportuniti
   const spare = passport["availableCapacity"]?.value;
 
   return (
-    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
       {!hideOpportunities && (
         <Panel title="Opportunities for you" to="/opportunities" color="bg-brand-green">
           {top.map(({ o, m }) => (
