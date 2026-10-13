@@ -30,11 +30,11 @@ type Campaign = Database["public"]["Tables"]["ad_campaigns"]["Row"];
 
 const TAGS = ["Connectivity", "Drones", "IoT", "Vehicles", "Finance", "Inputs", "Services"];
 const GRADIENT_PRESETS: { label: string; from: string; to: string }[] = [
-  { label: "Green", from: "#16a34a", to: "#052e14" },
-  { label: "Blue", from: "#2563eb", to: "#0f172a" },
-  { label: "Red", from: "#c8102e", to: "#4a0a12" },
-  { label: "Gold", from: "#ffcc00", to: "#1a1a1a" },
-  { label: "Teal", from: "#0891b2", to: "#042f3b" },
+  { label: "Green", from: "#16a34a", to: "#2f7a4f" },
+  { label: "Blue", from: "#2563eb", to: "#2c4694" },
+  { label: "Red", from: "#c8102e", to: "#8a2238" },
+  { label: "Gold", from: "#ffcc00", to: "#8a6d00" },
+  { label: "Teal", from: "#0891b2", to: "#1f6478" },
 ];
 
 const input =

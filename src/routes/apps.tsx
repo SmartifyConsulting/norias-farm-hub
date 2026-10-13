@@ -68,6 +68,18 @@ export const Route = createFileRoute("/apps")({
   component: Apps,
 });
 
+/** Bright, white-text badge colours for the Explore More Apps category accordion, cycled by
+ * position so each category is visually distinct. */
+const CATEGORY_COLORS = [
+  "bg-brand-green",
+  "bg-blue-600",
+  "bg-brand-red",
+  "bg-brand-orange",
+  "bg-earth-1",
+  "bg-teal-600",
+  "bg-purple-600",
+];
+
 function AppTile({ app, dragging }: { app: RegistryApp; dragging?: boolean }) {
   return (
     <div
@@ -447,20 +459,26 @@ function Apps() {
               Every app, grouped by category — browse here regardless of how you've organised "Your
               Apps" above.
             </p>
-            <Accordion type="multiple" className="rounded-2xl border bg-card px-4">
-              {CATEGORIES.map((c) => {
+            <Accordion type="multiple" className="space-y-2">
+              {CATEGORIES.map((c, i) => {
                 const apps = APP_REGISTRY.filter((a) => a.category === c.id);
                 return (
-                  <AccordionItem key={c.id} value={c.id} className="last:border-b-0">
-                    <AccordionTrigger>
+                  <AccordionItem
+                    key={c.id}
+                    value={c.id}
+                    className="overflow-hidden rounded-2xl border-0 bg-card"
+                  >
+                    <AccordionTrigger
+                      className={`px-4 py-2.5 text-white hover:no-underline [&>svg]:text-white ${CATEGORY_COLORS[i % CATEGORY_COLORS.length]}`}
+                    >
                       <span>
                         {c.name}{" "}
-                        <span className="font-normal text-muted-foreground">
+                        <span className="font-normal opacity-80">
                           · {apps.length} {apps.length === 1 ? "app" : "apps"}
                         </span>
                       </span>
                     </AccordionTrigger>
-                    <AccordionContent>
+                    <AccordionContent className="px-4">
                       {apps.length === 0 ? (
                         <p className="text-sm text-muted-foreground">No apps yet.</p>
                       ) : (

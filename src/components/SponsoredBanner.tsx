@@ -56,20 +56,21 @@ export function SponsoredBanner({
     };
   }, []);
 
-  const ads: DisplayAd[] =
-    paidAds.length > 0
-      ? paidAds
-      : SPONSORED_ADS.map((a) => ({
-          id: a.id,
-          sponsor: a.sponsor,
-          title: a.title,
-          blurb: a.blurb,
-          cta: a.cta,
-          tag: a.tag,
-          from: a.from,
-          to: a.to,
-          real: false,
-        }));
+  const seedAds: DisplayAd[] = SPONSORED_ADS.map((a) => ({
+    id: a.id,
+    sponsor: a.sponsor,
+    title: a.title,
+    blurb: a.blurb,
+    cta: a.cta,
+    tag: a.tag,
+    from: a.from,
+    to: a.to,
+    real: false,
+  }));
+  // Real paid ads come first, topped up with seed placeholders — guarantees at least a couple of
+  // distinct ads to rotate through even when there's only one live campaign, so two banners on
+  // the same page (e.g. Home) never end up stuck showing the exact same ad as each other.
+  const ads: DisplayAd[] = paidAds.length > 0 ? [...paidAds, ...seedAds] : seedAds;
 
   const [i, setI] = useState(offset);
   useEffect(() => {
@@ -116,7 +117,7 @@ export function SponsoredBanner({
       </div>
       <div
         key={ad.id}
-        className="relative flex min-h-[140px] animate-in flex-col justify-between overflow-hidden rounded-2xl p-5 text-white shadow-md fade-in duration-500"
+        className="relative flex min-h-[140px] animate-in flex-col justify-between overflow-hidden rounded-2xl p-5 text-white shadow-sm fade-in duration-500"
         style={{ backgroundImage: `linear-gradient(to bottom right, ${ad.from}, ${ad.to})` }}
       >
         <div className="flex items-center justify-between">

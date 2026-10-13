@@ -19,7 +19,7 @@ function Panel({
     <section className="overflow-hidden rounded-3xl border bg-card">
       <Link
         to={to}
-        className={`flex items-center justify-between px-4 py-2 text-xs font-semibold uppercase tracking-wide text-background ${color}`}
+        className={`flex items-center justify-between px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white ${color}`}
       >
         {title}
         <ArrowRight className="h-3.5 w-3.5" />
@@ -93,7 +93,7 @@ export function ActionDashboard({ hideOpportunities = false }: { hideOpportuniti
           {!passport["crops"] && <Empty>Complete your passport for better matches.</Empty>}
         </Panel>
       )}
-      <Panel title="Actions required" to="/outcomes" color="bg-brand-red">
+      <Panel title="Actions required" to="/outcomes" color="bg-blue-600">
         {actions.length ? (
           actions.map(({ o, m }) => (
             <p key={o.id} className="truncate">

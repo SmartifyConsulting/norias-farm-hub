@@ -22,7 +22,7 @@ export const SPONSORED_ADS: SponsoredAd[] = [
     cta: "Get a quote",
     tag: "Connectivity",
     from: "#ffcc00",
-    to: "#1a1a1a",
+    to: "#8a6d00",
   },
   {
     id: "isuzu-bakkie",
@@ -32,7 +32,7 @@ export const SPONSORED_ADS: SponsoredAd[] = [
     cta: "Find a dealer",
     tag: "Vehicles",
     from: "#c8102e",
-    to: "#4a0a12",
+    to: "#8a2238",
   },
   {
     id: "aerobotics-drone",
@@ -42,7 +42,7 @@ export const SPONSORED_ADS: SponsoredAd[] = [
     cta: "Book a scan",
     tag: "Drones",
     from: "#2563eb",
-    to: "#0f172a",
+    to: "#2c4694",
   },
   {
     id: "agridrone-spray",
@@ -52,7 +52,7 @@ export const SPONSORED_ADS: SponsoredAd[] = [
     cta: "Request a booking",
     tag: "Drones",
     from: "#16a34a",
-    to: "#052e14",
+    to: "#2f7a4f",
   },
   {
     id: "iot-irrigation",
@@ -62,6 +62,6 @@ export const SPONSORED_ADS: SponsoredAd[] = [
     cta: "Learn more",
     tag: "IoT",
     from: "#0891b2",
-    to: "#042f3b",
+    to: "#1f6478",
   },
 ];
