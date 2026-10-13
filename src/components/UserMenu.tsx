@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Megaphone, Settings, UserRound } from "lucide-react";
+import { LogOut, Megaphone, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/auth";
 import { profileOf } from "@/lib/profile";
+import { useIsAdmin } from "@/lib/adPackages";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -50,6 +51,7 @@ export function UserMenu() {
   const { user } = useUser();
   const nav = useNavigate();
   const qc = useQueryClient();
+  const isAdmin = useIsAdmin(user?.id);
   if (!user) return null;
   const p = profileOf(user);
   return (
@@ -78,6 +80,14 @@ export function UserMenu() {
             Sponsored Ads
           </Link>
         </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin/ads">
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Admin: Ad charges
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link to="/settings">
             <Settings className="mr-2 h-4 w-4" />

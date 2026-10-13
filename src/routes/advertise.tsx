@@ -548,7 +548,7 @@ function CampaignDialog({
               </label>
             </div>
             <button
-              disabled={saving || !companyName.trim() || !title.trim()}
+              disabled={saving || !title.trim()}
               className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
             >
               {saving ? "Saving…" : isEditing ? "Save changes" : "Save as draft"}
