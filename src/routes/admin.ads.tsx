@@ -75,20 +75,20 @@ function PackageRow({ pkg, onChanged }: { pkg: AdPackage; onChanged: () => void 
     setBusy(true);
     const { error } = await adPackagesTable().update(fields).eq("id", pkg.id);
     setBusy(false);
-    if (error) return toast.error(friendlyError(error));
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success(msg);
     onChanged();
   };
   const save = () => {
     const cents = Math.round(Number(price) * 100);
     const d = Math.round(Number(days));
-    if (!name.trim() || !(cents >= 0) || !(d > 0)) return toast.error("Enter a name, price and days.");
+    if (!name.trim() || !(cents >= 0) || !(d > 0)) { toast.error("Enter a name, price and days."); return; }
     update({ name: name.trim(), price_cents: cents, days: d }, "Package saved");
   };
   const remove = async () => {
     if (!confirm(`Delete the ${pkg.name} package?`)) return;
     const { error } = await adPackagesTable().delete().eq("id", pkg.id);
-    if (error) return toast.error(friendlyError(error));
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Package deleted");
     onChanged();
   };
@@ -144,9 +144,9 @@ function NewPackage({ nextOrder, onAdded }: { nextOrder: number; onAdded: () => 
     e.preventDefault();
     const cents = Math.round(Number(price) * 100);
     const d = Math.round(Number(days));
-    if (!name.trim() || !(cents >= 0) || price === "" || !(d > 0)) return toast.error("Enter a name, price and days.");
+    if (!name.trim() || !(cents >= 0) || price === "" || !(d > 0)) { toast.error("Enter a name, price and days."); return; }
     const { error } = await adPackagesTable().insert({ name: name.trim(), price_cents: cents, days: d, sort_order: nextOrder });
-    if (error) return toast.error(friendlyError(error));
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Package added");
     setName("");
     setPrice("");
