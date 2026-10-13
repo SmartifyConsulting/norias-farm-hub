@@ -60,8 +60,8 @@ export function SponsoredBanner({
             from: a.gradient_from ?? "#16a34a",
             to: a.gradient_to ?? "#052e14",
             imageUrl: a.image_url ?? "",
-            imageShape: a.image_shape === "portrait" ? "portrait" : "banner",
-            linkUrl: a.link_url ?? "",
+            imageShape: (a as { image_shape?: string }).image_shape === "portrait" ? "portrait" : "banner",
+            linkUrl: (a as { link_url?: string }).link_url ?? "",
             real: true,
           })),
       );

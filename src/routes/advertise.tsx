@@ -28,7 +28,17 @@ export const Route = createFileRoute("/advertise")({
   component: AdvertisePage,
 });
 
-type Campaign = Database["public"]["Tables"]["ad_campaigns"]["Row"];
+type Campaign = Database["public"]["Tables"]["ad_campaigns"]["Row"] & {
+  image_shape?: string;
+  link_url?: string;
+};
+
+const AD_PACKAGES = [
+  { id: "starter", label: "Starter — R250 (7 days)", cents: 25000 },
+  { id: "growth", label: "Growth — R500 (30 days)", cents: 50000 },
+  { id: "pro", label: "Pro Farm — R1,200 (60 days)", cents: 120000 },
+  { id: "enterprise", label: "Enterprise — R3,000 (90 days)", cents: 300000 },
+];
 
 const GRADIENT_PRESETS: { label: string; from: string; to: string }[] = [
   { label: "Green", from: "#16a34a", to: "#2f7a4f" },
@@ -128,7 +138,7 @@ function AdvertisePage() {
   return (
     <Screen title="Advertise on FarmerPlus">
       <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
-        Create a sponsored ad, set a budget and schedule, then pay to launch it. Live ads rotate
+        Create a sponsored ad, choose an ad package and schedule, then pay to launch it. Live ads rotate
         through the sponsored ad slots shown to every farmer on the home screen and Opportunities.
       </p>
       <button
@@ -168,7 +178,7 @@ function AdvertisePage() {
                   {STATUS_LABEL[c.status]}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Budget R{(c.budget_cents / 100).toFixed(0)}
+                  Package R{(c.budget_cents / 100).toFixed(0)}
                 </span>
               </div>
               <div className="mb-3 flex gap-4 text-xs text-muted-foreground">
@@ -327,7 +337,7 @@ function CampaignDialog({
   const [companyName, setCompanyName] = useState(campaign?.company_name ?? "");
   const [title, setTitle] = useState(campaign?.title ?? "");
   const [blurb, setBlurb] = useState(campaign?.blurb ?? "");
-  const [cta, setCta] = useState(campaign?.cta ?? "Learn more");
+  const [cta, setCta] = useState(campaign?.cta ?? "");
   const [linkUrl, setLinkUrl] = useState(campaign?.link_url ?? "");
   const [imageShape, setImageShape] = useState<"banner" | "portrait">(
     campaign?.image_shape === "portrait" ? "portrait" : "banner",
@@ -335,7 +345,9 @@ function CampaignDialog({
   const [imageUrl, setImageUrl] = useState(campaign?.image_url ?? "");
   const [uploading, setUploading] = useState(false);
   const [cropping, setCropping] = useState<File | null>(null);
-  const [budget, setBudget] = useState(campaign ? String(campaign.budget_cents / 100) : "500");
+  const [pkg, setPkg] = useState(
+    (campaign && AD_PACKAGES.find((p) => p.cents === campaign.budget_cents)?.id) || "growth",
+  );
   const [startsOn, setStartsOn] = useState(campaign?.starts_on ?? today);
   const [endsOn, setEndsOn] = useState(campaign?.ends_on ?? in30Days);
   const [saving, setSaving] = useState(false);
@@ -364,20 +376,20 @@ function CampaignDialog({
       company_name: companyName.trim(),
       title: title.trim(),
       blurb: blurb.trim(),
-      cta: cta.trim() || "Learn more",
+      cta: cta.trim() || "Find out more",
       tag: campaign?.tag ?? "Sponsored",
       gradient_from: gradient.from,
       gradient_to: gradient.to,
       image_url: imageUrl,
       image_shape: imageShape,
       link_url: trimmedLink,
-      budget_cents: Math.max(0, Math.round(Number(budget || 0) * 100)),
+      budget_cents: (AD_PACKAGES.find((p) => p.id === pkg) ?? AD_PACKAGES[1]!).cents,
       starts_on: startsOn,
       ends_on: endsOn,
     };
     const { error } = isEditing
-      ? await supabase.from("ad_campaigns").update(fields).eq("id", campaign.id)
-      : await supabase.from("ad_campaigns").insert({ ...fields, status: "draft" });
+      ? await supabase.from("ad_campaigns").update(fields as never).eq("id", campaign.id)
+      : await supabase.from("ad_campaigns").insert({ ...fields, status: "draft" } as never);
     setSaving(false);
     if (error) {
       toast.error(friendlyError(error));
@@ -389,7 +401,7 @@ function CampaignDialog({
 
   const preview = (
     <div
-      className={`order-first rounded-2xl bg-cover bg-center bg-no-repeat p-4 text-white md:sticky md:top-0 md:order-last ${imageUrl && imageShape === "portrait" ? "aspect-[4/5]" : "min-h-[140px]"}`}
+      className={`order-first rounded-2xl bg-cover bg-center bg-no-repeat p-4 text-white md:sticky md:top-0 md:order-last ${imageShape === "portrait" ? "mx-auto aspect-[4/5] w-full max-w-[18rem]" : "aspect-[3/1] min-h-[120px] w-full"}`}
       style={{
         backgroundImage: imageUrl
           ? `linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.1)), url(${imageUrl})`
@@ -400,7 +412,7 @@ function CampaignDialog({
       <p className="font-display text-sm font-bold">{title || "Your ad title"}</p>
       <p className="text-xs opacity-90">{blurb || "Your short description"}</p>
       <span className="mt-3 inline-block rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-black">
-        {cta || "Learn more"} →
+        {cta || "Call to Action"} →
       </span>
     </div>
   );
@@ -452,7 +464,22 @@ function CampaignDialog({
                     disabled={uploading}
                     onChange={(e) => {
                       const f = e.target.files?.[0];
-                      if (f) setCropping(f);
+                      if (f) {
+                        const url = URL.createObjectURL(f);
+                        const probe = new Image();
+                        probe.onload = () => {
+                          setImageShape(
+                            probe.naturalHeight > probe.naturalWidth ? "portrait" : "banner",
+                          );
+                          URL.revokeObjectURL(url);
+                          setCropping(f);
+                        };
+                        probe.onerror = () => {
+                          URL.revokeObjectURL(url);
+                          setCropping(f);
+                        };
+                        probe.src = url;
+                      }
                       e.target.value = "";
                     }}
                   />
@@ -482,7 +509,7 @@ function CampaignDialog({
             />
             <input
               className={input}
-              placeholder="Button text (e.g. Get a quote)"
+              placeholder="Call to Action (e.g. Get a quote)"
               value={cta}
               onChange={(e) => setCta(e.target.value)}
             />
@@ -494,15 +521,15 @@ function CampaignDialog({
               onChange={(e) => setLinkUrl(e.target.value)}
             />
             <div className="grid grid-cols-2 gap-2">
-              <label className="block text-xs text-muted-foreground">
-                Budget (R)
-                <input
-                  type="number"
-                  min="0"
-                  className={input}
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
-                />
+              <label className="col-span-2 block text-xs text-muted-foreground">
+                Ad package
+                <select className={input} value={pkg} onChange={(e) => setPkg(e.target.value)}>
+                  {AD_PACKAGES.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="block text-xs text-muted-foreground">
                 Start date
@@ -577,7 +604,7 @@ function PaymentDialog({
           </button>
         </div>
         <p className="mb-2 text-sm">
-          "{campaign.title}" · Budget R{(campaign.budget_cents / 100).toFixed(0)} ·{" "}
+          "{campaign.title}" · Package R{(campaign.budget_cents / 100).toFixed(0)} ·{" "}
           {campaign.starts_on} → {campaign.ends_on}
         </p>
         <p className="mb-4 rounded-xl bg-muted p-3 text-xs text-muted-foreground">

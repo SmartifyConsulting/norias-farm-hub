@@ -20,7 +20,7 @@ import { UserMenu } from "@/components/UserMenu";
 const items = [
   { to: "/", label: "Home", icon: Home, params: undefined },
   { to: "/apps", label: "My Apps", icon: LayoutGrid, params: undefined },
-  { to: "/opportunities", label: "Opportunities", icon: Handshake, params: undefined },
+  { to: "/opportunities", label: "Trades", icon: Handshake, params: undefined },
   { to: "/app/$appId", label: "Tasks", icon: ListTodo, params: { appId: "tasks" } },
   { to: "/wallet", label: "Wallet", icon: Wallet, params: undefined },
 ] as const;
