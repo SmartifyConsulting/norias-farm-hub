@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Megaphone, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { LogOut, Megaphone, Settings, ShieldCheck, UserCheck, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/auth";
@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ROLES, useActiveRole, type RoleId } from "@/lib/valuechain";
+import { isPrivileged, requestRole, useRoleGrants } from "@/lib/vc-roles";
 
 /** Where each role lands when switched to. Screens are shared; the role only changes the starting point. */
 const ROLE_HOME: Record<RoleId, "/" | "/field-ops" | "/coop" | "/gov-programmes" | "/logistics" | "/insurance" | "/opportunities"> = {
@@ -65,6 +66,7 @@ export function UserMenu() {
   const qc = useQueryClient();
   const isAdmin = useIsAdmin(user?.id);
   const [role, setRole] = useActiveRole();
+  const grants = useRoleGrants(user?.id);
   if (!user) return null;
   const p = profileOf(user);
   return (
@@ -89,15 +91,27 @@ export function UserMenu() {
             aria-label="Working as"
             className="w-full rounded-lg border bg-background px-2 py-1.5 text-sm"
             value={role}
-            onChange={(e) => {
-              setRole(e.target.value as RoleId);
-              const to = ROLE_HOME[e.target.value as RoleId];
+            onChange={async (e) => {
+              const next = e.target.value as RoleId;
+              if (!grants.canUse(next)) {
+                const st = grants.statusOf(next);
+                if (st === "pending") { toast("Your request is waiting for an admin to approve it."); return; }
+                const reason = prompt(`Request ${ROLES.find((r) => r.id === next)?.name} access. Why do you need it? (an admin will review)`);
+                if (reason === null) return;
+                try { await requestRole(next, reason); toast.success("Request sent to an admin"); grants.reload(); }
+                catch (err) { toast.error((err as Error).message); }
+                return;
+              }
+              setRole(next);
+              const to = ROLE_HOME[next];
               if (to) nav({ to });
             }}
           >
-            {ROLES.map((r) => (
-              <option key={r.id} value={r.id}>{r.name}</option>
-            ))}
+            {ROLES.map((r) => {
+              const st = grants.statusOf(r.id);
+              const tag = !isPrivileged(r.id) || st === "approved" ? "" : st === "pending" ? " (awaiting approval)" : " (request access)";
+              return <option key={r.id} value={r.id}>{r.name}{tag}</option>;
+            })}
           </select>
         </div>
         <DropdownMenuSeparator />
@@ -118,6 +132,14 @@ export function UserMenu() {
             <Link to="/admin/ads">
               <ShieldCheck className="mr-2 h-4 w-4" />
               Admin: Ad charges
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin/roles">
+              <UserCheck className="mr-2 h-4 w-4" />
+              Admin: Role approvals
             </Link>
           </DropdownMenuItem>
         )}
