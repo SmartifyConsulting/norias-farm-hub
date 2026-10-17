@@ -15,19 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ROLES, useActiveRole, type RoleId } from "@/lib/valuechain";
-import { isPrivileged, requestRole, useRoleGrants } from "@/lib/vc-roles";
-
-/** Where each role lands when switched to. Screens are shared; the role only changes the starting point. */
-const ROLE_HOME: Record<RoleId, "/" | "/field-ops" | "/coop" | "/gov-programmes" | "/logistics" | "/insurance" | "/opportunities"> = {
-  farmer: "/",
-  "field-officer": "/field-ops",
-  "coop-lead": "/coop",
-  "programme-manager": "/gov-programmes",
-  "service-provider": "/logistics",
-  "financial-partner": "/insurance",
-  buyer: "/opportunities",
-};
+import { ROLES, useActiveRole } from "@/lib/valuechain";
 
 export async function signOutEverywhere(nav: ReturnType<typeof useNavigate>, clear: () => void) {
   const { syncAll, unsyncedCount } = await import("@/lib/animal-sync");
@@ -65,8 +53,7 @@ export function UserMenu() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const isAdmin = useIsAdmin(user?.id);
-  const [role, setRole] = useActiveRole();
-  const grants = useRoleGrants(user?.id);
+  const [role] = useActiveRole();
   if (!user) return null;
   const p = profileOf(user);
   return (
@@ -84,35 +71,10 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="px-2 pb-2">
-          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             Working as
-          </label>
-          <select
-            aria-label="Working as"
-            className="w-full rounded-lg border bg-background px-2 py-1.5 text-sm"
-            value={role}
-            onChange={async (e) => {
-              const next = e.target.value as RoleId;
-              if (!grants.canUse(next)) {
-                const st = grants.statusOf(next);
-                if (st === "pending") { toast("Your request is waiting for an admin to approve it."); return; }
-                const reason = prompt(`Request ${ROLES.find((r) => r.id === next)?.name} access. Why do you need it? (an admin will review)`);
-                if (reason === null) return;
-                try { await requestRole(next, reason); toast.success("Request sent to an admin"); grants.reload(); }
-                catch (err) { toast.error((err as Error).message); }
-                return;
-              }
-              setRole(next);
-              const to = ROLE_HOME[next];
-              if (to) nav({ to });
-            }}
-          >
-            {ROLES.map((r) => {
-              const st = grants.statusOf(r.id);
-              const tag = !isPrivileged(r.id) || st === "approved" ? "" : st === "pending" ? " (awaiting approval)" : " (request access)";
-              return <option key={r.id} value={r.id}>{r.name}{tag}</option>;
-            })}
-          </select>
+          </p>
+          <p className="text-sm font-medium">{ROLES.find((r) => r.id === role)?.name}</p>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

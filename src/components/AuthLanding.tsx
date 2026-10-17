@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useGuest } from "@/lib/auth";
 import { friendlyError } from "@/lib/errors";
+import { ROLES, useActiveRole, type RoleId } from "@/lib/valuechain";
+import { isPrivileged, requestRole } from "@/lib/vc-roles";
 import bg from "@/assets/countryside.jpg";
 import logo from "@/assets/farmerplus-logo.png.asset.json";
 
@@ -72,13 +74,17 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
 function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void }) {
   const nav = useNavigate();
   const [, setGuest] = useGuest();
+  const [, setActiveRole] = useActiveRole();
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const name = `${first.trim()} ${last.trim()}`.trim();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [roles, setRoles] = useState<RoleId[]>([]);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const toggleRole = (id: RoleId) =>
+    setRoles((r) => (r.includes(id) ? r.filter((x) => x !== id) : [...r, id]));
   const input =
     "h-10 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring";
 
@@ -87,6 +93,10 @@ function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
     setMsg(null);
     if (mode === "signup" && password.length < 8) {
       setMsg("Password must be at least 8 characters.");
+      return;
+    }
+    if (mode === "signup" && roles.length === 0) {
+      setMsg("Pick at least one role to continue.");
       return;
     }
     setBusy(true);
@@ -115,6 +125,14 @@ function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
           const v = JSON.parse(localStorage.getItem("farmerplus:settings") || "{}");
           localStorage.setItem("farmerplus:settings", JSON.stringify({ ...v, owner: name }));
         } catch {}
+      }
+      if (!error && roles[0]) {
+        setActiveRole(roles[0]);
+        for (const r of roles.filter(isPrivileged)) {
+          try {
+            await requestRole(r, "Selected at sign-up");
+          } catch {}
+        }
       }
       setBusy(false);
       if (error) {
@@ -176,6 +194,27 @@ function AuthCard({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void })
               />
             </label>
           </div>
+        )}
+        {mode === "signup" && (
+          <fieldset className="space-y-1.5">
+            <legend className="text-sm font-medium">What do you do? (select all that apply)</legend>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {ROLES.map((r) => (
+                <label
+                  key={r.id}
+                  className="flex items-center gap-2 rounded-xl border border-input px-3 py-2 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={roles.includes(r.id)}
+                    onChange={() => toggleRole(r.id)}
+                    className="h-4 w-4 shrink-0"
+                  />
+                  {r.name}
+                </label>
+              ))}
+            </div>
+          </fieldset>
         )}
         <label className="block space-y-1 text-sm font-medium">
           Email

@@ -1,12 +1,10 @@
 import logo from "@/assets/farmerplus-logo.png.asset.json";
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
 import {
   Home,
   LayoutGrid,
   Wallet,
   Settings,
-  Search,
   Sprout,
   LogIn,
   Handshake,
@@ -14,7 +12,6 @@ import {
 } from "lucide-react";
 import { useGuest, useUser } from "@/lib/auth";
 import { useOnline } from "@/lib/farm";
-import { APP_REGISTRY } from "@/lib/app-registry";
 import { NotificationBell } from "@/components/NotificationBell";
 import { UserMenu } from "@/components/UserMenu";
 
@@ -63,25 +60,14 @@ export function TopNav() {
   const hidden = useNavHidden();
   const { user } = useUser();
   const online = useOnline();
-  const nav = useNavigate();
-  const [q, setQ] = useState("");
   if (hidden) return null;
-  const go = (e: React.FormEvent) => {
-    e.preventDefault();
-    const hit = APP_REGISTRY.find((a) => a.name.toLowerCase().includes(q.trim().toLowerCase()));
-    if (hit && q.trim()) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      nav({ to: hit.to as any, params: (hit.params ?? {}) as any });
-      setQ("");
-    }
-  };
   return (
     <header className="fixed inset-x-0 top-0 z-50 hidden border-b bg-primary text-primary-foreground md:block">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-6">
         <Link to="/" className="flex shrink-0 items-center" aria-label="FarmerPlus home">
           <img src={logo.url} alt="FarmerPlus" className="h-8 w-auto" />
         </Link>
-        <nav className="flex items-center gap-1">
+        <nav className="flex flex-1 items-center justify-center gap-1">
           {items.map(({ to, label, icon: Icon, params }) => (
             <Link
               key={to}
@@ -98,26 +84,7 @@ export function TopNav() {
             </Link>
           ))}
         </nav>
-        <form
-          onSubmit={go}
-          className="ml-auto hidden min-w-0 max-w-xs flex-1 items-center gap-2 rounded-full bg-primary-foreground/10 px-3 py-1.5 lg:flex"
-        >
-          <Search className="h-4 w-4 shrink-0 opacity-70" />
-          <input
-            aria-label="Search apps"
-            list="fp-apps"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search apps…"
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-primary-foreground/60"
-          />
-          <datalist id="fp-apps">
-            {APP_REGISTRY.map((a) => (
-              <option key={a.id} value={a.name} />
-            ))}
-          </datalist>
-        </form>
-        <div className="ml-auto flex shrink-0 items-center gap-3 lg:ml-0">
+        <div className="flex shrink-0 items-center gap-3">
           <span className="flex items-center gap-1.5 text-xs text-primary-foreground/80">
             <span className={`h-2 w-2 rounded-full ${online ? "bg-success" : "bg-destructive"}`} />
             {online ? "Online" : "Offline"}
