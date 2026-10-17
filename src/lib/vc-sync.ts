@@ -95,7 +95,7 @@ export async function syncValueChain(userId: string) {
     for (const id of deleted) delete pushed[id];
     const later = diff(now, pushed);
     // Refused records revert to the server copy (or disappear if they never existed there).
-    const laterChanged = new Map(later.changed.filter((i) => !refused.has(i.id) || hashOf(i) !== hashOf(changed.find((c) => c.id === i.id) ?? i) || false).map((i) => [i.id, i]));
+    const laterChanged = new Map(later.changed.map((i) => [i.id, i]));
     for (const id of refused) {
       const edited = now.find((i) => i.id === id);
       const sent = changed.find((i) => i.id === id);
