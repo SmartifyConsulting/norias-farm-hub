@@ -15,6 +15,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ROLES, useActiveRole, type RoleId } from "@/lib/valuechain";
+
+/** Where each role lands when switched to. Screens are shared; the role only changes the starting point. */
+const ROLE_HOME: Record<RoleId, "/" | "/field-ops" | "/coop" | "/gov-programmes" | "/logistics" | "/insurance" | "/opportunities"> = {
+  farmer: "/",
+  "field-officer": "/field-ops",
+  "coop-lead": "/coop",
+  "programme-manager": "/gov-programmes",
+  "service-provider": "/logistics",
+  "financial-partner": "/insurance",
+  buyer: "/opportunities",
+};
 
 export async function signOutEverywhere(nav: ReturnType<typeof useNavigate>, clear: () => void) {
   const { syncAll, unsyncedCount } = await import("@/lib/animal-sync");
@@ -52,6 +64,7 @@ export function UserMenu() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const isAdmin = useIsAdmin(user?.id);
+  const [role, setRole] = useActiveRole();
   if (!user) return null;
   const p = profileOf(user);
   return (
@@ -67,6 +80,26 @@ export function UserMenu() {
           <p className="truncate text-sm font-semibold">{p.full || "Your account"}</p>
           <p className="truncate text-xs font-normal text-muted-foreground">{p.email}</p>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <div className="px-2 pb-2">
+          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Working as
+          </label>
+          <select
+            aria-label="Working as"
+            className="w-full rounded-lg border bg-background px-2 py-1.5 text-sm"
+            value={role}
+            onChange={(e) => {
+              setRole(e.target.value as RoleId);
+              const to = ROLE_HOME[e.target.value as RoleId];
+              if (to) nav({ to });
+            }}
+          >
+            {ROLES.map((r) => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/settings" hash="profile">

@@ -17,9 +17,13 @@ import { Route as CapacityRouteImport } from './routes/capacity'
 import { Route as CollectiveRouteImport } from './routes/collective'
 import { Route as CopilotRouteImport } from './routes/copilot'
 import { Route as FarmschoolRouteImport } from './routes/farmschool'
+import { Route as FieldOpsRouteImport } from './routes/field-ops'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FundingRouteImport } from './routes/funding'
 import { Route as GovProgrammesRouteImport } from './routes/gov-programmes'
+import { Route as InsuranceRouteImport } from './routes/insurance'
+import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as LogisticsRouteImport } from './routes/logistics'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OutcomesRouteImport } from './routes/outcomes'
 import { Route as PassportRouteImport } from './routes/passport'
@@ -85,6 +89,11 @@ const FarmschoolRoute = FarmschoolRouteImport.update({
   path: '/farmschool',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FieldOpsRoute = FieldOpsRouteImport.update({
+  id: '/field-ops',
+  path: '/field-ops',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
@@ -98,6 +107,21 @@ const FundingRoute = FundingRouteImport.update({
 const GovProgrammesRoute = GovProgrammesRouteImport.update({
   id: '/gov-programmes',
   path: '/gov-programmes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsuranceRoute = InsuranceRouteImport.update({
+  id: '/insurance',
+  path: '/insurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogisticsRoute = LogisticsRouteImport.update({
+  id: '/logistics',
+  path: '/logistics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
@@ -230,9 +254,13 @@ export interface FileRoutesByFullPath {
   '/collective': typeof CollectiveRoute
   '/copilot': typeof CopilotRoute
   '/farmschool': typeof FarmschoolRoute
+  '/field-ops': typeof FieldOpsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/gov-programmes': typeof GovProgrammesRoute
+  '/insurance': typeof InsuranceRoute
+  '/jobs': typeof JobsRoute
+  '/logistics': typeof LogisticsRoute
   '/opportunities': typeof OpportunitiesRoute
   '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
@@ -267,9 +295,13 @@ export interface FileRoutesByTo {
   '/collective': typeof CollectiveRoute
   '/copilot': typeof CopilotRoute
   '/farmschool': typeof FarmschoolRoute
+  '/field-ops': typeof FieldOpsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/gov-programmes': typeof GovProgrammesRoute
+  '/insurance': typeof InsuranceRoute
+  '/jobs': typeof JobsRoute
+  '/logistics': typeof LogisticsRoute
   '/opportunities': typeof OpportunitiesRoute
   '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
@@ -305,9 +337,13 @@ export interface FileRoutesById {
   '/collective': typeof CollectiveRoute
   '/copilot': typeof CopilotRoute
   '/farmschool': typeof FarmschoolRoute
+  '/field-ops': typeof FieldOpsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/funding': typeof FundingRoute
   '/gov-programmes': typeof GovProgrammesRoute
+  '/insurance': typeof InsuranceRoute
+  '/jobs': typeof JobsRoute
+  '/logistics': typeof LogisticsRoute
   '/opportunities': typeof OpportunitiesRoute
   '/outcomes': typeof OutcomesRoute
   '/passport': typeof PassportRoute
@@ -344,9 +380,13 @@ export interface FileRouteTypes {
     | '/collective'
     | '/copilot'
     | '/farmschool'
+    | '/field-ops'
     | '/forgot-password'
     | '/funding'
     | '/gov-programmes'
+    | '/insurance'
+    | '/jobs'
+    | '/logistics'
     | '/opportunities'
     | '/outcomes'
     | '/passport'
@@ -381,9 +421,13 @@ export interface FileRouteTypes {
     | '/collective'
     | '/copilot'
     | '/farmschool'
+    | '/field-ops'
     | '/forgot-password'
     | '/funding'
     | '/gov-programmes'
+    | '/insurance'
+    | '/jobs'
+    | '/logistics'
     | '/opportunities'
     | '/outcomes'
     | '/passport'
@@ -418,9 +462,13 @@ export interface FileRouteTypes {
     | '/collective'
     | '/copilot'
     | '/farmschool'
+    | '/field-ops'
     | '/forgot-password'
     | '/funding'
     | '/gov-programmes'
+    | '/insurance'
+    | '/jobs'
+    | '/logistics'
     | '/opportunities'
     | '/outcomes'
     | '/passport'
@@ -456,9 +504,13 @@ export interface RootRouteChildren {
   CollectiveRoute: typeof CollectiveRoute
   CopilotRoute: typeof CopilotRoute
   FarmschoolRoute: typeof FarmschoolRoute
+  FieldOpsRoute: typeof FieldOpsRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   FundingRoute: typeof FundingRoute
   GovProgrammesRoute: typeof GovProgrammesRoute
+  InsuranceRoute: typeof InsuranceRoute
+  JobsRoute: typeof JobsRoute
+  LogisticsRoute: typeof LogisticsRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
   OutcomesRoute: typeof OutcomesRoute
   PassportRoute: typeof PassportRoute
@@ -536,6 +588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FarmschoolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/field-ops': {
+      id: '/field-ops'
+      path: '/field-ops'
+      fullPath: '/field-ops'
+      preLoaderRoute: typeof FieldOpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
@@ -555,6 +614,27 @@ declare module '@tanstack/react-router' {
       path: '/gov-programmes'
       fullPath: '/gov-programmes'
       preLoaderRoute: typeof GovProgrammesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insurance': {
+      id: '/insurance'
+      path: '/insurance'
+      fullPath: '/insurance'
+      preLoaderRoute: typeof InsuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logistics': {
+      id: '/logistics'
+      path: '/logistics'
+      fullPath: '/logistics'
+      preLoaderRoute: typeof LogisticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/opportunities': {
@@ -761,9 +841,13 @@ const rootRouteChildren: RootRouteChildren = {
   CollectiveRoute: CollectiveRoute,
   CopilotRoute: CopilotRoute,
   FarmschoolRoute: FarmschoolRoute,
+  FieldOpsRoute: FieldOpsRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   FundingRoute: FundingRoute,
   GovProgrammesRoute: GovProgrammesRoute,
+  InsuranceRoute: InsuranceRoute,
+  JobsRoute: JobsRoute,
+  LogisticsRoute: LogisticsRoute,
   OpportunitiesRoute: OpportunitiesRoute,
   OutcomesRoute: OutcomesRoute,
   PassportRoute: PassportRoute,

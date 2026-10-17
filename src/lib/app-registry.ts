@@ -25,6 +25,10 @@ import {
   GraduationCap,
   Users,
   Users2,
+  ClipboardCheck,
+  BriefcaseBusiness,
+  ShieldCheck,
+  Truck,
   type LucideIcon,
 } from "lucide-react";
 import { MINI_APPS } from "@/lib/farm";
@@ -217,6 +221,38 @@ const EXTRA_DEFS: Omit<RegistryApp, "tone">[] = [
     icon: Landmark,
     to: "/gov-programmes",
     category: "government",
+  },
+  {
+    id: "field-ops",
+    name: "Field Operations",
+    blurb: "Register farmers, schedule visits and record inspections",
+    icon: ClipboardCheck,
+    to: "/field-ops",
+    category: "government",
+  },
+  {
+    id: "jobs",
+    name: "Agri Jobs",
+    blurb: "Find farm work or post jobs and review applicants",
+    icon: BriefcaseBusiness,
+    to: "/jobs",
+    category: "marketplace",
+  },
+  {
+    id: "insurance",
+    name: "Farm Insurance",
+    blurb: "Risk-based quotes, policies and claims",
+    icon: ShieldCheck,
+    to: "/insurance",
+    category: "finance",
+  },
+  {
+    id: "logistics",
+    name: "Logistics & Storage",
+    blurb: "Book trucks and storage, or list your fleet",
+    icon: Truck,
+    to: "/logistics",
+    category: "cooperatives",
   },
 ];
 
