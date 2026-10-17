@@ -36,6 +36,7 @@ import { Route as TraceabilityRouteImport } from './routes/traceability'
 import { Route as VetCheckRouteImport } from './routes/vet-check'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as AdminAdsRouteImport } from './routes/admin.ads'
+import { Route as AdminRolesRouteImport } from './routes/admin.roles'
 import { Route as ApiCopilotRouteImport } from './routes/api/copilot'
 import { Route as ApiVetCheckRouteImport } from './routes/api/vet-check'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
@@ -184,6 +185,11 @@ const AdminAdsRoute = AdminAdsRouteImport.update({
   path: '/admin/ads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRolesRoute = AdminRolesRouteImport.update({
+  id: '/admin/roles',
+  path: '/admin/roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCopilotRoute = ApiCopilotRouteImport.update({
   id: '/api/copilot',
   path: '/api/copilot',
@@ -273,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/vet-check': typeof VetCheckRoute
   '/wallet': typeof WalletRoute
   '/admin/ads': typeof AdminAdsRoute
+  '/admin/roles': typeof AdminRolesRoute
   '/api/copilot': typeof ApiCopilotRoute
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
@@ -314,6 +321,7 @@ export interface FileRoutesByTo {
   '/vet-check': typeof VetCheckRoute
   '/wallet': typeof WalletRoute
   '/admin/ads': typeof AdminAdsRoute
+  '/admin/roles': typeof AdminRolesRoute
   '/api/copilot': typeof ApiCopilotRoute
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
@@ -356,6 +364,7 @@ export interface FileRoutesById {
   '/vet-check': typeof VetCheckRoute
   '/wallet': typeof WalletRoute
   '/admin/ads': typeof AdminAdsRoute
+  '/admin/roles': typeof AdminRolesRoute
   '/api/copilot': typeof ApiCopilotRoute
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
@@ -399,6 +408,7 @@ export interface FileRouteTypes {
     | '/vet-check'
     | '/wallet'
     | '/admin/ads'
+    | '/admin/roles'
     | '/api/copilot'
     | '/api/vet-check'
     | '/app/$appId'
@@ -440,6 +450,7 @@ export interface FileRouteTypes {
     | '/vet-check'
     | '/wallet'
     | '/admin/ads'
+    | '/admin/roles'
     | '/api/copilot'
     | '/api/vet-check'
     | '/app/$appId'
@@ -481,6 +492,7 @@ export interface FileRouteTypes {
     | '/vet-check'
     | '/wallet'
     | '/admin/ads'
+    | '/admin/roles'
     | '/api/copilot'
     | '/api/vet-check'
     | '/app/$appId'
@@ -523,6 +535,7 @@ export interface RootRouteChildren {
   VetCheckRoute: typeof VetCheckRoute
   WalletRoute: typeof WalletRoute
   AdminAdsRoute: typeof AdminAdsRoute
+  AdminRolesRoute: typeof AdminRolesRoute
   ApiCopilotRoute: typeof ApiCopilotRoute
   ApiVetCheckRoute: typeof ApiVetCheckRoute
   AppAppIdRoute: typeof AppAppIdRoute
@@ -721,6 +734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/roles': {
+      id: '/admin/roles'
+      path: '/admin/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminRolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/copilot': {
       id: '/api/copilot'
       path: '/api/copilot'
@@ -860,6 +880,7 @@ const rootRouteChildren: RootRouteChildren = {
   VetCheckRoute: VetCheckRoute,
   WalletRoute: WalletRoute,
   AdminAdsRoute: AdminAdsRoute,
+  AdminRolesRoute: AdminRolesRoute,
   ApiCopilotRoute: ApiCopilotRoute,
   ApiVetCheckRoute: ApiVetCheckRoute,
   AppAppIdRoute: AppAppIdRoute,

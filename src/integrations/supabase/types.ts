@@ -1245,6 +1245,42 @@ export type Database = {
           },
         ]
       }
+      vc_role_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role: string
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       active_ads: {
@@ -1367,15 +1403,31 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_vc_role: { Args: { _role: string; _user: string }; Returns: boolean }
       launch_ad_campaign: { Args: { _campaign: string }; Returns: undefined }
       record_ad_event: {
         Args: { _campaign: string; _kind: string }
         Returns: undefined
       }
       request_join_cooperative: { Args: { _coop: string }; Returns: undefined }
+      request_vc_role: {
+        Args: { _reason?: string; _role: string }
+        Returns: undefined
+      }
       review_join_request: {
         Args: { _approve: boolean; _coop: string; _user_id: string }
         Returns: undefined
+      }
+      review_vc_role: {
+        Args: { _request: string; _status: string }
+        Returns: undefined
+      }
+      vc_facility_usage: {
+        Args: never
+        Returns: {
+          facility_id: string
+          used: number
+        }[]
       }
       vc_job_owner: { Args: { _job: string }; Returns: string }
     }

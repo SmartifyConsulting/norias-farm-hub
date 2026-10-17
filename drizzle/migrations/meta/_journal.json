@@ -8,6 +8,13 @@
       "when": 1792264868156,
       "tag": "0000_value_chain_records",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792265144852,
+      "tag": "0001_vc_role_grants_and_storage_capacity",
+      "breakpoints": true
     }
   ]
 }

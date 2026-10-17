@@ -95,6 +95,8 @@ export function syncAll() {
       } finally { w.__fpPull = false; }
 
       await syncValueChain(uidv);
+      const refused = Object.values(read<Record<string, string>>("farmerplus:vc:rejected", {}));
+      if (refused.length) import("sonner").then(({ toast }) => toast.error(`${refused.length} change(s) were refused: ${refused[0]}`));
 
       localStorage.setItem("farmerplus:lastSynced", new Date().toISOString());
       window.dispatchEvent(new Event("farmerplus:change"));

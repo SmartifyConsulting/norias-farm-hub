@@ -21,3 +21,6 @@
 
 - Pre-bundle any lazily discovered client deps (radix, router-core, seroval) in vite.config.ts optimizeDeps.include — a mid-session re-optimization loads two React copies and blanks the preview.
 - Value-chain stores (farmers, visits, inspections, jobs, applications, cover, vehicles, facilities, bookings) sync per record to vc_records via src/lib/vc-sync.ts, diffing against a last-synced hash map so offline edits queue without extra bookkeeping; RLS: workspace rows by farm_role_of, jobs/vehicles/facilities readable by all signed-in users, applications by applicant + job owner.
+- Privileged value-chain roles (field officer, insurer, programme manager) come from admin-approved vc_role_requests and are enforced by the vc_records_guard trigger — the local "Working as" choice is only a UI start point.
+- Storage capacity is derived from active bookings (server trigger blocks overbooking; vc_facility_usage gives cross-device totals); never store a mutable "booked" counter on facilities.
+- Sample value-chain records use ids prefixed "demo-" and are excluded from cloud sync so they never pollute shared data.
