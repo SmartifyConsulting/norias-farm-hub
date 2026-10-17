@@ -107,12 +107,12 @@ const blank = { title: "", category: JOB_CATEGORIES[0], type: JOB_TYPES[0], prov
 function PostJob({ onDone }: { onDone: () => void }) {
   const [jobs, setJobs] = useJobs();
   const [f, setF] = useState(blank);
-  const [err, setErr] = useState<Record<string, string>>({});
+  const [err, setErr] = useState<Partial<Record<keyof typeof blank, string>>>({});
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof blank) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
   const submit = () => {
     if (busy) return;
-    const e: Record<string, string> = {};
+    const e: Partial<Record<keyof typeof blank, string>> = {};
     if (f.title.trim().length < 3) e.title = "Give the job a title";
     if (!f.town.trim()) e.town = "Which town or farm area?";
     if (!(Number(f.openings) >= 1)) e.openings = "At least one opening";

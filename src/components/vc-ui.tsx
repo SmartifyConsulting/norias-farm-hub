@@ -17,7 +17,7 @@ export function Card({ title, children, action }: { title?: string; children: Re
   );
 }
 
-export function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
+export function Field({ label, error, children }: { label: string; error?: string | undefined; children: ReactNode }) {
   return (
     <label className="block text-sm">
       <span className="mb-1 block font-medium">{label}</span>

@@ -55,9 +55,9 @@ function Farmers() {
   const [farmers, setFarmers] = useRegFarmers();
   const [insp] = useInspections();
   const [f, setF] = useState(blank);
-  const [err, setErr] = useState<Record<string, string>>({});
+  const [err, setErr] = useState<Partial<Record<keyof typeof blank, string>>>({});
   const save = () => {
-    const e: Record<string, string> = {};
+    const e: Partial<Record<keyof typeof blank, string>> = {};
     if (!/^[\p{L}' -]{2,}$/u.test(f.first.trim())) e.first = "Enter a first name";
     if (!/^[\p{L}' -]{2,}$/u.test(f.last.trim())) e.last = "Enter a last name (hyphens allowed)";
     if (!validSaId(f.idNumber.trim())) e.idNumber = "Enter a valid 13-digit SA ID number";
