@@ -43,11 +43,11 @@ const statusTone = { "Needs quote": "warn", Quoted: "info", Active: "ok", Declin
 
 function Farmer() {
   const [cover, setCover] = useCover();
-  const [f, setF] = useState({ crop: "", value: "", province: "Free State", peril: PERILS[0] });
+  const [f, setF] = useState({ crop: "", value: "", province: "Free State", peril: ! });
   const [claim, setClaim] = useState<Record<string, { amount: string; reason: string }>>({});
   const add = () => {
     const v = Number(f.value);
-    if (!f.crop.trim() || !(v > 0)) return toast.error("Enter what to cover and its value");
+    if (!f.crop.trim() || !(v > 0)) { toast.error("Enter what to cover and its value"); return; }
     setCover([{ id: uid(), crop: f.crop.trim(), value: v, province: f.province, peril: f.peril, status: "Needs quote", createdAt: today(), claims: [] }, ...cover]);
     setF({ ...f, crop: "", value: "" });
     toast.success("Cover requested");
@@ -60,8 +60,8 @@ function Farmer() {
   };
   const fileClaim = (c: CoverRequest) => {
     const x = claim[c.id]; const amt = Number(x?.amount);
-    if (!(amt > 0) || amt > c.value) return toast.error(`Claim must be between R1 and ${rand(c.value)}`);
-    if (!x?.reason.trim()) return toast.error("Describe what happened");
+    if (!(amt > 0) || amt > c.value) { toast.error(`Claim must be between R1 and ${rand(c.value)}`); return; }
+    if (!x?.reason.trim()) { toast.error("Describe what happened"); return; }
     upd(c.id, { claims: [...c.claims, { id: uid(), date: today(), amount: amt, reason: x.reason.trim(), status: "Submitted" }] });
     setClaim({ ...claim, [c.id]: { amount: "", reason: "" } });
     toast.success("Claim submitted");
@@ -119,8 +119,8 @@ function Underwriter() {
   const quote = (c: CoverRequest) => {
     const x = q[c.id]; const sug = suggestedPremium(c.value, rate, c.peril);
     const prem = Number(x?.premium || sug); const ded = Number(x?.deductible || 10);
-    if (prem < sug * 0.5 || prem > sug * 2) return toast.error(`Premium must be within 50%–200% of the risk-based ${rand(sug)}`);
-    if (!(ded >= 0 && ded <= 50)) return toast.error("Deductible must be 0–50%");
+    if (prem < sug * 0.5 || prem > sug * 2) { toast.error(`Premium must be within 50%–200% of the risk-based ${rand(sug)}`); return; }
+    if (!(ded >= 0 && ded <= 50)) { toast.error("Deductible must be 0–50%"); return; }
     upd(c.id, { status: "Quoted", premium: prem, deductible: ded, terms: x?.terms || `${c.peril} cover. ${ded}% deductible.` });
     toast.success("Quote sent");
   };

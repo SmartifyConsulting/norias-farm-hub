@@ -136,8 +136,8 @@ function Visits() {
   const [f, setF] = useState({ farmerId: "", date: "", type: "Verification" });
   const name = (id: string) => { const x = farmers.find((y) => y.id === id); return x ? `${x.first} ${x.last}` : "Unknown"; };
   const add = () => {
-    if (!f.farmerId || !f.date) return toast.error("Choose a farmer and a date");
-    if (f.date < today()) return toast.error("Visit date can't be in the past");
+    if (!f.farmerId || !f.date) { toast.error("Choose a farmer and a date"); return; }
+    if (f.date < today()) { toast.error("Visit date can't be in the past"); return; }
     setVisits([{ id: uid(), ...f, officer }, ...visits]);
     setF({ farmerId: "", date: "", type: "Verification" });
     toast.success("Visit scheduled");
@@ -181,8 +181,8 @@ function Inspections() {
     () => toast.error("Couldn't get your location"),
   );
   const add = () => {
-    if (!f.farmerId) return toast.error("Choose a farmer");
-    if (f.notes.trim().length < 10) return toast.error("Add at least a short note (10+ characters)");
+    if (!f.farmerId) { toast.error("Choose a farmer"); return; }
+    if (f.notes.trim().length < 10) { toast.error("Add at least a short note (10+ characters)"); return; }
     setInsp([{ id: uid(), date: today(), officer, ...f }, ...insp]);
     setF({ farmerId: "", result: "Pass", notes: "", gps: "" });
     toast.success("Inspection recorded");

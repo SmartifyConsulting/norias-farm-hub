@@ -48,8 +48,8 @@ function Book() {
   const [route, setRoute] = useState<Record<string, string>>({});
   const book = (kind: Booking["kind"], id: string, max: number) => {
     const n = Number(qty[id]);
-    if (!(n > 0) || n > max) return toast.error(`Enter between 1 and ${max} tonnes`);
-    if (kind === "Transport" && !route[id]?.includes("→") && !route[id]?.trim()) return toast.error("Enter where to and from");
+    if (!(n > 0) || n > max) { toast.error(`Enter between 1 and ${max} tonnes`); return; }
+    if (kind === "Transport" && !route[id]?.includes("→") && !route[id]?.trim()) { toast.error("Enter where to and from"); return; }
     if (kind === "Storage") setFac(fac.map((f) => (f.id === id ? { ...f, booked: f.booked + n } : f)));
     setBk([{ id: uid(), kind, resourceId: id, qty: n, from: route[id] ?? "", date: today(), status: "Requested" }, ...bk]);
     setQty({ ...qty, [id]: "" });
@@ -122,17 +122,17 @@ function Bookings() {
 
 function Provider() {
   const [vehicles, setV] = useVehicles(); const [fac, setF] = useFacilities();
-  const [v, sv] = useState({ name: "", plate: "", body: BODY_TYPES[0], tonnes: "", base: "", ratePerKm: "" });
-  const [f, sf] = useState({ name: "", kind: FACILITY_KINDS[0], province: "Free State", capacity: "", ratePerTMonth: "" });
+  const [v, sv] = useState({ name: "", plate: "", body: !, tonnes: "", base: "", ratePerKm: "" });
+  const [f, sf] = useState({ name: "", kind: !, province: "Free State", capacity: "", ratePerTMonth: "" });
   const addV = () => {
-    if (!v.name.trim() || !v.plate.trim() || !(Number(v.tonnes) > 0) || !(Number(v.ratePerKm) > 0)) return toast.error("Fill in name, plate, tonnes and rate");
+    if (!v.name.trim() || !v.plate.trim() || !(Number(v.tonnes) > 0) || !(Number(v.ratePerKm) > 0)) { toast.error("Fill in name, plate, tonnes and rate"); return; }
     setV([{ id: uid(), ...v, tonnes: Number(v.tonnes), ratePerKm: Number(v.ratePerKm) }, ...vehicles]);
-    sv({ name: "", plate: "", body: BODY_TYPES[0], tonnes: "", base: "", ratePerKm: "" }); toast.success("Vehicle added");
+    sv({ name: "", plate: "", body: !, tonnes: "", base: "", ratePerKm: "" }); toast.success("Vehicle added");
   };
   const addF = () => {
-    if (!f.name.trim() || !(Number(f.capacity) > 0) || !(Number(f.ratePerTMonth) > 0)) return toast.error("Fill in name, capacity and rate");
+    if (!f.name.trim() || !(Number(f.capacity) > 0) || !(Number(f.ratePerTMonth) > 0)) { toast.error("Fill in name, capacity and rate"); return; }
     setF([{ id: uid(), ...f, capacity: Number(f.capacity), booked: 0, ratePerTMonth: Number(f.ratePerTMonth) }, ...fac]);
-    sf({ name: "", kind: FACILITY_KINDS[0], province: "Free State", capacity: "", ratePerTMonth: "" }); toast.success("Facility added");
+    sf({ name: "", kind: !, province: "Free State", capacity: "", ratePerTMonth: "" }); toast.success("Facility added");
   };
   return (
     <div className="grid gap-4 lg:grid-cols-2">

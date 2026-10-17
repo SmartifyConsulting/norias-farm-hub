@@ -46,7 +46,7 @@ function Board() {
     && (type === "All" || j.type === type) && (prov === "All" || j.province === prov)
     && `${j.title} ${j.category} ${j.town}`.toLowerCase().includes(q.toLowerCase()));
   const apply = (id: string) => {
-    if (a.name.trim().length < 2 || !/^(\+27|0)\d{9}$/.test(a.phone.replace(/\s/g, ""))) return toast.error("Enter your name and a valid SA phone number");
+    if (a.name.trim().length < 2 || !/^(\+27|0)\d{9}$/.test(a.phone.replace(/\s/g, ""))) { toast.error("Enter your name and a valid SA phone number"); return; }
     setJobs(jobs.map((j) => j.id === id ? { ...j, applicants: [...j.applicants, { id: uid(), ...a, at: today() }] } : j));
     setApplyTo(null); setA({ name: "", phone: "", note: "" });
     toast.success("Application sent");
@@ -102,7 +102,7 @@ function MyJobs() {
   );
 }
 
-const blank = { title: "", category: JOB_CATEGORIES[0], type: JOB_TYPES[0], province: "Gauteng", town: "", openings: "1", minPay: "", maxPay: "", period: "month", deadline: "", description: "", requirements: "" };
+const blank = { title: "", category: !, type: !, province: "Gauteng", town: "", openings: "1", minPay: "", maxPay: "", period: "month", deadline: "", description: "", requirements: "" };
 
 function PostJob({ onDone }: { onDone: () => void }) {
   const [jobs, setJobs] = useJobs();
@@ -123,7 +123,7 @@ function PostJob({ onDone }: { onDone: () => void }) {
     if (f.description.trim().length < 20) e.description = "Describe the role in a sentence or two";
     if (!f.requirements.trim()) e.requirements = "List what applicants need";
     setErr(e);
-    if (Object.keys(e).length) return toast.error("Please fix the highlighted fields");
+    if (Object.keys(e).length) { toast.error("Please fix the highlighted fields"); return; }
     setBusy(true);
     setJobs([{ id: uid(), ...f, title: f.title.trim(), openings: Number(f.openings), minPay: min, maxPay: max, postedAt: today(), applicants: [], status: "Active" }, ...jobs]);
     setF(blank); setBusy(false);
