@@ -83,6 +83,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ad_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          days: number
+          id: string
+          name: string
+          price_cents: number
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          days: number
+          id?: string
+          name: string
+          price_cents: number
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          days?: number
+          id?: string
+          name?: string
+          price_cents?: number
+          sort_order?: number
+        }
+        Relationships: []
+      }
       animal_records: {
         Row: {
           animal_id: string
@@ -1159,6 +1189,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       active_ads: {
@@ -1274,6 +1322,13 @@ export type Database = {
         Args: { _farm: string }
         Returns: Database["public"]["Enums"]["farm_role"]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       launch_ad_campaign: { Args: { _campaign: string }; Returns: undefined }
       record_ad_event: {
         Args: { _campaign: string; _kind: string }
@@ -1292,6 +1347,7 @@ export type Database = {
         | "active"
         | "paused"
         | "completed"
+      app_role: "admin" | "user"
       coop_action_status: "open" | "done"
       coop_asset_status: "available" | "maintenance" | "retired"
       coop_booking_status: "requested" | "approved" | "rejected" | "completed"
@@ -1465,6 +1521,7 @@ export const Constants = {
         "paused",
         "completed",
       ],
+      app_role: ["admin", "user"],
       coop_action_status: ["open", "done"],
       coop_asset_status: ["available", "maintenance", "retired"],
       coop_booking_status: ["requested", "approved", "rejected", "completed"],
