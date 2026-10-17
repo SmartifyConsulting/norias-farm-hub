@@ -89,12 +89,27 @@ export type Vehicle = { id: string; name: string; plate: string; body: string; t
 export type Facility = { id: string; name: string; kind: string; province: string; capacity: number; booked: number; ratePerTMonth: number };
 export type Booking = {
   id: string; kind: "Transport" | "Storage"; resourceId: string; qty: number; from: string; to?: string;
-  date: string; status: "Requested" | "Accepted" | "In transit" | "Delivered" | "Stored" | "Declined";
+  date: string; status: "Requested" | "Accepted" | "In transit" | "Delivered" | "Stored" | "Declined" | "Cancelled";
+  providerId?: string; _owner?: string;
 };
 export const BODY_TYPES = ["Flatbed", "Refrigerated", "Grain tipper", "Livestock trailer", "Panel van"];
 export const FACILITY_KINDS = ["Grain silo", "Cold room", "Dry warehouse", "Packhouse store"];
 export const useVehicles = () => useStore<Vehicle[]>("farmerplus:vc:vehicles", []);
 export const useFacilities = () => useStore<Facility[]>("farmerplus:vc:facilities", []);
 export const useBookings = () => useStore<Booking[]>("farmerplus:vc:bookings", []);
+export const useUsage = () => useStore<Record<string, number>>("farmerplus:vc:usage", {});
+
+/** Storage bookings in these states hold capacity; Declined/Cancelled release it. */
+export const HOLDS_CAPACITY: Booking["status"][] = ["Requested", "Accepted", "Stored"];
+/**
+ * Tonnes in use at a facility: the server's cross-device total plus this device's
+ * active bookings that haven't reached the cloud yet (synced = ids already counted by the server).
+ */
+export function usedAt(facilityId: string, bookings: Booking[], serverUsed: Record<string, number>, synced: Set<string>) {
+  const pending = bookings
+    .filter((b) => b.kind === "Storage" && b.resourceId === facilityId && !synced.has(b.id) && HOLDS_CAPACITY.includes(b.status))
+    .reduce((s, b) => s + b.qty, 0);
+  return (serverUsed[facilityId] ?? 0) + pending;
+}
 
 export { uid, today };
