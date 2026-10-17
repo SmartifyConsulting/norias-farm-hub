@@ -20,3 +20,4 @@
 - Shared farms: farms/farm_members/farm_invites with farm_role_of() security-definer for RLS; records carry farm_id from the active farm (localStorage farmerplus:activeFarm) — keeps private and team records in one table.
 
 - Pre-bundle any lazily discovered client deps (radix, router-core, seroval) in vite.config.ts optimizeDeps.include — a mid-session re-optimization loads two React copies and blanks the preview.
+- Value-chain stores (farmers, visits, inspections, jobs, applications, cover, vehicles, facilities, bookings) sync per record to vc_records via src/lib/vc-sync.ts, diffing against a last-synced hash map so offline edits queue without extra bookkeeping; RLS: workspace rows by farm_role_of, jobs/vehicles/facilities readable by all signed-in users, applications by applicant + job owner.

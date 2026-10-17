@@ -1207,6 +1207,44 @@ export type Database = {
         }
         Relationships: []
       }
+      vc_records: {
+        Row: {
+          collection: string
+          data: Json
+          farm_id: string | null
+          id: string
+          owner_id: string
+          updated_at: string
+          visibility: string | null
+        }
+        Insert: {
+          collection: string
+          data?: Json
+          farm_id?: string | null
+          id: string
+          owner_id?: string
+          updated_at?: string
+          visibility?: string | null
+        }
+        Update: {
+          collection?: string
+          data?: Json
+          farm_id?: string | null
+          id?: string
+          owner_id?: string
+          updated_at?: string
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vc_records_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       active_ads: {
@@ -1339,6 +1377,7 @@ export type Database = {
         Args: { _approve: boolean; _coop: string; _user_id: string }
         Returns: undefined
       }
+      vc_job_owner: { Args: { _job: string }; Returns: string }
     }
     Enums: {
       ad_campaign_status:

@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useUser } from "@/lib/auth";
 import { Screen } from "@/components/Dock";
 import { Card, Field, Tabs, Pill, inputCls, btn, btnGhost } from "@/components/vc-ui";
-import { JOB_CATEGORIES, JOB_TYPES, PROVINCES, rand, today, uid, useJobs, type Job } from "@/lib/valuechain";
+import { JOB_CATEGORIES, JOB_TYPES, PROVINCES, rand, today, uid, useJobs, useApplications, type Job } from "@/lib/valuechain";
 
 export const Route = createFileRoute("/jobs")({
   head: () => ({
@@ -36,7 +37,8 @@ function JobsPage() {
 const pay = (j: Job) => `${rand(j.minPay)}${j.maxPay > j.minPay ? ` – ${rand(j.maxPay)}` : ""} / ${j.period}`;
 
 function Board() {
-  const [jobs, setJobs] = useJobs();
+  const [jobs] = useJobs();
+  const [apps, setApps] = useApplications();
   const [q, setQ] = useState("");
   const [type, setType] = useState("All");
   const [prov, setProv] = useState("All");
@@ -47,7 +49,7 @@ function Board() {
     && `${j.title} ${j.category} ${j.town}`.toLowerCase().includes(q.toLowerCase()));
   const apply = (id: string) => {
     if (a.name.trim().length < 2 || !/^(\+27|0)\d{9}$/.test(a.phone.replace(/\s/g, ""))) { toast.error("Enter your name and a valid SA phone number"); return; }
-    setJobs(jobs.map((j) => j.id === id ? { ...j, applicants: [...j.applicants, { id: uid(), ...a, at: today() }] } : j));
+    setApps([{ id: uid(), jobId: id, ...a, at: today() }, ...apps]);
     setApplyTo(null); setA({ name: "", phone: "", note: "" });
     toast.success("Application sent");
   };
@@ -83,18 +85,22 @@ function Board() {
 }
 
 function MyJobs() {
-  const [jobs, setJobs] = useJobs();
+  const [all, setJobs] = useJobs();
+  const [apps] = useApplications();
+  const { user } = useUser();
+  const jobs = all.filter((j) => !j._owner || j._owner === user?.id);
+  const setMine = (next: Job[]) => setJobs([...all.filter((j) => !jobs.includes(j)), ...next]);
   if (!jobs.length) return <Card><p className="text-sm text-muted-foreground">You haven't posted a job yet.</p></Card>;
   return (
     <div className="space-y-3">
       {jobs.map((j) => (
         <Card key={j.id} title={j.title} action={<Pill tone={j.status === "Active" ? "ok" : "info"}>{j.status}</Pill>}>
           <p className="text-sm text-muted-foreground">{j.town}, {j.province} • {pay(j)} • posted {j.postedAt}</p>
-          <p className="mt-2 text-sm font-medium">{j.applicants.length} applicant{j.applicants.length === 1 ? "" : "s"}</p>
-          <ul className="mt-1 space-y-1 text-sm">{j.applicants.map((p) => <li key={p.id}>{p.name} • {p.phone}{p.note && ` — ${p.note}`}</li>)}</ul>
+          <p className="mt-2 text-sm font-medium">{apps.filter((p) => p.jobId === j.id).length} applicant{apps.filter((p) => p.jobId === j.id).length === 1 ? "" : "s"}</p>
+          <ul className="mt-1 space-y-1 text-sm">{apps.filter((p) => p.jobId === j.id).map((p) => <li key={p.id}>{p.name} • {p.phone}{p.note && ` — ${p.note}`}</li>)}</ul>
           <div className="mt-3 flex gap-2">
-            <button className={btnGhost} onClick={() => setJobs(jobs.map((x) => x.id === j.id ? { ...x, status: x.status === "Active" ? "Closed" : "Active" } : x))}>{j.status === "Active" ? "Close job" : "Reopen"}</button>
-            <button className={`${btnGhost} text-destructive`} onClick={() => confirm("Delete this job?") && setJobs(jobs.filter((x) => x.id !== j.id))}>Delete</button>
+            <button className={btnGhost} onClick={() => setMine(jobs.map((x) => x.id === j.id ? { ...x, status: x.status === "Active" ? "Closed" : "Active" } : x))}>{j.status === "Active" ? "Close job" : "Reopen"}</button>
+            <button className={`${btnGhost} text-destructive`} onClick={() => confirm("Delete this job?") && setMine(jobs.filter((x) => x.id !== j.id))}>Delete</button>
           </div>
         </Card>
       ))}
@@ -125,7 +131,7 @@ function PostJob({ onDone }: { onDone: () => void }) {
     setErr(e);
     if (Object.keys(e).length) { toast.error("Please fix the highlighted fields"); return; }
     setBusy(true);
-    setJobs([{ id: uid(), ...f, title: f.title.trim(), openings: Number(f.openings), minPay: min, maxPay: max, postedAt: today(), applicants: [], status: "Active" }, ...jobs]);
+    setJobs([{ id: uid(), ...f, title: f.title.trim(), openings: Number(f.openings), minPay: min, maxPay: max, postedAt: today(), status: "Active" }, ...jobs]);
     setF(blank); setBusy(false);
     toast.success("Job posted");
     onDone();
