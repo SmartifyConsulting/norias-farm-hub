@@ -31,7 +31,7 @@ async function run<T>(
 }
 
 export type ForusWallet = { id: string; label?: string; currency: string; balance?: number; available_balance?: number };
-export type ForusPayment = { id: string; status: string; amount: number; currency: string; reference?: string; description?: string; created_at?: string; method?: string };
+export type ForusPayment = { id: string; status: string; amount: number; currency: string; reference?: string; description?: string | undefined; created_at?: string; method?: string };
 
 const walletId = z.string().regex(/^wal_[A-Za-z0-9]+$/);
 const rid = () => Math.random().toString(36).slice(2, 12) + Date.now().toString(36);

@@ -113,7 +113,7 @@ export function forusClient() {
 }
 
 // Sandbox test outcomes published by FORUS, used while the sandbox operations are unpublished.
-export function simulateOutcome(p: { method?: string; card_number?: string; mobile_number?: string }):
+export function simulateOutcome(p: { method?: string | undefined; card_number?: string | undefined; mobile_number?: string | undefined }):
   { status: "completed" } | { status: "failed"; error: string } {
   if (p.method === "mobile_money") {
     const n = (p.mobile_number || "").replace(/\s/g, "");
