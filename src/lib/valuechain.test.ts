@@ -31,10 +31,11 @@ describe("storage capacity", () => {
 });
 describe("demo data", () => {
   it("every booking, visit, inspection and application points at a real record", () => {
-    const d = demoData() as Record<string, { id: string; [k: string]: unknown }[]>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const d = demoData() as Record<string, any[]>;
     const ids = (c: string) => new Set(d[c]!.map((x) => x.id));
-    for (const v of [...d.visits!, ...d.inspections!]) expect(ids("farmers").has(v.farmerId as string)).toBe(true);
-    for (const a of d.applications!) expect(ids("jobs").has(a.jobId as string)).toBe(true);
-    for (const x of d.bookings!) expect(ids(x.kind === "Storage" ? "facilities" : "vehicles").has(x.resourceId as string)).toBe(true);
+    for (const v of [...d["visits"]!, ...d["inspections"]!]) expect(ids("farmers").has(v.farmerId as string)).toBe(true);
+    for (const a of d["applications"]!) expect(ids("jobs").has(a.jobId as string)).toBe(true);
+    for (const x of d["bookings"]!) expect(ids(x.kind === "Storage" ? "facilities" : "vehicles").has(x.resourceId as string)).toBe(true);
   });
 });
