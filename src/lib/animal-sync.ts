@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { MINI_APPS, type FarmRecord } from "./farm";
 import { activeFarmId } from "./team";
+import { syncValueChain, vcUnsynced } from "./vc-sync";
 
 /** Mini-apps whose records sync to the cloud (all of them). */
 const APPS = MINI_APPS.map((a) => a.id);
@@ -8,7 +9,7 @@ const APPS = MINI_APPS.map((a) => a.id);
 const DOC_KEYS = [
   "farmerplus:passport", "farmerplus:demand", "farmerplus:capacity", "farmerplus:risks", "farmerplus:pipeline",
   "farmerplus:pools", "farmerplus:pools:own", "farmerplus:batches", "farmerplus:role", "farmerplus:notify",
-  "farmerplus:notify:read", "farmerplus:wallet", "farmerplus:settings",
+  "farmerplus:notify:read", "farmerplus:wallet", "farmerplus:settings", "farmerplus:vc:baseRate", "farmerplus:activeRole",
 ];
 const DIRTY = "farmerplus:docs:dirty";
 const key = (app: string) => `farmerplus:${app}`;
@@ -93,6 +94,8 @@ export function syncAll() {
         for (const d of docs ?? []) if (!stillDirty.has(d.key)) localStorage.setItem(d.key, JSON.stringify(d.value));
       } finally { w.__fpPull = false; }
 
+      await syncValueChain(uidv);
+
       localStorage.setItem("farmerplus:lastSynced", new Date().toISOString());
       window.dispatchEvent(new Event("farmerplus:change"));
       return { ok: true };
@@ -115,7 +118,7 @@ export function syncAll() {
 export const syncAnimals = syncAll;
 
 export function unsyncedCount() {
-  let n = read<string[]>(DIRTY, []).length;
+  let n = read<string[]>(DIRTY, []).length + vcUnsynced();
   for (const app of APPS) n += read<FarmRecord[]>(key(app), []).filter((r) => r.sync !== "synced").length + read<string[]>(tombKey(app), []).length;
   return n;
 }
