@@ -24,7 +24,7 @@ export type Remittance = { id: string; status: string; amount: number; source_cu
 export type Settlement = { id: string; status: string; gross_amount: number; fees: number; net_amount: number; merchant_id?: string };
 export type List<T> = { data: T[]; has_more?: boolean };
 
-type Opts = { baseUrl?: string };
+type Opts = { baseUrl?: string | undefined };
 
 export default class Forus {
   private base: string;
@@ -64,10 +64,10 @@ export default class Forus {
 
   payments = {
     create: (p: {
-      amount: number; currency: string; wallet_id: string; method?: "card" | "mobile_money";
-      mobile_number?: string; reference: string; description?: string;
+      amount: number; currency: string; wallet_id: string; method?: "card" | "mobile_money" | undefined;
+      mobile_number?: string | undefined; reference: string; description?: string | undefined;
     }) => this.req<Payment>("POST", "/payments", p),
-    refund: (id: string, p: { amount?: number } = {}) =>
+    refund: (id: string, p: { amount?: number | undefined } = {}) =>
       this.req<Payment>("POST", `/payments/${encodeURIComponent(id)}/refund`, p),
     list: (p: { wallet_id?: string; limit?: number } = {}) => this.req<List<Payment>>("GET", `/payments${this.qs(p)}`),
   };
