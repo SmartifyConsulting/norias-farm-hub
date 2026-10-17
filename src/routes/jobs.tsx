@@ -102,7 +102,7 @@ function MyJobs() {
   );
 }
 
-const blank = { title: "", category: !, type: !, province: "Gauteng", town: "", openings: "1", minPay: "", maxPay: "", period: "month", deadline: "", description: "", requirements: "" };
+const blank = { title: "", category: JOB_CATEGORIES[0]!, type: JOB_TYPES[0]!, province: "Gauteng", town: "", openings: "1", minPay: "", maxPay: "", period: "month", deadline: "", description: "", requirements: "" };
 
 function PostJob({ onDone }: { onDone: () => void }) {
   const [jobs, setJobs] = useJobs();

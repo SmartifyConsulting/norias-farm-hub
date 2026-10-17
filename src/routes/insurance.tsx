@@ -43,7 +43,7 @@ const statusTone = { "Needs quote": "warn", Quoted: "info", Active: "ok", Declin
 
 function Farmer() {
   const [cover, setCover] = useCover();
-  const [f, setF] = useState({ crop: "", value: "", province: "Free State", peril: ! });
+  const [f, setF] = useState({ crop: "", value: "", province: "Free State", peril: PERILS[0]! });
   const [claim, setClaim] = useState<Record<string, { amount: string; reason: string }>>({});
   const add = () => {
     const v = Number(f.value);
