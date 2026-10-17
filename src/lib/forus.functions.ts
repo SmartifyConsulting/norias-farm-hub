@@ -13,7 +13,7 @@ async function forus<T>(path: string, init?: { method?: string; body?: unknown }
     const res = await fetch(`${base}${path}`, {
       method: init?.method ?? "GET",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: init?.body ? JSON.stringify(init.body) : undefined,
+      body: init?.body ? JSON.stringify(init.body) : null,
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
