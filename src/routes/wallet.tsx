@@ -1,83 +1,111 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Screen, SyncBadge } from "@/components/Dock";
-import { useOnline } from "@/lib/farm";
+import { useCallback, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Screen } from "@/components/Dock";
+import { createPayment, createWallet, getWallet, listPayments, type ForusPayment, type ForusWallet } from "@/lib/forus.functions";
 
 export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
-      { title: "Wallet — FarmerPlus" },
-      { name: "description", content: "Track farm income and expenses in your FarmerPlus wallet." },
-      { property: "og:title", content: "Wallet — FarmerPlus" },
-      { property: "og:description", content: "Farm income and expenses at a glance." },
+      { title: "Farmer Wallet — FarmerPlus" },
+      { name: "description", content: "Your FarmerPlus Farmer Wallet: balance, payments and payouts in ZAR." },
+      { property: "og:title", content: "Farmer Wallet — FarmerPlus" },
+      { property: "og:description", content: "Receive and send farm payments in ZAR." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: WalletPage,
 });
 
-type Tx = { id: string; label: string; amount: number; date: string; sync: "synced" | "local" };
+const KEY = "farmerplus:walletId";
+const zar = (cents: number) => (cents / 100).toLocaleString("en-ZA", { style: "currency", currency: "ZAR" });
 
 function WalletPage() {
-  const online = useOnline();
-  const [txs, setTxs] = useState<Tx[]>([]);
-  const [label, setLabel] = useState("");
+  const create = useServerFn(createWallet);
+  const fetchWallet = useServerFn(getWallet);
+  const fetchPayments = useServerFn(listPayments);
+  const pay = useServerFn(createPayment);
+  const [walletId, setWalletId] = useState<string | null>(null);
+  const [wallet, setWallet] = useState<ForusWallet | null>(null);
+  const [payments, setPayments] = useState<ForusPayment[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [amount, setAmount] = useState("");
-  useEffect(() => { try { setTxs(JSON.parse(localStorage.getItem("farmerplus:wallet") || "[]")); } catch {} }, []);
-  const persist = (n: Tx[]) => { localStorage.setItem("farmerplus:wallet", JSON.stringify(n)); setTxs(n); };
-  const balance = txs.reduce((s, t) => s + t.amount, 0);
-  const add = (sign: 1 | -1) => {
-    const v = parseFloat(amount);
-    if (!label.trim() || !v) return;
-    persist([{ id: crypto.randomUUID(), label: label.trim(), amount: sign * Math.abs(v), date: new Date().toISOString(), sync: online ? "synced" : "local" }, ...txs]);
-    setLabel(""); setAmount("");
+  const [desc, setDesc] = useState("");
+
+  useEffect(() => { setWalletId(localStorage.getItem(KEY)); }, []);
+
+  const refresh = useCallback(async (id: string) => {
+    const w = await fetchWallet({ data: { id } });
+    if (!w.ok) return setError(w.error);
+    setWallet(w.data); setError(null);
+    const p = await fetchPayments({ data: { walletId: id } });
+    if (p.ok) setPayments(p.data.data ?? []);
+  }, [fetchWallet, fetchPayments]);
+
+  useEffect(() => { if (walletId) refresh(walletId); }, [walletId, refresh]);
+
+  const open = async () => {
+    setBusy(true);
+    const r = await create({ data: { label: "Farmer Wallet" } });
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    localStorage.setItem(KEY, r.data.id); setWalletId(r.data.id); setWallet(r.data);
   };
+
+  const receive = async () => {
+    const cents = Math.round(parseFloat(amount) * 100);
+    if (!walletId || !cents || cents <= 0) return;
+    setBusy(true);
+    const r = await pay({ data: { walletId, amountCents: cents, reference: `fp_${Date.now()}`, description: desc || undefined } });
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    setAmount(""); setDesc(""); refresh(walletId);
+  };
+
   const input = "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+  const balance = wallet?.available_balance ?? wallet?.balance ?? 0;
+
   return (
-    <Screen title="Wallet">
+    <Screen title="Farmer Wallet">
       <div className="md:grid md:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] md:items-start md:gap-6">
-      <div className="md:sticky md:top-24">
-      <div className="rounded-3xl bg-primary p-6 text-primary-foreground">
-        <p className="text-xs uppercase tracking-widest opacity-80">Farm balance</p>
-        <p className="font-display text-4xl">{balance.toLocaleString(undefined, { style: "currency", currency: "USD" })}</p>
-      </div>
-      <div className="mt-4 space-y-2 rounded-2xl border bg-card p-4">
-        <input className={input} placeholder="Description (e.g. Sold 200kg wheat)" value={label} onChange={(e) => setLabel(e.target.value)} />
-        <input className={input} placeholder="Amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
-        <div className="grid grid-cols-2 gap-2">
-          <button onClick={() => add(1)} className="rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground">+ Income</button>
-          <button onClick={() => add(-1)} className="rounded-xl bg-secondary py-2 text-sm font-semibold text-secondary-foreground">− Expense</button>
-        </div>
-      </div>
-      </div>
-      <div className="mt-4 md:mt-0">
-      <ul className="space-y-2 md:hidden">
-        {txs.map((t) => (
-          <li key={t.id} className="flex items-center justify-between rounded-2xl border bg-card p-4">
-            <div>
-              <p className="font-medium text-card-foreground">{t.label}</p>
-              <p className="text-xs text-muted-foreground">{new Date(t.date).toLocaleDateString()} <SyncBadge status={t.sync} /></p>
+        <div className="space-y-4 md:sticky md:top-24">
+          <div className="rounded-3xl bg-primary p-6 text-primary-foreground">
+            <p className="text-xs uppercase tracking-widest opacity-80">Available balance</p>
+            <p className="font-display text-4xl">{zar(balance)}</p>
+            {walletId && <p className="mt-2 font-mono text-xs opacity-80">{walletId}</p>}
+          </div>
+          {error && <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+          {!walletId ? (
+            <button disabled={busy} onClick={open} className="w-full rounded-xl bg-foreground py-3 text-sm font-semibold text-background disabled:opacity-60">
+              {busy ? "Opening…" : "Open my Farmer Wallet"}
+            </button>
+          ) : (
+            <div className="space-y-2 rounded-2xl border bg-card p-4">
+              <p className="text-sm font-semibold">Receive a payment</p>
+              <input className={input} placeholder="Amount (R)" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <input className={input} placeholder="Description (e.g. 200kg wheat)" value={desc} onChange={(e) => setDesc(e.target.value)} />
+              <button disabled={busy} onClick={receive} className="w-full rounded-xl bg-primary py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+                {busy ? "Processing…" : "Request payment"}
+              </button>
             </div>
-            <span className={`font-semibold ${t.amount < 0 ? "text-destructive" : "text-primary"}`}>{t.amount < 0 ? "−" : "+"}{Math.abs(t.amount).toFixed(2)}</span>
-          </li>
-        ))}
-      </ul>
-      <table className="hidden w-full overflow-hidden rounded-2xl border bg-card text-sm md:table">
-        <thead className="bg-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
-          <tr><th className="p-3">Description</th><th className="p-3">Date</th><th className="p-3">Status</th><th className="p-3 text-right">Amount</th></tr>
-        </thead>
-        <tbody>
-          {txs.length === 0 && <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">No transactions yet.</td></tr>}
-          {txs.map((t) => (
-            <tr key={t.id} className="border-t">
-              <td className="p-3 font-medium">{t.label}</td>
-              <td className="p-3 text-muted-foreground">{new Date(t.date).toLocaleDateString()}</td>
-              <td className="p-3"><SyncBadge status={t.sync} /></td>
-              <td className={`p-3 text-right font-semibold ${t.amount < 0 ? "text-destructive" : "text-success"}`}>{t.amount < 0 ? "−" : "+"}{Math.abs(t.amount).toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      </div>
+          )}
+        </div>
+        <div className="mt-4 md:mt-0">
+          <ul className="space-y-2">
+            {payments.length === 0 && <li className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">No payments yet.</li>}
+            {payments.map((p) => (
+              <li key={p.id} className="flex items-center justify-between rounded-2xl border bg-card p-4">
+                <div>
+                  <p className="font-medium">{p.description || p.reference || "Payment"}</p>
+                  <p className="text-xs text-muted-foreground">{p.created_at ? new Date(p.created_at).toLocaleDateString("en-ZA") : ""} · {p.status}</p>
+                </div>
+                <span className="font-semibold text-success">+{zar(p.amount)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </Screen>
   );
