@@ -1,3 +1,4 @@
+import logo from "@/assets/farmerplus-logo.png.asset.json";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
@@ -77,8 +78,8 @@ export function TopNav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 hidden border-b bg-primary text-primary-foreground md:block">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2 font-display text-lg font-bold">
-          <Sprout className="h-5 w-5" /> FarmerPlus
+        <Link to="/" className="flex shrink-0 items-center" aria-label="FarmerPlus home">
+          <img src={logo.url} alt="FarmerPlus" className="h-8 w-auto" />
         </Link>
         <nav className="flex items-center gap-1">
           {items.map(({ to, label, icon: Icon, params }) => (
