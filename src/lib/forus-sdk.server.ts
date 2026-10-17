@@ -100,8 +100,30 @@ export default class Forus {
   };
 }
 
+export const SANDBOX = "https://sandbox-api.forus.digital/v1";
+
+export function isTestKey() {
+  return (process.env["FORUS_API_KEY"] || "").startsWith("forus_test");
+}
+
 export function forusClient() {
   const key = process.env["FORUS_API_KEY"];
   if (!key) throw new ForusError("Wallet service is not configured.", 500, "not_configured");
-  return new Forus(key, { baseUrl: process.env["FORUS_API_BASE"] });
+  return new Forus(key, { baseUrl: process.env["FORUS_API_BASE"] || (isTestKey() ? SANDBOX : undefined) });
+}
+
+// Sandbox test outcomes published by FORUS, used while the sandbox operations are unpublished.
+export function simulateOutcome(p: { method?: string; card_number?: string; mobile_number?: string }):
+  { status: "completed" } | { status: "failed"; error: string } {
+  if (p.method === "mobile_money") {
+    const n = (p.mobile_number || "").replace(/\s/g, "");
+    if (n === "+254700000001") return { status: "completed" };
+    if (n === "+254700000002") return { status: "failed", error: "Mobile money transaction failed." };
+    return { status: "failed", error: "Use a sandbox test number (+254700000001 or +254700000002)." };
+  }
+  const c = (p.card_number || "").replace(/\s/g, "");
+  if (c === "4242424242424242") return { status: "completed" };
+  if (c === "4000000000000002") return { status: "failed", error: "Card was declined." };
+  if (c === "4000000000009995") return { status: "failed", error: "Not enough money on the card." };
+  return { status: "failed", error: "Use a sandbox test card (e.g. 4242 4242 4242 4242)." };
 }
