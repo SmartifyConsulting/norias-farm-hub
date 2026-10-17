@@ -59,12 +59,13 @@ export const newAin = () => `AIN-${Math.floor(100000 + Math.random() * 900000)}`
 export type Job = {
   id: string; title: string; category: string; type: string; province: string; town: string;
   openings: number; minPay: number; maxPay: number; period: string; deadline: string;
-  description: string; requirements: string; postedAt: string; applicants: Applicant[]; status: "Active" | "Closed";
+  description: string; requirements: string; postedAt: string; status: "Active" | "Closed"; _owner?: string;
 };
-export type Applicant = { id: string; name: string; phone: string; note: string; at: string };
+export type Applicant = { id: string; jobId: string; name: string; phone: string; note: string; at: string };
 export const JOB_CATEGORIES = ["Farm management", "Livestock", "Crops & agronomy", "Machinery operator", "Packhouse", "Logistics & driving", "General farm work"];
 export const JOB_TYPES = ["Full time", "Part time", "Seasonal", "Contract", "Internship"];
 export const useJobs = () => useStore<Job[]>("farmerplus:vc:jobs", []);
+export const useApplications = () => useStore<Applicant[]>("farmerplus:vc:applications", []);
 
 /* ---------- Insurance ---------- */
 export type CoverRequest = {
