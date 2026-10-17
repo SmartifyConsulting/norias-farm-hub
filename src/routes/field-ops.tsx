@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Circle } from "lucide-react";
 import { Screen } from "@/components/Dock";
+import { DemoBar } from "@/lib/vc-demo";
 import { Card, Field, Stat, Tabs, Pill, inputCls, btn, btnGhost } from "@/components/vc-ui";
 import { useUser } from "@/lib/auth";
 import { profileOf } from "@/lib/profile";
@@ -35,6 +36,7 @@ function FieldOps() {
   const verified = farmers.filter((f) => verificationOf(f, insp).verified).length;
   return (
     <Screen title="Field Operations">
+      <DemoBar />
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Registered farmers" value={farmers.length} />
         <Stat label="Verified" value={verified} />

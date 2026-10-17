@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Screen } from "@/components/Dock";
+import { DemoBar } from "@/lib/vc-demo";
 import { Card, Field, Stat, Tabs, Pill, inputCls, btn, btnGhost } from "@/components/vc-ui";
 import { PERILS, PROVINCES, rand, suggestedPremium, today, uid, useBaseRate, useCover, type CoverRequest } from "@/lib/valuechain";
 
@@ -27,6 +28,7 @@ function InsurancePage() {
   const active = cover.filter((c) => c.status === "Active");
   return (
     <Screen title="Farm Insurance">
+      <DemoBar />
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Awaiting quote" value={cover.filter((c) => c.status === "Needs quote").length} />
         <Stat label="Active policies" value={active.length} />

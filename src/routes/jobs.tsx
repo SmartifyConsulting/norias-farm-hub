@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useUser } from "@/lib/auth";
 import { Screen } from "@/components/Dock";
+import { DemoBar } from "@/lib/vc-demo";
 import { Card, Field, Tabs, Pill, inputCls, btn, btnGhost } from "@/components/vc-ui";
 import { JOB_CATEGORIES, JOB_TYPES, PROVINCES, rand, today, uid, useJobs, useApplications, type Job } from "@/lib/valuechain";
 
@@ -26,6 +27,7 @@ function JobsPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Find work");
   return (
     <Screen title="Agri Jobs">
+      <DemoBar />
       <Tabs tabs={TABS} value={tab} onChange={setTab} />
       {tab === "Find work" && <Board />}
       {tab === "My job posts" && <MyJobs />}

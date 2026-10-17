@@ -4,8 +4,25 @@ import { toast } from "sonner";
 import { Screen } from "@/components/Dock";
 import { Card, Field, Stat, Tabs, Pill, inputCls, btn, btnGhost } from "@/components/vc-ui";
 import {
-  BODY_TYPES, FACILITY_KINDS, PROVINCES, rand, today, uid, useBookings, useFacilities, useVehicles, type Booking,
+  BODY_TYPES, FACILITY_KINDS, HOLDS_CAPACITY, PROVINCES, rand, today, uid, useBookings, useFacilities, useUsage, useVehicles, usedAt,
+  type Booking, type Facility,
 } from "@/lib/valuechain";
+import { DemoBar } from "@/lib/vc-demo";
+import { isDemo, metaKey } from "@/lib/vc-sync";
+import { useUser } from "@/lib/auth";
+
+/** Free tonnes at each facility, counting every device's bookings the server knows about plus this device's unsynced ones. */
+function useFree() {
+  const [bk] = useBookings(); const [usage] = useUsage();
+  let synced = new Set<string>();
+  try { synced = new Set(Object.keys(JSON.parse(localStorage.getItem(metaKey("farmerplus:vc:bookings")) || "{}"))); } catch { /* none */ }
+  return (f: Facility) => {
+    const used = isDemo(f)
+      ? bk.filter((b) => b.kind === "Storage" && b.resourceId === f.id && HOLDS_CAPACITY.includes(b.status)).reduce((s, b) => s + b.qty, 0)
+      : usedAt(f.id, bk, usage, synced);
+    return Math.max(0, f.capacity - used);
+  };
+}
 
 export const Route = createFileRoute("/logistics")({
   head: () => ({
@@ -25,14 +42,15 @@ const TABS = ["Book", "My bookings", "My fleet & facilities"] as const;
 
 function LogisticsPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Book");
-  const [v] = useVehicles(); const [fa] = useFacilities(); const [b] = useBookings();
+  const [v] = useVehicles(); const [fa] = useFacilities(); const [b] = useBookings(); const free = useFree();
   return (
     <Screen title="Logistics & Storage">
+      <DemoBar />
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Vehicles" value={v.length} />
         <Stat label="Payload" value={`${v.reduce((s, x) => s + x.tonnes, 0)} t`} />
-        <Stat label="Free storage" value={`${fa.reduce((s, x) => s + x.capacity - x.booked, 0)} t`} />
-        <Stat label="Active bookings" value={b.filter((x) => !["Delivered", "Declined"].includes(x.status)).length} />
+        <Stat label="Free storage" value={`${fa.reduce((s, x) => s + free(x), 0)} t`} />
+        <Stat label="Active bookings" value={b.filter((x) => !["Delivered", "Declined", "Cancelled"].includes(x.status)).length} />
       </div>
       <Tabs tabs={TABS} value={tab} onChange={setTab} />
       {tab === "Book" && <Book />}
@@ -43,14 +61,13 @@ function LogisticsPage() {
 }
 
 function Book() {
-  const [vehicles] = useVehicles(); const [fac, setFac] = useFacilities(); const [bk, setBk] = useBookings();
+  const [vehicles] = useVehicles(); const [fac] = useFacilities(); const [bk, setBk] = useBookings(); const freeOf = useFree();
   const [qty, setQty] = useState<Record<string, string>>({});
   const [route, setRoute] = useState<Record<string, string>>({});
   const book = (kind: Booking["kind"], id: string, max: number) => {
     const n = Number(qty[id]);
     if (!(n > 0) || n > max) { toast.error(`Enter between 1 and ${max} tonnes`); return; }
     if (kind === "Transport" && !route[id]?.includes("→") && !route[id]?.trim()) { toast.error("Enter where to and from"); return; }
-    if (kind === "Storage") setFac(fac.map((f) => (f.id === id ? { ...f, booked: f.booked + n } : f)));
     setBk([{ id: uid(), kind, resourceId: id, qty: n, from: route[id] ?? "", date: today(), status: "Requested" }, ...bk]);
     setQty({ ...qty, [id]: "" });
     toast.success(`${kind} requested`);
@@ -73,11 +90,11 @@ function Book() {
       </Card>
       <Card title="Storage">
         <ul className="space-y-3">{fac.map((f) => {
-          const free = f.capacity - f.booked;
+          const free = freeOf(f);
           return (
             <li key={f.id} className="rounded-xl border p-3 text-sm">
               <p className="font-semibold">{f.name}</p>
-              <p className="text-xs text-muted-foreground">{f.kind} • {f.province} • {free} of {f.capacity} t free • {rand(f.ratePerTMonth)}/t/month</p>
+              <p className="text-xs text-muted-foreground">{f.kind} • {f.province} • {free} of {f.capacity} t free{free <= 0 ? " — fully booked" : ""} • {rand(f.ratePerTMonth)}/t/month</p>
               <div className="mt-2 flex gap-2">
                 <input className={`${inputCls} max-w-24`} placeholder="Tonnes" value={qty[f.id] ?? ""} onChange={(e) => setQty({ ...qty, [f.id]: e.target.value })} />
                 <button className={btn} disabled={free <= 0} onClick={() => book("Storage", f.id, free)}>Reserve</button>
@@ -95,25 +112,31 @@ const FLOW: Record<Booking["kind"], Booking["status"][]> = {
 };
 
 function Bookings() {
-  const [bk, setBk] = useBookings(); const [v] = useVehicles(); const [fac, setFac] = useFacilities();
+  const [bk, setBk] = useBookings(); const [v] = useVehicles(); const [fac] = useFacilities(); const { user } = useUser();
   if (!bk.length) return <Card><p className="text-sm text-muted-foreground">No bookings yet.</p></Card>;
-  const name = (b: Booking) => (b.kind === "Transport" ? v.find((x) => x.id === b.resourceId)?.name : fac.find((x) => x.id === b.resourceId)?.name) ?? "Removed";
-  const advance = (b: Booking) => {
-    const f = FLOW[b.kind]; const next = f[f.indexOf(b.status) + 1];
-    if (next) setBk(bk.map((x) => (x.id === b.id ? { ...x, status: next } : x)));
-  };
-  const decline = (b: Booking) => {
-    if (b.kind === "Storage") setFac(fac.map((f) => (f.id === b.resourceId ? { ...f, booked: Math.max(0, f.booked - b.qty) } : f)));
-    setBk(bk.map((x) => (x.id === b.id ? { ...x, status: "Declined" } : x)));
-  };
+  const res = (b: Booking) => (b.kind === "Transport" ? v.find((x) => x.id === b.resourceId) : fac.find((x) => x.id === b.resourceId)) as { name: string; _owner?: string } | undefined;
+  const set = (b: Booking, status: Booking["status"]) => setBk(bk.map((x) => (x.id === b.id ? { ...x, status } : x)));
   return (
     <Card title="Bookings">
+      <p className="mb-3 text-xs text-muted-foreground">Requested, accepted and stored bookings hold storage space. Declining or cancelling frees it for everyone.</p>
       <ul className="space-y-2">{bk.map((b) => {
         const f = FLOW[b.kind]; const next = f[f.indexOf(b.status) + 1];
+        const r = res(b);
+        // The provider moves a booking forward; the person who booked can cancel. Demo/local items: both.
+        const provider = !r?._owner || r._owner === user?.id;
+        const booker = !b._owner || b._owner === user?.id;
+        const closed = ["Declined", "Cancelled", "Delivered", "Stored"].includes(b.status);
         return (
           <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 text-sm">
-            <span>{b.kind}: <b>{name(b)}</b> • {b.qty} t {b.from && `• ${b.from}`} • {b.date} <Pill tone={b.status === "Declined" ? "bad" : next ? "warn" : "ok"}>{b.status}</Pill></span>
-            {next && b.status !== "Declined" && <span className="flex gap-2"><button className={btnGhost} onClick={() => advance(b)}>Mark {next.toLowerCase()}</button>{b.status === "Requested" && <button className={btnGhost} onClick={() => decline(b)}>Decline</button>}</span>}
+            <span>{b.kind}: <b>{r?.name ?? "Removed"}</b> • {b.qty} t {b.from && `• ${b.from}`} • {b.date} <Pill tone={["Declined", "Cancelled"].includes(b.status) ? "bad" : next ? "warn" : "ok"}>{b.status}</Pill></span>
+            {!["Declined", "Cancelled"].includes(b.status) && (
+              <span className="flex gap-2">
+                {next && provider && <button className={btnGhost} onClick={() => set(b, next)}>Mark {next.toLowerCase()}</button>}
+                {b.status === "Requested" && provider && <button className={btnGhost} onClick={() => set(b, "Declined")}>Decline</button>}
+                {!closed && booker && <button className={btnGhost} onClick={() => set(b, "Cancelled")}>Cancel</button>}
+                {b.kind === "Storage" && b.status === "Stored" && booker && <button className={btnGhost} onClick={() => set(b, "Cancelled")}>Collect & release</button>}
+              </span>
+            )}
           </li>);
       })}</ul>
     </Card>
@@ -121,7 +144,7 @@ function Bookings() {
 }
 
 function Provider() {
-  const [vehicles, setV] = useVehicles(); const [fac, setF] = useFacilities();
+  const [vehicles, setV] = useVehicles(); const [fac, setF] = useFacilities(); const freeOf = useFree();
   const [v, sv] = useState({ name: "", plate: "", body: BODY_TYPES[0]!, tonnes: "", base: "", ratePerKm: "" });
   const [f, sf] = useState({ name: "", kind: FACILITY_KINDS[0]!, province: "Free State", capacity: "", ratePerTMonth: "" });
   const addV = () => {
@@ -157,7 +180,7 @@ function Provider() {
           <Field label="Rate (R per t / month)"><input className={inputCls} value={f.ratePerTMonth} onChange={(e) => sf({ ...f, ratePerTMonth: e.target.value })} /></Field>
         </div>
         <button className={`${btn} mt-3`} onClick={addF}>Add facility</button>
-        <ul className="mt-4 space-y-1 text-sm">{fac.map((x) => <li key={x.id} className="flex justify-between">{x.name} • {x.booked}/{x.capacity} t <button className="text-xs text-destructive" onClick={() => setF(fac.filter((y) => y.id !== x.id))}>Remove</button></li>)}</ul>
+        <ul className="mt-4 space-y-1 text-sm">{fac.map((x) => <li key={x.id} className="flex justify-between">{x.name} • {x.capacity - freeOf(x)}/{x.capacity} t <button className="text-xs text-destructive" onClick={() => setF(fac.filter((y) => y.id !== x.id))}>Remove</button></li>)}</ul>
       </Card>
     </div>
   );
