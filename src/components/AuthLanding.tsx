@@ -8,6 +8,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useGuest } from "@/lib/auth";
 import { friendlyError } from "@/lib/errors";
 import bg from "@/assets/countryside.jpg";
+import logo from "@/assets/farmerplus-logo.png.asset.json";
 
 type Mode = "signin" | "signup";
 
@@ -26,10 +27,8 @@ export function AuthLanding({ initial = "signup" }: { initial?: Mode }) {
       <main className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-6 px-6 py-8 lg:max-w-none lg:flex-row lg:items-stretch lg:gap-0 lg:p-0">
         <div className="flex w-full flex-1 flex-col items-center justify-center gap-2 text-primary-foreground lg:w-1/2 lg:px-12">
           <div className="mb-6 flex flex-col items-center gap-3">
-            <span className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-foreground text-primary md:h-32 md:w-32">
-              <Sprout className="h-12 w-12 md:h-16 md:w-16" />
-            </span>
-            <p className="font-display text-4xl font-bold md:text-5xl">FarmerPlus</p>
+            <h1 className="sr-only">FarmerPlus</h1>
+            <img src={logo.url} alt="FarmerPlus" className="h-auto w-full max-w-xs drop-shadow-lg md:max-w-md" />
           </div>
           <p className="text-center text-sm text-primary-foreground/80">
             Your farm in your pocket — records, weather and sync.
