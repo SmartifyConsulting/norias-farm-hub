@@ -66,19 +66,20 @@ export async function syncValueChain(userId: string) {
 
     const { data, error } = await supabase.from("vc_records").select("id,owner_id,farm_id,data").eq("collection", collection);
     if (error) throw error;
-    // Re-read: the user may have edited while we were online-waiting; keep those edits for the next sync.
+    // Re-read: edits made while this sync was running stay local and go up next time.
     const now = read<Item[]>(k, []);
-    const pending = diff(now, meta);
-    const pendingIds = new Set([...pending.changed.map((i) => i.id), ...pending.deleted]);
+    const pushed: Meta = { ...meta };
+    for (const i of changed) pushed[i.id] = hashOf(i);
+    for (const id of deleted) delete pushed[id];
+    const later = diff(now, pushed);
+    const laterChanged = new Map(later.changed.map((i) => [i.id, i]));
+    const laterDeleted = new Set(later.deleted);
     const server: Item[] = (data ?? []).map((r) => ({ ...(r.data as Record<string, unknown>), id: r.id, _owner: r.owner_id, _farm: r.farm_id }));
     const serverIds = new Set(server.map((i) => i.id));
-    const pushedIds = new Set(changed.map((i) => i.id));
-    const merged = [
-      ...now.filter((i) => pendingIds.has(i.id) && !pushedIds.has(i.id) || (pendingIds.has(i.id) && !serverIds.has(i.id))),
-      ...server.filter((i) => !pendingIds.has(i.id) || pushedIds.has(i.id)),
+    const out: Item[] = [
+      ...later.changed.filter((i) => !serverIds.has(i.id)),
+      ...server.filter((i) => !laterDeleted.has(i.id)).map((i) => laterChanged.get(i.id) ?? i),
     ];
-    const seen = new Set<string>();
-    const out = merged.filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
     const nextMeta: Meta = {};
     for (const i of server) nextMeta[i.id] = hashOf(i);
     localStorage.setItem(k, JSON.stringify(out));
