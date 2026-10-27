@@ -20,3 +20,5 @@ jobs:
         run: bun run build
       - name: Typecheck
         run: bunx tsc --noEmit
+      - name: Inventory ledger tests
+        run: bunx vitest run src/lib/inventory-ledger.test.ts
