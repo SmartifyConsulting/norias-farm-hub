@@ -37,3 +37,16 @@ export function inventoryProducts(records: StockMovement[], farmId: string | nul
   }
   return [...products.values()].sort((a, b) => a.product.localeCompare(b.product));
 }
+/** Detect a sale stock deduction without its corresponding finance record (or vice versa). */
+export function saleReconciliation(stock: StockMovement[], finance: FarmRecord[], farmId: string | null, animalId: string) {
+  const reference = (detail: string) => detail.match(/Sale reference:\\s*([a-f0-9-]{36})/i)?.[1];
+  const stockRefs = new Set(stock.filter(r => r.farmId === farmId && r.animalId === animalId)
+    .map(decodeInventoryRecord).filter(r => r.movementType === "sale")
+    .map(r => r.referenceId ?? reference(r.detail)).filter((r): r is string => !!r));
+  const financeRefs = new Set(finance.filter(r => r.farmId === farmId && r.animalId === animalId && r.title.startsWith("Sale: "))
+    .map(r => reference(r.detail)).filter((r): r is string => !!r));
+  return {
+    missingFinance: [...stockRefs].filter(ref => !financeRefs.has(ref)),
+    missingStock: [...financeRefs].filter(ref => !stockRefs.has(ref)),
+  };
+}
