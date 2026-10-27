@@ -201,6 +201,7 @@ function MiniAppPage() {
         detail: detail.trim(),
         qty: qty.trim(),
         ...clean(extra),
+        farmId: current?.id ?? null,
         date: new Date().toISOString(),
         sync: cloud
           ? user
