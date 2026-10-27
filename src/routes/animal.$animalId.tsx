@@ -6,7 +6,7 @@ import { useTeam, permissions } from "@/lib/team";
 import { useUser } from "@/lib/auth";
 import { syncAnimals } from "@/lib/animal-sync";
 import { toast } from "sonner";
-import { inventoryBalance, inventoryProducts, stockKey, encodeInventoryDetail, saleReconciliation, type StockMovement } from "@/lib/inventory-ledger";
+import { inventoryBalance, inventoryProducts, stockKey, encodeInventoryDetail, inventoryDisplayDetail, saleReconciliation, type StockMovement } from "@/lib/inventory-ledger";
 
 export const Route = createFileRoute("/animal/$animalId")({
   component: AnimalDetail,
