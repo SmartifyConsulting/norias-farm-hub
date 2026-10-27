@@ -160,7 +160,7 @@ function AnimalDetail() {
       </section>
       <section className="mb-5 rounded-2xl border bg-card p-4">
         <h2 className="font-semibold">Sell recorded livestock output</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Available {saleItem.trim() || "selected output"}: {stockBalanceFor(saleItem)} units. Output names and units must match exactly between production and sale records.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Available {saleItem.trim() || "selected output"}: {stockBalanceFor(saleItem, saleUnit)} {saleUnit}. Only structured inventory movements count toward this balance.</p>
         <form onSubmit={recordSale} className="mt-3 grid gap-3 sm:grid-cols-3">
           <label className="text-sm">Output / item<input required className="mt-1 w-full rounded-xl border bg-background p-2" value={saleItem} onChange={e => setSaleItem(e.target.value)} placeholder="e.g. milk (litres)" /></label>
           <label className="text-sm">Unit<select className="mt-1 w-full rounded-xl border bg-background p-2" value={saleUnit} onChange={e => setSaleUnit(e.target.value)}><option value="litres">Litres</option><option value="kg">Kilograms</option><option value="units">Units</option><option value="dozens">Dozens</option></select></label>
