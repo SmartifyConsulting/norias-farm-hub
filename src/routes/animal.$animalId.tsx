@@ -182,7 +182,7 @@ function AnimalDetail() {
             <li key={app + record.id} className="rounded-xl border p-3">
               <p className="text-xs text-muted-foreground">{label} · {new Date(record.date).toLocaleDateString()}</p>
               <p className="font-semibold">{record.title}</p>
-              {record.detail && <p className="text-sm text-muted-foreground">{record.detail}</p>}
+              {record.detail && <p className="text-sm text-muted-foreground">{app === "stock" ? inventoryDisplayDetail(record.detail) : record.detail}</p>}
               {record.qty && <p className="text-sm">Recorded: {record.qty}</p>}
               <Link to="/app/$appId" params={{ appId: app }} className="text-xs text-primary underline">Open {label.toLowerCase()} records</Link>
             </li>
