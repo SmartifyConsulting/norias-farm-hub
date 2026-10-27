@@ -731,6 +731,8 @@ function MiniAppPage() {
 /** Fields, merged into My Farm: a simple list, with precise location now handled by pinning a field to the farm map above. */
 function FieldsSection() {
   const { records, save } = useRecords("fields");
+  const { current } = useTeam();
+  const visibleFields = records.filter((r) => r.farmId == null || r.farmId === current?.id);
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [qty, setQty] = useState("");
@@ -747,6 +749,7 @@ function FieldsSection() {
         qty: qty.trim(),
         date: new Date().toISOString(),
         sync: "local",
+        farmId: current?.id ?? null,
       },
       ...records,
     ]);
@@ -780,13 +783,13 @@ function FieldsSection() {
           Add field
         </button>
       </form>
-      {records.length === 0 ? (
+      {visibleFields.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No fields yet — add one above, then pin it on the farm map.
         </p>
       ) : (
         <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 xl:grid-cols-3">
-          {records.map((r) => (
+          {visibleFields.map((r) => (
             <li
               key={r.id}
               className="flex items-center justify-between gap-2 rounded-2xl border bg-card p-3 text-sm"
