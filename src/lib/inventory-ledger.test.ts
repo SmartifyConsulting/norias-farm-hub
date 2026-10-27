@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, inventoryProducts, type StockMovement } from "./inventory-ledger";
+import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, inventoryProducts, saleReconciliation, type StockMovement } from "./inventory-ledger";
 
 const base = { date: "2026-10-28T00:00:00Z", sync: "local" as const, farmId: "farm-a", animalId: "animal-a" };
 const movement = (id: string, product: string, unit: string, qty: number, type: "production" | "sale" = "production"): StockMovement => ({
@@ -30,6 +30,13 @@ describe("livestock inventory ledger", () => {
   test("excludes unstructured legacy rows from balances", () => {
     const legacy: StockMovement = { ...base, id: "legacy", title: "Milk", detail: "old record", qty: "500" };
     expect(inventoryBalance([legacy], "farm-a", "animal-a", "Milk", "litres")).toBe(0);
+  });
+  test("detects unmatched sale records in either direction", () => {
+    const id1 = "11111111-1111-4111-8111-111111111111";
+    const id2 = "22222222-2222-4222-8222-222222222222";
+    const stock = [{ ...movement("sale1", "Milk", "litres", -2, "sale"), detail: encodeInventoryDetail("Sale reference: " + id1, "Milk", "litres", "sale", id1) }];
+    const finance = [{ ...base, id: "payment2", title: "Sale: Milk", detail: "Sale reference: " + id2, qty: "50" }];
+    expect(saleReconciliation(stock, finance, "farm-a", "animal-a")).toEqual({ missingFinance: [id1], missingStock: [id2] });
   });
   test("malformed metadata does not invent inventory", () => {
     const bad: StockMovement = { ...base, id: "bad", title: "Milk", detail: "[[inventory:invalid]]", qty: "50" };
