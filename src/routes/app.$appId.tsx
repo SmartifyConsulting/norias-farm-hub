@@ -968,7 +968,7 @@ function ExtraInputs({
   );
 }
 
-const LINKED = ["tasks", "treatments", "maintenance", "finance"];
+const LINKED = ["tasks", "treatments", "maintenance", "finance", "harvest"];
 const money = (q?: string) => {
   const n = parseFloat((q ?? "").replace(/[^0-9.-]/g, ""));
   return isNaN(n) ? 0 : n;
@@ -1034,6 +1034,8 @@ function RecordItem({
   const cost = linked
     .filter((l) => l.a === "finance" || l.a === "maintenance")
     .reduce((s, l) => s + money(l.v.qty), 0);
+  const harvests = linked.filter((l) => l.a === "harvest");
+  const harvestKg = harvests.reduce((sum, l) => sum + money(l.v.qty), 0);
   const input =
     "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
   if (editing)
@@ -1173,7 +1175,8 @@ function RecordItem({
             })
               .filter(Boolean)
               .join(" · ")}
-            {cost !== 0 && <> · Net R{cost.toFixed(0)}</>}
+            {harvests.length > 0 && <> · Harvest {harvestKg.toLocaleString()} kg</>}
+            {cost !== 0 && <> · Recorded finance R{cost.toFixed(0)}</>}
           </p>
         )}
         {cloud && (
