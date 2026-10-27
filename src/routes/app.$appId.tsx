@@ -1113,6 +1113,12 @@ function RecordItem({
             </span>
           )}
         </div>
+        {app.id === "crops" && (
+          <Link to="/crop-cycle/$cycleId" params={{ cycleId: r.id }}
+            className="mt-2 inline-flex rounded-lg border px-3 py-1 text-xs font-semibold text-primary hover:bg-muted">
+            Open production history
+          </Link>
+        )}
         {r.detail && <p className="text-sm text-muted-foreground">{r.detail}</p>}
         <p className="mt-1 text-xs text-muted-foreground">
           {r.qty && (
