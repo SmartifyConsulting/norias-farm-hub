@@ -41,12 +41,12 @@ function CropCycleDetail() {
   // An explicitly assigned farm must match the active farm. Legacy unassigned
   // records remain available, but are never automatically claimed by a farm.
   const allowed = !!cycle && (cycle.farmId == null || cycle.farmId === current?.id);
-  const canWrite = permissions(current?.role).canWrite && (!cycle?.farmId || cycle.farmId === current?.id);
+  const canWrite = allowed && permissions(current?.role).canWrite;
   const linked = activities.flatMap(({ app, label }) =>
-    stores[app].records.filter((r) => r.cropId === cycleId && (r.farmId == null || r.farmId === cycle?.farmId))
+    stores[app].records.filter((r) => r.cropId === cycleId && r.farmId === (cycle?.farmId ?? null))
       .map((r) => ({ app, label, record: r })),
   ).sort((a, b) => b.record.date.localeCompare(a.record.date));
-  const field = fields.find((f) => f.id === cycle?.fieldId && (f.farmId == null || f.farmId === cycle?.farmId));
+  const field = fields.find((f) => f.id === cycle?.fieldId && f.farmId === (cycle?.farmId ?? null));
   const yieldKg = linked.filter((x) => x.app === "harvest").reduce((sum, x) => {
     const n = Number(x.record.qty);
     return sum + (Number.isFinite(n) ? n : 0);
@@ -60,7 +60,7 @@ function CropCycleDetail() {
         id: crypto.randomUUID(), title: title.trim(), detail: detail.trim(),
         qty: qty.trim(), date: new Date().toISOString(),
         sync: user ? "pending" : "local",
-        farmId: cycle.farmId ?? current?.id ?? null,
+        farmId: cycle.farmId ?? null,
         fieldId: cycle.fieldId,
         cropId: cycle.id,
       };
@@ -90,7 +90,7 @@ function CropCycleDetail() {
       <section className="mb-5 rounded-2xl border bg-card p-4">
         <h2 className="font-display text-xl font-semibold">{cycle.title}</h2>
         <p className="text-sm text-muted-foreground">{cycle.detail || "No description recorded"}</p>
-        <p className="mt-2 text-sm">Farm: {current?.name ?? (cycle.farmId ? "Linked farm" : "Legacy / personal record")}</p>
+        <p className="mt-2 text-sm">Farm: {cycle.farmId ? current?.name ?? "Linked farm" : "Legacy / unassigned record"}</p>
         {field && <p className="text-sm">Field: {field.title}</p>}
         {cycle.due && <p className="text-sm">Planting: {cycle.due}</p>}
         {cycle.end && <p className="text-sm">Expected harvest: {cycle.end}</p>}
@@ -102,7 +102,7 @@ function CropCycleDetail() {
       </section>
       <section className="mb-5 rounded-2xl border bg-card p-4">
         <h2 className="mb-2 font-semibold">Add an activity to this crop cycle</h2>
-        <p className="mb-3 text-xs text-muted-foreground">The crop cycle and field will be linked automatically.</p>
+        <p className="mb-3 text-xs text-muted-foreground">The crop cycle and field will be linked automatically. Legacy unassigned crop cycles remain unassigned until explicitly migrated.</p>
         <form onSubmit={add} className="space-y-3">
           <label className="block text-sm">Activity type
             <select className="mt-1 w-full rounded-xl border bg-background p-2" value={kind}
