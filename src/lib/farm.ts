@@ -108,6 +108,7 @@ export const MINI_APPS: MiniApp[] = [
     titleLabel: "Crop",
     detailLabel: "Field / notes",
     qtyLabel: "Yield (kg)",
+    links: ["field", "crop"],
   },
   {
     id: "fields",
