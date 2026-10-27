@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useStore } from "@/lib/network";
 import { AppLink } from "@/components/AppLink";
 import { appById } from "@/lib/app-registry";
-import { useSettings } from "@/lib/farm";
+import { useSettings, useRecords } from "@/lib/farm";
 import { useTeam } from "@/lib/team";
 import { useFarmDetails } from "@/lib/farmdetails";
 import { Building2, Sprout, Truck, Users, ChartNoAxesCombined, ArrowRight } from "lucide-react";
@@ -84,6 +84,12 @@ function FarmingJourney() {
     : ["Aquaculture", "Beekeeping", "Forestry and nurseries"].includes(category) ? ["other"] : [];
   const effectiveTypes = types ?? suggested;
   const [all, setAll] = useState(false);
+  const { records: cropCycles } = useRecords("crops");
+  const { records: harvests } = useRecords("harvest");
+  const { records: fields } = useRecords("fields");
+  const visibleCycles = cropCycles.filter(c => c.farmId == null || c.farmId === active);
+  const assignedCycles = visibleCycles.filter(c => active != null && c.farmId === active);
+  const unassignedCycles = visibleCycles.filter(c => c.farmId == null);
   const toggle = (type: string) => setTypes(effectiveTypes.includes(type) ? effectiveTypes.filter(t => t !== type) : [...effectiveTypes, type]);
   return (
     <Screen title="My Farming Journey">
@@ -119,6 +125,33 @@ function FarmingJourney() {
           {all ? "Show my activities" : "Show all activities"}
         </button>
       </section>
+      {(effectiveTypes.includes("crops") || all) && (
+        <section className="mb-6 rounded-2xl border bg-card p-4 md:p-5">
+          <h2 className="font-display text-xl font-semibold">My crop cycles</h2>
+          <p className="mb-3 text-sm text-muted-foreground">Open a crop cycle to see its field, activities and harvests together.</p>
+          {assignedCycles.length === 0 && <p className="mb-3 text-sm text-muted-foreground">No crop cycles assigned to this farm yet. Create one or assign an older cycle.</p>}
+          <ul className="grid gap-2 md:grid-cols-2">
+            {assignedCycles.map(c => {
+              const field = fields.find(f => f.id === c.fieldId && (f.farmId == null || f.farmId === active));
+              const count = harvests.filter(h => h.cropId === c.id && h.farmId === c.farmId).length;
+              return <li key={c.id}><Link to="/crop-cycle/$cycleId" params={{ cycleId: c.id }} className="block rounded-xl border p-3 hover:bg-muted">
+                <p className="font-semibold">{c.title}</p>
+                <p className="text-xs text-muted-foreground">{field ? "Field: " + field.title + " · " : ""}{count} linked harvest(s)</p>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">Open production history <ArrowRight className="h-3 w-3" /></span>
+              </Link></li>;
+            })}
+          </ul>
+          {unassignedCycles.length > 0 && <div className="mt-3 rounded-xl border border-dashed p-3">
+            <p className="text-sm font-semibold">{unassignedCycles.length} older crop cycle(s) not assigned to a farm</p>
+            <p className="mb-2 text-xs text-muted-foreground">These remain separate until you explicitly assign them.</p>
+            <div className="flex flex-wrap gap-2">{unassignedCycles.slice(0, 5).map(c => <Link key={c.id} to="/crop-cycle/$cycleId" params={{ cycleId: c.id }} className="rounded-lg border px-2 py-1 text-xs text-primary">{c.title}</Link>)}</div>
+          </div>}
+          <div className="mt-3 flex flex-wrap gap-3 text-sm">
+            <Link to="/app/$appId" params={{ appId: "farm" }} className="text-primary underline">Set up fields</Link>
+            <Link to="/app/$appId" params={{ appId: "crops" }} className="text-primary underline">Manage crop cycles and assignments</Link>
+          </div>
+        </section>
+      )}
       <div className="space-y-5">
         {stages.map((stage) => {
           const Icon = stage.icon;
