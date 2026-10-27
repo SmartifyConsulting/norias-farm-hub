@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, inventoryProducts, saleReconciliation, type StockMovement } from "./inventory-ledger";
+import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, inventoryProducts, saleReconciliation, inventoryDisplayDetail, type StockMovement } from "./inventory-ledger";
 
 const base = { date: "2026-10-28T00:00:00Z", sync: "local" as const, farmId: "farm-a", animalId: "animal-a" };
 const movement = (id: string, product: string, unit: string, qty: number, type: "production" | "sale" = "production"): StockMovement => ({
@@ -44,6 +44,12 @@ describe("livestock inventory ledger", () => {
     const finance = [{ ...base, id: "invoice", title: "Sale: Milk", detail: "Sale reference: " + ref, qty: "90" }];
     expect(saleReconciliation(stock, finance, "farm-a", "animal-a")).toEqual({ missingFinance: [], missingStock: [] });
     expect(saleReconciliation(stock, finance, "farm-b", "animal-a")).toEqual({ missingFinance: [], missingStock: [] });
+  });
+  test("shows clean notes for new and legacy encoded inventory records", () => {
+    const encoded = encodeInventoryDetail("Collected today", "Milk", "litres", "production");
+    expect(inventoryDisplayDetail(encoded)).toBe("Collected today");
+    expect(inventoryDisplayDetail(encoded.replace("\\n", "\\\\n"))).toBe("Collected today");
+    expect(inventoryDisplayDetail("Ordinary notes")).toBe("Ordinary notes");
   });
   test("malformed metadata does not invent inventory", () => {
     const bad: StockMovement = { ...base, id: "bad", title: "Milk", detail: "[[inventory:invalid]]", qty: "50" };
