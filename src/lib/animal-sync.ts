@@ -9,7 +9,7 @@ const APPS = MINI_APPS.map((a) => a.id);
 const DOC_KEYS = [
   "farmerplus:passport", "farmerplus:demand", "farmerplus:capacity", "farmerplus:risks", "farmerplus:pipeline",
   "farmerplus:pools", "farmerplus:pools:own", "farmerplus:batches", "farmerplus:role", "farmerplus:notify",
-  "farmerplus:notify:read", "farmerplus:wallet", "farmerplus:settings", "farmerplus:vc:baseRate", "farmerplus:activeRole",
+  "farmerplus:notify:read", "farmerplus:wallet", "farmerplus:settings", "farmerplus:vc:baseRate", "farmerplus:activeRole", "farmerplus:learning",
 ];
 const DIRTY = "farmerplus:docs:dirty";
 const key = (app: string) => `farmerplus:${app}`;

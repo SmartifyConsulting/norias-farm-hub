@@ -42,6 +42,7 @@ import { Route as ApiVetCheckRouteImport } from './routes/api/vet-check'
 import { Route as AppAppIdRouteImport } from './routes/app.$appId'
 import { Route as CoopIndexRouteImport } from './routes/coop.index'
 import { Route as CoopCoopIdRouteImport } from './routes/coop.$coopId'
+import { Route as FarmschoolCourseIdRouteImport } from './routes/farmschool_.$courseId'
 import { Route as CoopCoopIdFinanceRouteImport } from './routes/coop.$coopId.finance'
 import { Route as CoopCoopIdGovernanceRouteImport } from './routes/coop.$coopId.governance'
 import { Route as CoopCoopIdIntelligenceRouteImport } from './routes/coop.$coopId.intelligence'
@@ -215,6 +216,11 @@ const CoopCoopIdRoute = CoopCoopIdRouteImport.update({
   path: '/coop/$coopId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FarmschoolCourseIdRoute = FarmschoolCourseIdRouteImport.update({
+  id: '/farmschool_/$courseId',
+  path: '/farmschool/$courseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoopCoopIdFinanceRoute = CoopCoopIdFinanceRouteImport.update({
   id: '/finance',
   path: '/finance',
@@ -284,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
   '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
+  '/farmschool/$courseId': typeof FarmschoolCourseIdRoute
   '/coop/': typeof CoopIndexRoute
   '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
   '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
   '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
+  '/farmschool/$courseId': typeof FarmschoolCourseIdRoute
   '/coop': typeof CoopIndexRoute
   '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
   '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/api/vet-check': typeof ApiVetCheckRoute
   '/app/$appId': typeof AppAppIdRoute
   '/coop/$coopId': typeof CoopCoopIdRouteWithChildren
+  '/farmschool_/$courseId': typeof FarmschoolCourseIdRoute
   '/coop/': typeof CoopIndexRoute
   '/coop/$coopId/finance': typeof CoopCoopIdFinanceRoute
   '/coop/$coopId/governance': typeof CoopCoopIdGovernanceRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/api/vet-check'
     | '/app/$appId'
     | '/coop/$coopId'
+    | '/farmschool/$courseId'
     | '/coop/'
     | '/coop/$coopId/finance'
     | '/coop/$coopId/governance'
@@ -455,6 +465,7 @@ export interface FileRouteTypes {
     | '/api/vet-check'
     | '/app/$appId'
     | '/coop/$coopId'
+    | '/farmschool/$courseId'
     | '/coop'
     | '/coop/$coopId/finance'
     | '/coop/$coopId/governance'
@@ -497,6 +508,7 @@ export interface FileRouteTypes {
     | '/api/vet-check'
     | '/app/$appId'
     | '/coop/$coopId'
+    | '/farmschool_/$courseId'
     | '/coop/'
     | '/coop/$coopId/finance'
     | '/coop/$coopId/governance'
@@ -540,6 +552,7 @@ export interface RootRouteChildren {
   ApiVetCheckRoute: typeof ApiVetCheckRoute
   AppAppIdRoute: typeof AppAppIdRoute
   CoopCoopIdRoute: typeof CoopCoopIdRouteWithChildren
+  FarmschoolCourseIdRoute: typeof FarmschoolCourseIdRoute
   CoopIndexRoute: typeof CoopIndexRoute
 }
 
@@ -776,6 +789,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoopCoopIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/farmschool_/$courseId': {
+      id: '/farmschool_/$courseId'
+      path: '/farmschool/$courseId'
+      fullPath: '/farmschool/$courseId'
+      preLoaderRoute: typeof FarmschoolCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coop/$coopId/finance': {
       id: '/coop/$coopId/finance'
       path: '/finance'
@@ -885,6 +905,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVetCheckRoute: ApiVetCheckRoute,
   AppAppIdRoute: AppAppIdRoute,
   CoopCoopIdRoute: CoopCoopIdRouteWithChildren,
+  FarmschoolCourseIdRoute: FarmschoolCourseIdRoute,
   CoopIndexRoute: CoopIndexRoute,
 }
 export const routeTree = rootRouteImport
