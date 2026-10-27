@@ -9,7 +9,7 @@ const movement = (id: string, product: string, unit: string, qty: number, type: 
 describe("livestock inventory ledger", () => {
   test("round-trips structured movements through detail-only cloud storage", () => {
     const original = movement("one", "Milk", "litres", 12);
-    const restored = decodeInventoryRecord({ ...base, id: original.id, title: original.title, detail: original.detail, qty: original.qty });
+    const restored = decodeInventoryRecord({ ...base, id: original.id, title: original.title, detail: original.detail, qty: original.qty ?? "" });
     expect(restored.productKey).toBe("milk");
     expect(restored.unit).toBe("litres");
     expect(restored.movementType).toBe("production");
