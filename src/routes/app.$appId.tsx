@@ -751,6 +751,8 @@ function FieldsSection() {
   const { records, save } = useRecords("fields");
   const { current } = useTeam();
   const visibleFields = records.filter((r) => r.farmId == null || r.farmId === current?.id);
+  const { records: cropCycles } = useRecords("crops");
+  const { canWrite, canDelete } = permissions(current?.role);
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [qty, setQty] = useState("");
@@ -816,11 +818,30 @@ function FieldsSection() {
                 <p className="font-semibold">{r.title}</p>
                 {r.detail && <p className="text-xs text-muted-foreground">{r.detail}</p>}
                 {r.qty && <p className="text-xs text-muted-foreground">{r.qty} ha</p>}
+                {r.farmId == null && current?.id && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">Unassigned legacy field</span>
+                    {canWrite && <button type="button" className="rounded-lg border px-2 py-1 font-semibold text-primary" onClick={() => {
+                      const children = cropCycles.filter((c) => c.fieldId === r.id);
+                      if (children.some((c) => c.farmId != null && c.farmId !== current.id)) {
+                        toast.error("This field has crop cycles assigned to another farm."); return;
+                      }
+                      if (!window.confirm("Assign " + r.title + " to " + current.name + "? " + children.length + " linked crop cycle(s) will remain unchanged.")) return;
+                      save(records.map((f) => f.id === r.id ? { ...f, farmId: current.id, sync: "pending" as const } : f));
+                    }}>Assign to {current.name}</button>}
+                  </div>
+                )}
               </div>
               <button
                 aria-label="Remove field"
-                onClick={() => save(records.filter((x) => x.id !== r.id))}
-                className="text-muted-foreground hover:text-destructive"
+                disabled={!canDelete}
+                onClick={() => {
+                  if (cropCycles.some((c) => c.fieldId === r.id)) { toast.error("This field has linked crop cycles. Unlink them before deleting."); return; }
+                  if (!window.confirm("Delete field " + r.title + "?")) return;
+                  if (r.sync === "synced") markDeleted(r.id, "fields");
+                  save(records.filter((x) => x.id !== r.id));
+                }}
+                className="text-muted-foreground hover:text-destructive disabled:opacity-30"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
