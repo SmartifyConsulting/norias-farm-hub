@@ -190,6 +190,11 @@ function MiniAppPage() {
   const fields = useRecords("fields").records;
   const crops = useRecords("crops").records;
   const animals = useRecords("animals").records;
+  const belongsToFarm = (r: FarmRecord) => r.farmId == null || r.farmId === current?.id;
+  const visibleRecords = records.filter(belongsToFarm);
+  const visibleFields = fields.filter(belongsToFarm);
+  const visibleCrops = crops.filter(belongsToFarm);
+  const visibleAnimals = animals.filter(belongsToFarm);
 
   const add = (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,9 +257,9 @@ function MiniAppPage() {
           app={app}
           v={extra}
           set={setExtra}
-          fields={fields}
-          crops={crops}
-          animals={animals}
+          fields={visibleFields}
+          crops={visibleCrops}
+          animals={visibleAnimals}
         />
         {!canWrite && (
           <p className="text-center text-xs text-muted-foreground">
@@ -310,23 +315,23 @@ function MiniAppPage() {
           </div>
         )}
         {view === "calendar" ? (
-          <FarmCalendar events={eventsFor(app, records)} />
+          <FarmCalendar events={eventsFor(app, visibleRecords)} />
         ) : (
           <ul className="space-y-2 md:mt-0 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0">
-            {records.length === 0 && (
+            {visibleRecords.length === 0 && (
               <li className="py-8 text-center xl:col-span-2 text-sm text-muted-foreground">
                 No records yet.
               </li>
             )}
-            {records.map((r) => (
+            {visibleRecords.map((r) => (
               <RecordItem
                 key={r.id}
                 r={r}
                 app={app}
                 cloud={cloud}
-                fields={fields}
-                crops={crops}
-                animals={animals}
+                fields={visibleFields}
+                crops={visibleCrops}
+                animals={visibleAnimals}
                 canWrite={canWrite}
                 canDelete={canDelete}
                 onSave={(u) => {
@@ -1030,7 +1035,7 @@ function RecordItem({
     app.id === "fields" || app.id === "crops"
       ? LINKED.flatMap((a) =>
           read(a)
-            .filter((v) => (app.id === "fields" ? v.fieldId : v.cropId) === r.id)
+            .filter((v) => (app.id === "fields" ? v.fieldId : v.cropId) === r.id && (v.farmId ?? null) === (r.farmId ?? null))
             .map((v) => ({ a, v })),
         )
       : [];
