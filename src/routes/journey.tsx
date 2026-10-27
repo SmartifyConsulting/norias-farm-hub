@@ -87,9 +87,13 @@ function FarmingJourney() {
   const { records: cropCycles } = useRecords("crops");
   const { records: harvests } = useRecords("harvest");
   const { records: fields } = useRecords("fields");
+  const { records: animals } = useRecords("animals");
+  const { records: health } = useRecords("health");
   const visibleCycles = cropCycles.filter(c => c.farmId == null || c.farmId === active);
   const assignedCycles = visibleCycles.filter(c => active != null && c.farmId === active);
   const unassignedCycles = visibleCycles.filter(c => c.farmId == null);
+  const assignedAnimals = animals.filter(a => active != null && a.farmId === active);
+  const unassignedAnimals = animals.filter(a => a.farmId == null);
   const toggle = (type: string) => setTypes(effectiveTypes.includes(type) ? effectiveTypes.filter(t => t !== type) : [...effectiveTypes, type]);
   return (
     <Screen title="My Farming Journey">
@@ -149,6 +153,33 @@ function FarmingJourney() {
           <div className="mt-3 flex flex-wrap gap-3 text-sm">
             <Link to="/app/$appId" params={{ appId: "farm" }} className="text-primary underline">Set up fields</Link>
             <Link to="/app/$appId" params={{ appId: "crops" }} className="text-primary underline">Manage crop cycles and assignments</Link>
+          </div>
+        </section>
+      )}
+      {(effectiveTypes.includes("livestock") || all) && (
+        <section className="mb-6 rounded-2xl border bg-card p-4 md:p-5">
+          <h2 className="font-display text-xl font-semibold">My livestock</h2>
+          <p className="mb-3 text-sm text-muted-foreground">Manage animals and their health records without needing to set up crop cycles.</p>
+          {assignedAnimals.length === 0 && <p className="mb-3 text-sm text-muted-foreground">No animals assigned to this farm yet. Add animals or assign existing records.</p>}
+          <ul className="grid gap-2 md:grid-cols-2">
+            {assignedAnimals.map(a => {
+              const count = health.filter(h => h.animalId === a.id && h.farmId === a.farmId).length;
+              return <li key={a.id}><Link to="/app/$appId" params={{ appId: "animals" }} className="block rounded-xl border p-3 hover:bg-muted">
+                <p className="font-semibold">{a.title}</p>
+                <p className="text-xs text-muted-foreground">{count} linked health record(s)</p>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">Manage animal <ArrowRight className="h-3 w-3" /></span>
+              </Link></li>;
+            })}
+          </ul>
+          {unassignedAnimals.length > 0 && <div className="mt-3 rounded-xl border border-dashed p-3">
+            <p className="text-sm font-semibold">{unassignedAnimals.length} older animal record(s) not assigned to a farm</p>
+            <p className="mb-2 text-xs text-muted-foreground">Assign these explicitly so their health records stay with the right farm.</p>
+            <Link to="/app/$appId" params={{ appId: "animals" }} className="text-xs text-primary underline">Manage animal assignments</Link>
+          </div>}
+          <div className="mt-3 flex flex-wrap gap-3 text-sm">
+            <Link to="/app/$appId" params={{ appId: "animals" }} className="text-primary underline">Manage animals</Link>
+            <Link to="/app/$appId" params={{ appId: "health" }} className="text-primary underline">Animal health</Link>
+            <Link to="/app/$appId" params={{ appId: "tasks" }} className="text-primary underline">Farm tasks</Link>
           </div>
         </section>
       )}
