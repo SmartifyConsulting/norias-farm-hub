@@ -16,6 +16,7 @@ import type { FarmRecord, MiniApp } from "@/lib/farm";
 import { Screen, SyncBadge } from "@/components/Dock";
 import { MINI_APPS, read, useOnline, useRecords, useSettings } from "@/lib/farm";
 import { markDeleted, syncAnimals } from "@/lib/animal-sync";
+import { decodeInventoryRecord, inventoryDisplayDetail, type StockMovement } from "@/lib/inventory-ledger";
 import { useUser } from "@/lib/auth";
 import { toast } from "sonner";
 import { FarmMap } from "@/components/FarmMap";
@@ -1053,6 +1054,7 @@ function RecordItem({
   onSave: (u: Partial<FarmRecord>) => void;
   onDelete: () => void;
 }) {
+  const structuredStock = app.id === "stock" && !!decodeInventoryRecord(r as StockMovement).movementType;
   const [editing, setEditing] = useState(false);
   const [f, setF] = useState({ title: r.title, detail: r.detail, qty: r.qty ?? "" });
   const [x, setX] = useState<Extra>({
@@ -1186,7 +1188,7 @@ function RecordItem({
             Open production history
           </Link>
         )}
-        {r.detail && <p className="text-sm text-muted-foreground">{r.detail}</p>}
+        {r.detail && <p className="text-sm text-muted-foreground">{app.id === "stock" ? inventoryDisplayDetail(r.detail) : r.detail}</p>}
         <p className="mt-1 text-xs text-muted-foreground">
           {r.qty && (
             <>
@@ -1343,7 +1345,7 @@ function RecordItem({
           </p>
         )}
       </div>
-      {canWrite && (
+      {canWrite && !structuredStock && (
         <button
           aria-label="Edit"
           onClick={() => setEditing(true)}
@@ -1352,7 +1354,8 @@ function RecordItem({
           <Pencil className="h-4 w-4" />
         </button>
       )}
-      {canDelete && (
+      {canWrite && structuredStock && <p className="max-w-32 text-xs text-muted-foreground">Ledger entry locked to protect stock balances</p>}
+      {canDelete && !structuredStock && (
         <button
           aria-label="Delete"
           onClick={onDelete}
