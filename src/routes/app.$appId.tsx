@@ -826,6 +826,9 @@ function FieldsSection() {
                       if (children.some((c) => c.farmId != null && c.farmId !== current.id)) {
                         toast.error("This field has crop cycles assigned to another farm."); return;
                       }
+                      if (children.some((c) => c.farmId == null)) {
+                        toast.error("Assign linked crop cycles before assigning this field."); return;
+                      }
                       if (!window.confirm("Assign " + r.title + " to " + current.name + "? " + children.length + " linked crop cycle(s) will remain unchanged.")) return;
                       save(records.map((f) => f.id === r.id ? { ...f, farmId: current.id, sync: "pending" as const } : f));
                     }}>Assign to {current.name}</button>}
@@ -1215,6 +1218,28 @@ function RecordItem({
                   if (r.animalId && !animals.some((a) => a.id === r.animalId && (a.farmId == null || a.farmId === activeFarmId))) {
                     toast.error("This record references an animal from another farm.");
                     return;
+                  }
+                  if (app.id === "crops") {
+                    const children = LINKED.flatMap((a) => read(a).filter((v) => v.cropId === r.id));
+                    if (children.some((v) => v.farmId != null && v.farmId !== activeFarmId)) {
+                      toast.error("Linked crop activities belong to another farm. Resolve those records first.");
+                      return;
+                    }
+                    if (children.some((v) => v.farmId == null)) {
+                      toast.error("Assign the unassigned linked crop activities to this farm before assigning the crop cycle.");
+                      return;
+                    }
+                  }
+                  if (app.id === "animals") {
+                    const children = read("health").filter((v) => v.animalId === r.id);
+                    if (children.some((v) => v.farmId != null && v.farmId !== activeFarmId)) {
+                      toast.error("Linked health records belong to another farm.");
+                      return;
+                    }
+                    if (children.some((v) => v.farmId == null)) {
+                      toast.error("Assign linked health records before assigning this animal.");
+                      return;
+                    }
                   }
                   if (window.confirm(`Assign this record to ${activeFarmName}? It will no longer appear as unassigned on other farms.`)) {
                     onSave({ farmId: activeFarmId });
