@@ -176,7 +176,7 @@ function AnimalDetail() {
       </section>
       <section className="rounded-2xl border bg-card p-4">
         <h2 className="mb-3 font-semibold">Animal production & transaction history</h2>
-        <p className="mb-3 text-xs text-muted-foreground">Output and sale entries are separate records; recording output does not automatically create a sale or adjust inventory balances.</p>
+        <p className="mb-3 text-xs text-muted-foreground">Recording production adds to the structured inventory balance; recording a sale deducts stock and creates a separate finance entry.</p>
         {linked.length === 0 ? <p className="text-sm text-muted-foreground">No linked events yet. Older unlinked records remain in their original tools.</p> :
           <ol className="space-y-2">{linked.map(({ app, label, record }) => (
             <li key={app + record.id} className="rounded-xl border p-3">
