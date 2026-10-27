@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Screen } from "@/components/Dock";
-import { useRecords, type FarmRecord } from "@/lib/farm";
+import { useRecords, read, type FarmRecord } from "@/lib/farm";
 import { useTeam, permissions } from "@/lib/team";
 import { useUser } from "@/lib/auth";
 import { syncAnimals } from "@/lib/animal-sync";
@@ -86,15 +86,19 @@ function AnimalDetail() {
     if (!window.confirm("Record sale of " + quantity + " units of " + saleItem + " for R" + amount.toFixed(2) + "? This will reduce recorded stock.")) return;
     setSaving(true);
     try {
+      const latestStock = read("stock");
+      if (quantity > inventoryBalance(latestStock as StockMovement[], animal.farmId ?? null, animal.id, saleItem, saleUnit)) {
+        toast.error("Stock changed. Review the latest balance before selling."); return;
+      }
       const transactionId = crypto.randomUUID();
       const base = { date: new Date().toISOString(), sync: user ? "pending" as const : "local" as const, farmId: animal.farmId ?? null, animalId: animal.id };
       const movement: StockMovement = { ...base, id: crypto.randomUUID(), title: "Sale dispatch: " + saleItem.trim(), detail: encodeInventoryDetail("Sale reference: " + transactionId, saleItem, saleUnit, "sale", transactionId), qty: String(-quantity), productKey: stockKey(saleItem), unit: saleUnit, movementType: "sale", referenceId: transactionId };
       const payment: FarmRecord = { ...base, id: crypto.randomUUID(), title: "Sale: " + saleItem.trim(), detail: "Sale reference: " + transactionId + "; quantity: " + quantity, qty: String(amount) };
-      stock.save([movement, ...stock.records]);
-      finance.save([payment, ...finance.records]);
+      stock.save([movement, ...latestStock]);
+      finance.save([payment, ...read("finance")]);
       setSaleItem(""); setSaleQuantity(""); setSaleAmount("");
       if (user && navigator.onLine) { const result = await syncAnimals(); if (!result.ok) toast.error("Saved locally; cloud sync is pending."); }
-      toast.success("Sale and stock movement recorded");
+      toast.success("Sale and stock movement saved; payment not confirmed");
     } finally { setSaving(false); }
   };
   if (loading) return <Screen title="Animal history"><p>Loading farm…</p></Screen>;
