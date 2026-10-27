@@ -26,6 +26,9 @@ function AnimalDetail() {
   const [detail, setDetail] = useState("");
   const [qty, setQty] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saleItem, setSaleItem] = useState("");
+  const [saleQuantity, setSaleQuantity] = useState("");
+  const [saleAmount, setSaleAmount] = useState("");
   const animal = animals.find((a) => a.id === animalId);
   const allowed = !!animal && (animal.farmId == null || animal.farmId === current?.id);
   const canWrite = allowed && permissions(current?.role).canWrite;
@@ -63,6 +66,31 @@ function AnimalDetail() {
     } finally {
       setSaving(false);
     }
+  };
+  const stockBalance = stock.records.filter(r => r.animalId === animalId && r.farmId === (animal?.farmId ?? null))
+    .reduce((sum, r) => { const n = Number(r.qty); return sum + (Number.isFinite(n) ? n : 0); }, 0);
+  const recordSale = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!animal || !allowed || !canWrite || saving) return;
+    const quantity = Number(saleQuantity);
+    const amount = Number(saleAmount);
+    if (!saleItem.trim() || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(amount) || amount < 0) {
+      toast.error("Enter an item, a positive quantity and a valid sale amount."); return;
+    }
+    if (quantity > stockBalance) { toast.error("Not enough recorded stock for this animal. Add output first."); return; }
+    if (!window.confirm("Record sale of " + quantity + " units of " + saleItem + " for R" + amount.toFixed(2) + "? This will reduce recorded stock.")) return;
+    setSaving(true);
+    try {
+      const transactionId = crypto.randomUUID();
+      const base = { date: new Date().toISOString(), sync: user ? "pending" as const : "local" as const, farmId: animal.farmId ?? null, animalId: animal.id };
+      const movement: FarmRecord = { ...base, id: crypto.randomUUID(), title: "Sale dispatch: " + saleItem.trim(), detail: "Sale reference: " + transactionId, qty: String(-quantity) };
+      const payment: FarmRecord = { ...base, id: crypto.randomUUID(), title: "Sale: " + saleItem.trim(), detail: "Sale reference: " + transactionId + "; quantity: " + quantity, qty: String(amount) };
+      stock.save([movement, ...stock.records]);
+      finance.save([payment, ...finance.records]);
+      setSaleItem(""); setSaleQuantity(""); setSaleAmount("");
+      if (user && navigator.onLine) { const result = await syncAnimals(); if (!result.ok) toast.error("Saved locally; cloud sync is pending."); }
+      toast.success("Sale and stock movement recorded");
+    } finally { setSaving(false); }
   };
   if (loading) return <Screen title="Animal history"><p>Loading farm…</p></Screen>;
   if (!animal || !allowed) return (
@@ -115,6 +143,17 @@ function AnimalDetail() {
           </button>
           {!canWrite && <p className="text-xs text-muted-foreground">Your current farm role does not permit changes.</p>}
         </form>
+      </section>
+      <section className="mb-5 rounded-2xl border bg-card p-4">
+        <h2 className="font-semibold">Sell recorded livestock output</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Recorded balance: {stockBalance} units. Quantities across different products are not interchangeable; use this only when all entries for this animal use the same unit and product.</p>
+        <form onSubmit={recordSale} className="mt-3 grid gap-3 sm:grid-cols-3">
+          <label className="text-sm">Output / item<input required className="mt-1 w-full rounded-xl border bg-background p-2" value={saleItem} onChange={e => setSaleItem(e.target.value)} placeholder="e.g. milk (litres)" /></label>
+          <label className="text-sm">Quantity<input required type="number" min="0.001" step="any" className="mt-1 w-full rounded-xl border bg-background p-2" value={saleQuantity} onChange={e => setSaleQuantity(e.target.value)} /></label>
+          <label className="text-sm">Sale amount (R)<input required type="number" min="0" step="0.01" className="mt-1 w-full rounded-xl border bg-background p-2" value={saleAmount} onChange={e => setSaleAmount(e.target.value)} /></label>
+          <button disabled={!canWrite || saving} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50 sm:col-span-3">Record sale and stock deduction</button>
+        </form>
+        <p className="mt-2 text-xs text-muted-foreground">Creates a linked stock deduction and finance entry with a shared reference. This is a simple local workflow, not a transactional inventory ledger or proof of payment.</p>
       </section>
       <section className="rounded-2xl border bg-card p-4">
         <h2 className="mb-3 font-semibold">Animal production & transaction history</h2>
