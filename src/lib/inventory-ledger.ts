@@ -25,7 +25,7 @@ export function inventoryDisplayDetail(detail: string) {
   if (pos < 0 || !detail.slice(pos).endsWith("]]")) return detail;
   try {
     const payload = JSON.parse(decodeURIComponent(detail.slice(pos + marker.length, -2))) as Record<string, unknown>;
-    if (typeof payload.productKey !== "string" || typeof payload.unit !== "string" || !["production", "sale", "adjustment"].includes(String(payload.movementType))) return detail;
+    if (typeof payload["productKey"] !== "string" || typeof payload["unit"] !== "string" || !["production", "sale", "adjustment"].includes(String(payload["movementType"]))) return detail;
     return detail.slice(0, pos).replace(/(?:\\n|\n)$/, "");
   } catch { return detail; }
 }
