@@ -6,6 +6,7 @@ import { AppLink } from "@/components/AppLink";
 import { appById } from "@/lib/app-registry";
 import { useSettings } from "@/lib/farm";
 import { useTeam } from "@/lib/team";
+import { useFarmDetails } from "@/lib/farmdetails";
 import { Building2, Sprout, Truck, Users, ChartNoAxesCombined, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/journey")({
@@ -73,10 +74,17 @@ const stages = [
 
 function FarmingJourney() {
   const [settings] = useSettings();
-  const { active } = useTeam();
-  const [types, setTypes] = useStore<string[]>("farmerplus:journey:types", []);
+  const { active, current } = useTeam();
+  const details = useFarmDetails(active);
+  const [types, setTypes] = useStore<string[]>("farmerplus:journey:types:" + (active ?? "personal"), []);
+  const category = details.mainProduction;
+  const suggested = category === "Livestock" || category === "Poultry" ? ["livestock"]
+    : ["Field crops", "Horticulture", "Industrial and plantation crops", "Pasture and fodder"].includes(category) ? ["crops"]
+    : category === "Other" && details.subCategory === "Mixed farming" ? ["crops", "livestock"]
+    : ["Aquaculture", "Beekeeping", "Forestry and nurseries"].includes(category) ? ["other"] : [];
+  const effectiveTypes = types.length ? types : suggested;
   const [all, setAll] = useState(false);
-  const toggle = (type: string) => setTypes(types.includes(type) ? types.filter(t => t !== type) : [...types, type]);
+  const toggle = (type: string) => setTypes(effectiveTypes.includes(type) ? effectiveTypes.filter(t => t !== type) : [...effectiveTypes, type]);
   return (
     <Screen title="My Farming Journey">
       <p className="mb-3 text-sm text-muted-foreground">
@@ -86,7 +94,7 @@ function FarmingJourney() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border bg-card p-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Working context</p>
-          <p className="font-semibold">{settings.farmName || "My Farm"}</p>
+          <p className="font-semibold">{current?.name || settings.farmName || "My Farm"}</p>
           <p className="text-xs text-muted-foreground">{active ? "Active farm selected" : "Choose or create a farm to link your work"}</p>
         </div>
         <Link to="/team" className="rounded-xl border px-3 py-2 text-sm font-semibold hover:bg-muted">
@@ -95,17 +103,18 @@ function FarmingJourney() {
       </div>
       <section className="mb-6 rounded-2xl border bg-card p-4">
         <h2 className="font-display text-xl font-semibold">What do you produce?</h2>
-        <p className="mb-3 text-sm text-muted-foreground">Choose one or more. This only changes your journey view, not your farm records.</p>
+        <p className="mb-3 text-sm text-muted-foreground">Choose one or more for this farm. This changes your journey view, not farm records.</p>
         <div className="grid gap-2 sm:grid-cols-3">
           {[{id:"crops",label:"Crops"},{id:"livestock",label:"Livestock"},{id:"other",label:"Other (bees, fish, nursery...)"}].map(option => (
-            <button key={option.id} type="button" aria-pressed={types.includes(option.id)}
+            <button key={option.id} type="button" aria-pressed={effectiveTypes.includes(option.id)}
               onClick={() => toggle(option.id)}
-              className={types.includes(option.id) ? "rounded-xl border-2 border-primary bg-primary/5 p-3 text-left text-sm font-semibold" : "rounded-xl border p-3 text-left text-sm font-semibold hover:bg-muted"}>
-              {types.includes(option.id) ? "✓ " : ""}{option.label}
+              className={effectiveTypes.includes(option.id) ? "rounded-xl border-2 border-primary bg-primary/5 p-3 text-left text-sm font-semibold" : "rounded-xl border p-3 text-left text-sm font-semibold hover:bg-muted"}>
+              {effectiveTypes.includes(option.id) ? "✓ " : ""}{option.label}
             </button>
           ))}
         </div>
-        {types.includes("other") && <p className="mt-2 text-xs text-muted-foreground">Specialist production workflows are not yet built; shared tasks, stock and trade remain available.</p>}
+        {suggested.length > 0 && types.length === 0 && <p className="mt-2 text-xs text-muted-foreground">Suggested from this farm’s main production: {category}. Adjust if needed.</p>}
+        {effectiveTypes.includes("other") && <p className="mt-2 text-xs text-muted-foreground">Specialist production workflows are not yet built; shared tasks, stock and trade remain available.</p>}
         <button type="button" className="mt-3 text-sm font-semibold text-primary underline" onClick={() => setAll(!all)}>
           {all ? "Show my activities" : "Show all activities"}
         </button>
@@ -124,10 +133,10 @@ function FarmingJourney() {
               </div>
               <ol className="grid gap-2 md:grid-cols-2">
                 {(stage.title.startsWith("2.") ? [
-                  ...(types.includes("crops") || all ? [{id:"crops",why:"Plan planting and crop cycles"}] : []),
+                  ...(effectiveTypes.includes("crops") || all ? [{id:"crops",why:"Plan planting and crop cycles"}] : []),
                   ...stage.steps,
-                  ...(types.includes("crops") || all ? [{id:"harvest",why:"Record crop harvests"}] : []),
-                  ...(types.includes("livestock") || all ? [{id:"animals",why:"Manage animals and herds"},{id:"health",why:"Manage animal health"}] : []),
+                  ...(effectiveTypes.includes("crops") || all ? [{id:"harvest",why:"Record crop harvests"}] : []),
+                  ...(effectiveTypes.includes("livestock") || all ? [{id:"animals",why:"Manage animals and herds"},{id:"health",why:"Manage animal health"}] : []),
                 ] : stage.steps).map((step, index) => {
                   const app = appById(step.id);
                   if (!app) return null;
