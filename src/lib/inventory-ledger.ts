@@ -39,7 +39,7 @@ export function inventoryProducts(records: StockMovement[], farmId: string | nul
 }
 /** Detect a sale stock deduction without its corresponding finance record (or vice versa). */
 export function saleReconciliation(stock: StockMovement[], finance: FarmRecord[], farmId: string | null, animalId: string) {
-  const reference = (detail: string) => detail.match(/Sale reference:\\s*([a-f0-9-]{36})/i)?.[1];
+  const reference = (detail: string) => detail.match(/Sale reference:\s*([a-f0-9-]{36})/i)?.[1];
   const stockRefs = new Set(stock.filter(r => r.farmId === farmId && r.animalId === animalId)
     .map(decodeInventoryRecord).filter(r => r.movementType === "sale")
     .map(r => r.referenceId ?? reference(r.detail)).filter((r): r is string => !!r));
