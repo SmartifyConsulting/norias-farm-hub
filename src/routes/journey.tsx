@@ -164,10 +164,10 @@ function FarmingJourney() {
           <ul className="grid gap-2 md:grid-cols-2">
             {assignedAnimals.map(a => {
               const count = health.filter(h => h.animalId === a.id && h.farmId === a.farmId).length;
-              return <li key={a.id}><Link to="/app/$appId" params={{ appId: "animals" }} className="block rounded-xl border p-3 hover:bg-muted">
+              return <li key={a.id}><Link to="/animal/$animalId" params={{ animalId: a.id }} className="block rounded-xl border p-3 hover:bg-muted">
                 <p className="font-semibold">{a.title}</p>
                 <p className="text-xs text-muted-foreground">{count} linked health record(s)</p>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">Manage animal <ArrowRight className="h-3 w-3" /></span>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">Open animal history <ArrowRight className="h-3 w-3" /></span>
               </Link></li>;
             })}
           </ul>
