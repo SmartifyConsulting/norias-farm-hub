@@ -344,6 +344,8 @@ function MiniAppPage() {
                 crops={visibleCrops}
                 animals={visibleAnimals}
                 canWrite={canWrite}
+                activeFarmId={current?.id ?? null}
+                activeFarmName={current?.name ?? ""}
                 canDelete={canDelete}
                 onSave={(u) => {
                   save(
@@ -1001,6 +1003,8 @@ function RecordItem({
   crops,
   animals,
   canWrite,
+  activeFarmId,
+  activeFarmName,
   canDelete,
   onSave,
   onDelete,
@@ -1012,6 +1016,8 @@ function RecordItem({
   crops: FarmRecord[];
   animals: FarmRecord[];
   canWrite: boolean;
+  activeFarmId: string | null;
+  activeFarmName: string;
   canDelete: boolean;
   onSave: (u: Partial<FarmRecord>) => void;
   onDelete: () => void;
@@ -1170,6 +1176,36 @@ function RecordItem({
             </>
           )}
         </p>
+        {r.farmId == null && activeFarmId && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>Unassigned legacy record</span>
+            {canWrite && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (r.fieldId && !fields.some((f) => f.id === r.fieldId && (f.farmId == null || f.farmId === activeFarmId))) {
+                    toast.error("This record references a field from another farm.");
+                    return;
+                  }
+                  if (r.cropId && !crops.some((c) => c.id === r.cropId && (c.farmId == null || c.farmId === activeFarmId))) {
+                    toast.error("This record references a crop cycle from another farm.");
+                    return;
+                  }
+                  if (r.animalId && !animals.some((a) => a.id === r.animalId && (a.farmId == null || a.farmId === activeFarmId))) {
+                    toast.error("This record references an animal from another farm.");
+                    return;
+                  }
+                  if (window.confirm(`Assign this record to ${activeFarmName}? It will no longer appear as unassigned on other farms.`)) {
+                    onSave({ farmId: activeFarmId });
+                  }
+                }}
+                className="rounded-lg border px-2 py-1 font-semibold text-primary"
+              >
+                Assign to {activeFarmName}
+              </button>
+            )}
+          </div>
+        )}
         {animal && <p className="mt-1 text-xs text-primary">Animal: {animal.title}</p>}
         {app.recurring && (
           <p className="mt-1 text-xs text-muted-foreground">
