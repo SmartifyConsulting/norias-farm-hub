@@ -16,7 +16,7 @@ export function decodeInventoryRecord(record: StockMovement): StockMovement {
     if (!parsed || typeof parsed !== "object") return record;
     const data = parsed as Partial<StockMovement>;
     if (typeof data.productKey !== "string" || typeof data.unit !== "string" || !["production", "sale", "adjustment"].includes(data.movementType ?? "")) return record;
-    return { ...record, productKey: data.productKey, unit: data.unit, movementType: data.movementType, referenceId: typeof data.referenceId === "string" ? data.referenceId : undefined };
+    return { ...record, productKey: data.productKey, unit: data.unit, movementType: data.movementType, ...(typeof data.referenceId === "string" ? { referenceId: data.referenceId } : {}) };
   } catch { return record; }
 }
 export const stockKey = (name: string) => name.trim().toLocaleLowerCase();
