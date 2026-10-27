@@ -818,6 +818,13 @@ function FieldsSection() {
                 <p className="font-semibold">{r.title}</p>
                 {r.detail && <p className="text-xs text-muted-foreground">{r.detail}</p>}
                 {r.qty && <p className="text-xs text-muted-foreground">{r.qty} ha</p>}
+                {r.farmId == null && current?.id && cropCycles.some((c) => c.fieldId === r.id && c.farmId == null) && (
+                  <div className="mt-2 rounded-xl border border-dashed p-2 text-xs">
+                    <p className="font-semibold">Assign linked crop cycles first</p>
+                    <p className="text-muted-foreground">{cropCycles.filter((c) => c.fieldId === r.id && c.farmId == null).length} unassigned crop cycle(s) must be assigned to {current.name} before this field.</p>
+                    <Link to="/app/$appId" params={{ appId: "crops" }} className="text-primary underline">Open crop cycles</Link>
+                  </div>
+                )}
                 {r.farmId == null && current?.id && (
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                     <span className="text-muted-foreground">Unassigned legacy field</span>
@@ -1200,6 +1207,32 @@ function RecordItem({
             </>
           )}
         </p>
+        {r.farmId == null && activeFarmId && app.id === "crops" && (() => {
+          const dependent = LINKED.flatMap((a) => read(a).filter((v) => v.cropId === r.id && v.farmId == null).map((v) => ({ appId: a, id: v.id })));
+          return dependent.length ? (
+            <div className="mt-2 rounded-xl border border-dashed p-3 text-xs">
+              <p className="font-semibold">Before assigning this crop cycle</p>
+              <p className="mt-1 text-muted-foreground">Assign its {dependent.length} unassigned linked record(s) to {activeFarmName} first. Return here afterwards.</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[...new Set(dependent.map((v) => v.appId))].map((a) => (
+                  <Link key={a} to="/app/$appId" params={{ appId: a }} className="rounded-lg border px-2 py-1 text-primary">
+                    {MINI_APPS.find((m) => m.id === a)?.name ?? a} ({dependent.filter((v) => v.appId === a).length})
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null;
+        })()}
+        {r.farmId == null && activeFarmId && app.id === "animals" && (() => {
+          const pending = read("health").filter((v) => v.animalId === r.id && v.farmId == null);
+          return pending.length ? (
+            <div className="mt-2 rounded-xl border border-dashed p-3 text-xs">
+              <p className="font-semibold">Before assigning this animal</p>
+              <p className="mt-1 text-muted-foreground">Assign {pending.length} linked health record(s) to {activeFarmName} first.</p>
+              <Link to="/app/$appId" params={{ appId: "health" }} className="mt-2 inline-block text-primary underline">Open animal health records</Link>
+            </div>
+          ) : null;
+        })()}
         {r.farmId == null && activeFarmId && (
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <span>Unassigned legacy record</span>
