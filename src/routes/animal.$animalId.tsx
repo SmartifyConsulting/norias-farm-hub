@@ -6,7 +6,7 @@ import { useTeam, permissions } from "@/lib/team";
 import { useUser } from "@/lib/auth";
 import { syncAnimals } from "@/lib/animal-sync";
 import { toast } from "sonner";
-import { inventoryBalance, inventoryProducts, stockKey, encodeInventoryDetail, type StockMovement } from "@/lib/inventory-ledger";
+import { inventoryBalance, inventoryProducts, stockKey, encodeInventoryDetail, saleReconciliation, type StockMovement } from "@/lib/inventory-ledger";
 
 export const Route = createFileRoute("/animal/$animalId")({
   component: AnimalDetail,
@@ -74,9 +74,12 @@ function AnimalDetail() {
   };
   const stockBalanceFor = (item: string, unit: string) => inventoryBalance(stock.records as StockMovement[], animal?.farmId ?? null, animalId, item, unit);
   const products = inventoryProducts(stock.records as StockMovement[], animal?.farmId ?? null, animalId);
+  const reconciliation = saleReconciliation(stock.records as StockMovement[], finance.records, animal?.farmId ?? null, animalId);
+  const hasMismatch = reconciliation.missingFinance.length + reconciliation.missingStock.length > 0;
   const recordSale = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!animal || !allowed || !canWrite || saving) return;
+    if (hasMismatch) { toast.error("Resolve unmatched sale records before recording another sale."); return; }
     const quantity = Number(saleQuantity);
     const amount = Number(saleAmount);
     if (!saleItem.trim() || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(amount) || amount < 0) {
@@ -154,6 +157,7 @@ function AnimalDetail() {
           {!canWrite && <p className="text-xs text-muted-foreground">Your current farm role does not permit changes.</p>}
         </form>
       </section>
+      {hasMismatch && <section role="alert" className="mb-5 rounded-2xl border border-destructive p-4"><h2 className="font-semibold">Sale records need reconciliation</h2><p className="mt-1 text-sm">{reconciliation.missingFinance.length} stock deductions have no matching sale entry; {reconciliation.missingStock.length} sale entries have no matching stock deduction. Check the stock and finance records before recording further sales.</p></section>}
       <section className="mb-5 rounded-2xl border bg-card p-4">
         <h2 className="font-semibold">Inventory balances</h2>
         {products.length ? <ul className="mt-2 space-y-1 text-sm">{products.map(p => <li key={p.product + p.unit} className="flex justify-between rounded-lg border p-2"><span>{p.product} ({p.unit})</span><strong>{p.balance}</strong></li>)}</ul> : <p className="mt-2 text-sm text-muted-foreground">No structured output movements yet. Older stock records remain in the history but are not automatically converted.</p>}
