@@ -1065,6 +1065,17 @@ function RecordItem({
           onSubmit={(e) => {
             e.preventDefault();
             if (!f.title.trim()) return;
+            if ((x.fieldId && !fields.some((v) => v.id === x.fieldId)) ||
+                (x.cropId && !crops.some((v) => v.id === x.cropId)) ||
+                (x.animalId && !animals.some((v) => v.id === x.animalId))) {
+              toast.error("Choose a linked record from the selected farm.");
+              return;
+            }
+            const selectedCrop = crops.find((v) => v.id === x.cropId);
+            if (selectedCrop?.fieldId && x.fieldId && selectedCrop.fieldId !== x.fieldId) {
+              toast.error("The selected crop cycle belongs to another field.");
+              return;
+            }
             onSave({
               title: f.title.trim(),
               detail: f.detail.trim(),
