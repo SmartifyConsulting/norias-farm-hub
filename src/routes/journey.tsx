@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
+import { useState } from "react";
+import { useStore } from "@/lib/network";
 import { AppLink } from "@/components/AppLink";
 import { appById } from "@/lib/app-registry";
 import { useSettings } from "@/lib/farm";
@@ -20,19 +22,16 @@ const stages = [
     steps: [
       { id: "farm", why: "Set up your farm and assets" },
       { id: "team", why: "Choose who works on the farm" },
-      { id: "animals", why: "Manage livestock if applicable" },
       { id: "passport", why: "Describe what your farm can supply" },
     ],
   },
   {
     title: "2. Production",
-    subtitle: "Plan what to grow, do the work and record the harvest.",
+    subtitle: "Follow the production activities relevant to your farm.",
     icon: Sprout,
     steps: [
-      { id: "crops", why: "Plan a crop cycle and planting dates" },
       { id: "tasks", why: "Schedule and complete farm activities" },
       { id: "treatments", why: "Record inputs and treatments" },
-      { id: "harvest", why: "Record the quantity harvested" },
       { id: "stock", why: "Track stock and supplies" },
     ],
   },
@@ -75,6 +74,9 @@ const stages = [
 function FarmingJourney() {
   const [settings] = useSettings();
   const { active } = useTeam();
+  const [types, setTypes] = useStore<string[]>("farmerplus:journey:types", []);
+  const [all, setAll] = useState(false);
+  const toggle = (type: string) => setTypes(types.includes(type) ? types.filter(t => t !== type) : [...types, type]);
   return (
     <Screen title="My Farming Journey">
       <p className="mb-3 text-sm text-muted-foreground">
@@ -91,6 +93,23 @@ function FarmingJourney() {
           Manage farm & team
         </Link>
       </div>
+      <section className="mb-6 rounded-2xl border bg-card p-4">
+        <h2 className="font-display text-xl font-semibold">What do you produce?</h2>
+        <p className="mb-3 text-sm text-muted-foreground">Choose one or more. This only changes your journey view, not your farm records.</p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {[{id:"crops",label:"Crops"},{id:"livestock",label:"Livestock"},{id:"other",label:"Other (bees, fish, nursery...)"}].map(option => (
+            <button key={option.id} type="button" aria-pressed={types.includes(option.id)}
+              onClick={() => toggle(option.id)}
+              className={types.includes(option.id) ? "rounded-xl border-2 border-primary bg-primary/5 p-3 text-left text-sm font-semibold" : "rounded-xl border p-3 text-left text-sm font-semibold hover:bg-muted"}>
+              {types.includes(option.id) ? "✓ " : ""}{option.label}
+            </button>
+          ))}
+        </div>
+        {types.includes("other") && <p className="mt-2 text-xs text-muted-foreground">Specialist production workflows are not yet built; shared tasks, stock and trade remain available.</p>}
+        <button type="button" className="mt-3 text-sm font-semibold text-primary underline" onClick={() => setAll(!all)}>
+          {all ? "Show my activities" : "Show all activities"}
+        </button>
+      </section>
       <div className="space-y-5">
         {stages.map((stage) => {
           const Icon = stage.icon;
@@ -104,7 +123,12 @@ function FarmingJourney() {
                 </div>
               </div>
               <ol className="grid gap-2 md:grid-cols-2">
-                {stage.steps.map((step, index) => {
+                {(stage.title.startsWith("2.") ? [
+                  ...(types.includes("crops") || all ? [{id:"crops",why:"Plan planting and crop cycles"}] : []),
+                  ...stage.steps,
+                  ...(types.includes("crops") || all ? [{id:"harvest",why:"Record crop harvests"}] : []),
+                  ...(types.includes("livestock") || all ? [{id:"animals",why:"Manage animals and herds"},{id:"health",why:"Manage animal health"}] : []),
+                ] : stage.steps).map((step, index) => {
                   const app = appById(step.id);
                   if (!app) return null;
                   return (
