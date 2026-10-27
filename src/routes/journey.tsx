@@ -76,13 +76,13 @@ function FarmingJourney() {
   const [settings] = useSettings();
   const { active, current } = useTeam();
   const details = useFarmDetails(active);
-  const [types, setTypes] = useStore<string[]>("farmerplus:journey:types:" + (active ?? "personal"), []);
+  const [types, setTypes] = useStore<string[] | null>("farmerplus:journey:types:" + (active ?? "personal"), null);
   const category = details.mainProduction;
   const suggested = category === "Livestock" || category === "Poultry" ? ["livestock"]
     : ["Field crops", "Horticulture", "Industrial and plantation crops", "Pasture and fodder"].includes(category) ? ["crops"]
     : category === "Other" && details.subCategory === "Mixed farming" ? ["crops", "livestock"]
     : ["Aquaculture", "Beekeeping", "Forestry and nurseries"].includes(category) ? ["other"] : [];
-  const effectiveTypes = types.length ? types : suggested;
+  const effectiveTypes = types ?? suggested;
   const [all, setAll] = useState(false);
   const toggle = (type: string) => setTypes(effectiveTypes.includes(type) ? effectiveTypes.filter(t => t !== type) : [...effectiveTypes, type]);
   return (
@@ -113,7 +113,7 @@ function FarmingJourney() {
             </button>
           ))}
         </div>
-        {suggested.length > 0 && types.length === 0 && <p className="mt-2 text-xs text-muted-foreground">Suggested from this farm’s main production: {category}. Adjust if needed.</p>}
+        {suggested.length > 0 && types === null && <p className="mt-2 text-xs text-muted-foreground">Suggested from this farm’s main production: {category}. Adjust if needed.</p>}
         {effectiveTypes.includes("other") && <p className="mt-2 text-xs text-muted-foreground">Specialist production workflows are not yet built; shared tasks, stock and trade remain available.</p>}
         <button type="button" className="mt-3 text-sm font-semibold text-primary underline" onClick={() => setAll(!all)}>
           {all ? "Show my activities" : "Show all activities"}
