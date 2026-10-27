@@ -4,7 +4,7 @@ import type { FarmRecord } from "@/lib/farm";
 export type StockMovement = FarmRecord & { productKey?: string; unit?: string; movementType?: "production" | "sale" | "adjustment"; referenceId?: string };
 const marker = "[[inventory:";
 export function encodeInventoryDetail(detail: string, product: string, unit: string, type: "production" | "sale" | "adjustment", referenceId?: string) {
-  return detail + "\\n" + marker + encodeURIComponent(JSON.stringify({ productKey: stockKey(product), unit, movementType: type, referenceId })) + "]]";
+  return detail + "\n" + marker + encodeURIComponent(JSON.stringify({ productKey: stockKey(product), unit, movementType: type, referenceId })) + "]]";
 }
 export function decodeInventoryRecord(record: StockMovement): StockMovement {
   const pos = record.detail.lastIndexOf(marker);
@@ -18,6 +18,16 @@ export function decodeInventoryRecord(record: StockMovement): StockMovement {
     if (typeof data.productKey !== "string" || typeof data.unit !== "string" || !["production", "sale", "adjustment"].includes(data.movementType ?? "")) return record;
     return { ...record, productKey: data.productKey, unit: data.unit, movementType: data.movementType as "production" | "sale" | "adjustment", ...(typeof data.referenceId === "string" ? { referenceId: data.referenceId } : {}) };
   } catch { return record; }
+}
+/** Keep sync metadata intact while presenting only farmer-entered notes. */
+export function inventoryDisplayDetail(detail: string) {
+  const pos = detail.lastIndexOf(marker);
+  if (pos < 0 || !detail.slice(pos).endsWith("]]")) return detail;
+  try {
+    const payload = JSON.parse(decodeURIComponent(detail.slice(pos + marker.length, -2))) as Record<string, unknown>;
+    if (typeof payload.productKey !== "string" || typeof payload.unit !== "string" || !["production", "sale", "adjustment"].includes(String(payload.movementType))) return detail;
+    return detail.slice(0, pos).replace(/(?:\\n|\n)$/, "");
+  } catch { return detail; }
 }
 export const stockKey = (name: string) => name.trim().toLocaleLowerCase();
 export function inventoryBalance(records: StockMovement[], farmId: string | null, animalId: string, product: string, unit: string) {
