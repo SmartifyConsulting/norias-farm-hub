@@ -3,12 +3,12 @@ import { Link, useLocation } from "@tanstack/react-router";
 import {
   Home,
   LayoutGrid,
+  Route as JourneyIcon,
   Wallet,
   Settings,
   Sprout,
   LogIn,
   Handshake,
-  ListTodo,
 } from "lucide-react";
 import { useGuest, useUser } from "@/lib/auth";
 import { useOnline } from "@/lib/farm";
@@ -17,9 +17,9 @@ import { UserMenu } from "@/components/UserMenu";
 
 const items = [
   { to: "/", label: "Home", icon: Home, params: undefined },
-  { to: "/apps", label: "My Apps", icon: LayoutGrid, params: undefined },
+  { to: "/journey", label: "Journey", icon: JourneyIcon, params: undefined },
   { to: "/opportunities", label: "Trades", icon: Handshake, params: undefined },
-  { to: "/app/$appId", label: "Tasks", icon: ListTodo, params: { appId: "tasks" } },
+  { to: "/apps", label: "All Apps", icon: LayoutGrid, params: undefined },
   { to: "/wallet", label: "Wallet", icon: Wallet, params: undefined },
 ] as const;
 
