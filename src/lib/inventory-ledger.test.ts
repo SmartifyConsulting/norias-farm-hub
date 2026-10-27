@@ -38,6 +38,13 @@ describe("livestock inventory ledger", () => {
     const finance = [{ ...base, id: "payment2", title: "Sale: Milk", detail: "Sale reference: " + id2, qty: "50" }];
     expect(saleReconciliation(stock, finance, "farm-a", "animal-a")).toEqual({ missingFinance: [id1], missingStock: [id2] });
   });
+  test("matched sale pair has no reconciliation warning", () => {
+    const ref = "33333333-3333-4333-8333-333333333333";
+    const stock = [{ ...movement("dispatch", "Milk", "litres", -3, "sale"), detail: encodeInventoryDetail("Sale reference: " + ref, "Milk", "litres", "sale", ref) }];
+    const finance = [{ ...base, id: "invoice", title: "Sale: Milk", detail: "Sale reference: " + ref, qty: "90" }];
+    expect(saleReconciliation(stock, finance, "farm-a", "animal-a")).toEqual({ missingFinance: [], missingStock: [] });
+    expect(saleReconciliation(stock, finance, "farm-b", "animal-a")).toEqual({ missingFinance: [], missingStock: [] });
+  });
   test("malformed metadata does not invent inventory", () => {
     const bad: StockMovement = { ...base, id: "bad", title: "Milk", detail: "[[inventory:invalid]]", qty: "50" };
     expect(inventoryProducts([bad], "farm-a", "animal-a")).toEqual([]);
