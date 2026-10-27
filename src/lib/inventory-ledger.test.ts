@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, inventoryProducts, type StockMovement } from "./inventory-ledger";
 
 const base = { date: "2026-10-28T00:00:00Z", sync: "local" as const, farmId: "farm-a", animalId: "animal-a" };
