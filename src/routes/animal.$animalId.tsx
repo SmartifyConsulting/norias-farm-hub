@@ -17,9 +17,11 @@ function AnimalDetail() {
   const { records: animals } = useRecords("animals");
   const health = useRecords("health");
   const tasks = useRecords("tasks");
+  const stock = useRecords("stock");
+  const finance = useRecords("finance");
   const { current, loading } = useTeam();
   const { user } = useUser();
-  const [kind, setKind] = useState<"health" | "tasks">("health");
+  const [kind, setKind] = useState<"health" | "tasks" | "stock" | "finance">("health");
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [qty, setQty] = useState("");
@@ -30,6 +32,8 @@ function AnimalDetail() {
   const linked = [
     ...health.records.filter((r) => r.animalId === animalId && r.farmId === (animal?.farmId ?? null)).map((r) => ({ app: "health" as const, label: "Health event", record: r })),
     ...tasks.records.filter((r) => r.animalId === animalId && r.farmId === (animal?.farmId ?? null)).map((r) => ({ app: "tasks" as const, label: "Task", record: r })),
+    ...stock.records.filter((r) => r.animalId === animalId && r.farmId === (animal?.farmId ?? null)).map((r) => ({ app: "stock" as const, label: "Output / inventory", record: r })),
+    ...finance.records.filter((r) => r.animalId === animalId && r.farmId === (animal?.farmId ?? null)).map((r) => ({ app: "finance" as const, label: "Cost / sale", record: r })),
   ].sort((a, b) => b.record.date.localeCompare(a.record.date));
   const add = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -46,7 +50,7 @@ function AnimalDetail() {
         farmId: animal.farmId ?? null,
         animalId: animal.id,
       };
-      const store = kind === "health" ? health : tasks;
+      const store = { health, tasks, stock, finance }[kind];
       store.save([record, ...store.records]);
       setTitle("");
       setDetail("");
@@ -81,6 +85,8 @@ function AnimalDetail() {
           <span className="rounded-full bg-muted px-3 py-1">{linked.length} linked events</span>
           <span className="rounded-full bg-muted px-3 py-1">{linked.filter((x) => x.app === "health").length} health records</span>
           <span className="rounded-full bg-muted px-3 py-1">{linked.filter((x) => x.app === "tasks").length} tasks</span>
+          <span className="rounded-full bg-muted px-3 py-1">{linked.filter((x) => x.app === "stock").length} output / stock entries</span>
+          <span className="rounded-full bg-muted px-3 py-1">{linked.filter((x) => x.app === "finance").length} cost / sale entries</span>
         </div>
       </section>
       <section className="mb-5 rounded-2xl border bg-card p-4">
@@ -88,9 +94,11 @@ function AnimalDetail() {
         <p className="mb-3 text-xs text-muted-foreground">New events are linked to this animal automatically. Legacy animals remain unassigned until explicitly migrated.</p>
         <form onSubmit={add} className="space-y-3">
           <label className="block text-sm">Event type
-            <select className="mt-1 w-full rounded-xl border bg-background p-2" value={kind} onChange={(e) => setKind(e.target.value as "health" | "tasks")}>
+            <select className="mt-1 w-full rounded-xl border bg-background p-2" value={kind} onChange={(e) => setKind(e.target.value as "health" | "tasks" | "stock" | "finance")}>
               <option value="health">Health event</option>
               <option value="tasks">Farm task</option>
+              <option value="stock">Livestock output / stock (e.g. milk, eggs)</option>
+              <option value="finance">Livestock cost / sale</option>
             </select>
           </label>
           <label className="block text-sm">Title
@@ -99,7 +107,7 @@ function AnimalDetail() {
           <label className="block text-sm">Notes
             <textarea className="mt-1 w-full rounded-xl border bg-background p-2" value={detail} onChange={(e) => setDetail(e.target.value)} />
           </label>
-          <label className="block text-sm">Quantity / value (optional)
+          <label className="block text-sm">{kind === "finance" ? "Amount (R; negative for costs)" : kind === "stock" ? "Quantity (include units in notes)" : "Quantity / value (optional)"}
             <input className="mt-1 w-full rounded-xl border bg-background p-2" value={qty} onChange={(e) => setQty(e.target.value)} />
           </label>
           <button disabled={!canWrite || saving} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
@@ -109,7 +117,8 @@ function AnimalDetail() {
         </form>
       </section>
       <section className="rounded-2xl border bg-card p-4">
-        <h2 className="mb-3 font-semibold">Animal history</h2>
+        <h2 className="mb-3 font-semibold">Animal production & transaction history</h2>
+        <p className="mb-3 text-xs text-muted-foreground">Output and sale entries are separate records; recording output does not automatically create a sale or adjust inventory balances.</p>
         {linked.length === 0 ? <p className="text-sm text-muted-foreground">No linked events yet. Older unlinked records remain in their original tools.</p> :
           <ol className="space-y-2">{linked.map(({ app, label, record }) => (
             <li key={app + record.id} className="rounded-xl border p-3">
