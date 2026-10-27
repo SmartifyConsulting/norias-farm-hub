@@ -6,7 +6,7 @@ import { useTeam, permissions } from "@/lib/team";
 import { useUser } from "@/lib/auth";
 import { syncAnimals } from "@/lib/animal-sync";
 import { toast } from "sonner";
-import { inventoryBalance, inventoryProducts, stockKey, type StockMovement } from "@/lib/inventory-ledger";
+import { inventoryBalance, inventoryProducts, stockKey, encodeInventoryDetail, type StockMovement } from "@/lib/inventory-ledger";
 
 export const Route = createFileRoute("/animal/$animalId")({
   component: AnimalDetail,
@@ -50,7 +50,7 @@ function AnimalDetail() {
       const record: StockMovement = {
         id: crypto.randomUUID(),
         title: title.trim(),
-        detail: detail.trim(),
+        detail: kind === "stock" ? encodeInventoryDetail(detail.trim(), title, outputUnit, "production") : detail.trim(),
         qty: qty.trim(),
         date: new Date().toISOString(),
         sync: user ? "pending" : "local",
@@ -88,7 +88,7 @@ function AnimalDetail() {
     try {
       const transactionId = crypto.randomUUID();
       const base = { date: new Date().toISOString(), sync: user ? "pending" as const : "local" as const, farmId: animal.farmId ?? null, animalId: animal.id };
-      const movement: StockMovement = { ...base, id: crypto.randomUUID(), title: "Sale dispatch: " + saleItem.trim(), detail: "Sale reference: " + transactionId, qty: String(-quantity), productKey: stockKey(saleItem), unit: saleUnit, movementType: "sale", referenceId: transactionId };
+      const movement: StockMovement = { ...base, id: crypto.randomUUID(), title: "Sale dispatch: " + saleItem.trim(), detail: encodeInventoryDetail("Sale reference: " + transactionId, saleItem, saleUnit, "sale", transactionId), qty: String(-quantity), productKey: stockKey(saleItem), unit: saleUnit, movementType: "sale", referenceId: transactionId };
       const payment: FarmRecord = { ...base, id: crypto.randomUUID(), title: "Sale: " + saleItem.trim(), detail: "Sale reference: " + transactionId + "; quantity: " + quantity, qty: String(amount) };
       stock.save([movement, ...stock.records]);
       finance.save([payment, ...finance.records]);
