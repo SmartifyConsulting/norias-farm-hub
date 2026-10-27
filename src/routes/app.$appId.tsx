@@ -199,6 +199,17 @@ function MiniAppPage() {
   const add = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+    if ((extra.fieldId && !visibleFields.some((f) => f.id === extra.fieldId)) ||
+        (extra.cropId && !visibleCrops.some((c) => c.id === extra.cropId)) ||
+        (extra.animalId && !visibleAnimals.some((a) => a.id === extra.animalId))) {
+      toast.error("Choose a linked record from this farm.");
+      return;
+    }
+    const crop = visibleCrops.find((c) => c.id === extra.cropId);
+    if (crop?.fieldId && extra.fieldId && crop.fieldId !== extra.fieldId) {
+      toast.error("The selected crop cycle belongs to another field.");
+      return;
+    }
     save([
       {
         id: crypto.randomUUID(),
