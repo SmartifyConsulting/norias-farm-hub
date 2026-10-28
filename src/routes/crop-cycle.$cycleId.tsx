@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Screen } from "@/components/Dock";
 import { useRecords, read, type FarmRecord } from "@/lib/farm";
-import { cropInventoryBalance, encodeInventoryDetail, stockKey, type StockMovement } from "@/lib/inventory-ledger";
+import { cropInventoryBalance, cropSaleReconciliation, encodeInventoryDetail, stockKey, type StockMovement } from "@/lib/inventory-ledger";
 import { useTeam, permissions } from "@/lib/team";
 import { useUser } from "@/lib/auth";
 import { syncAnimals } from "@/lib/animal-sync";
@@ -56,6 +56,8 @@ function CropCycleDetail() {
     const n = Number(x.record.qty);
     return sum + (Number.isFinite(n) ? n : 0);
   }, 0);
+  const reconciliation = cropSaleReconciliation(stock.records as StockMovement[], finance.records, cycle?.farmId ?? null, cycleId);
+  const hasMismatch = reconciliation.missingFinance.length + reconciliation.missingStock.length > 0;
   const add = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!cycle || !allowed || !canWrite || !title.trim() || saving) return;
@@ -93,6 +95,7 @@ function CropCycleDetail() {
   const recordSale = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!cycle || !allowed || !canWrite || saving) return;
+    if (hasMismatch) { toast.error("Resolve unmatched crop sale records before another sale."); return; }
     const quantity = Number(saleQuantity), amount = Number(saleAmount);
     if (!saleProduct.trim() || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(amount) || amount < 0) {
       toast.error("Enter a product, positive quantity and valid sale amount."); return;
@@ -100,6 +103,8 @@ function CropCycleDetail() {
     setSaving(true);
     try {
       const latest = read("stock") as StockMovement[];
+      const latestMismatch = cropSaleReconciliation(latest, read("finance"), cycle.farmId ?? null, cycle.id);
+      if (latestMismatch.missingFinance.length || latestMismatch.missingStock.length) { toast.error("Sale records changed; reconcile them before continuing."); return; }
       if (quantity > cropInventoryBalance(latest, cycle.farmId ?? null, cycle.id, saleProduct, "kg")) {
         toast.error("Insufficient recorded crop stock."); return;
       }
@@ -171,6 +176,15 @@ function CropCycleDetail() {
           {!canWrite && <p className="text-xs text-muted-foreground">Your current farm role does not permit changes.</p>}
         </form>
       </section>
+      {hasMismatch && <section role="alert" className="mb-5 rounded-2xl border border-destructive p-4">
+        <h2 className="font-semibold">Crop sale records need reconciliation</h2>
+        <p className="mt-1 text-sm">Some stock deductions and financial sale entries do not have matching references. Check cloud sync and existing records before another sale.</p>
+        <ul className="mt-2 space-y-1 text-xs">
+          {reconciliation.missingFinance.map(ref => <li key={"finance-" + ref}>Missing finance entry: <code>{ref}</code></li>)}
+          {reconciliation.missingStock.map(ref => <li key={"stock-" + ref}>Missing stock deduction: <code>{ref}</code></li>)}
+        </ul>
+        <p className="mt-2 text-xs">Do not recreate an entry without checking whether it is pending sync.</p>
+      </section>}
       <section className="mb-5 rounded-2xl border bg-card p-4">
         <h2 className="mb-2 font-semibold">Sell harvested crop stock</h2>
         <p className="mb-3 text-xs text-muted-foreground">Record harvest first to add stock in kilograms. Sales reduce stock and record revenue, but do not confirm payment. This workflow is not yet database-atomic.</p>
@@ -179,7 +193,7 @@ function CropCycleDetail() {
           <label className="text-sm">Quantity (kg)<input required type="number" min="0.001" step="any" className="mt-1 w-full rounded-xl border bg-background p-2" value={saleQuantity} onChange={e => setSaleQuantity(e.target.value)} /></label>
           <label className="text-sm">Sale amount (R)<input required type="number" min="0" step="0.01" className="mt-1 w-full rounded-xl border bg-background p-2" value={saleAmount} onChange={e => setSaleAmount(e.target.value)} /></label>
           <p className="text-xs text-muted-foreground sm:col-span-3">Available: {saleProduct.trim() ? cropInventoryBalance(stock.records as StockMovement[], cycle.farmId ?? null, cycle.id, saleProduct, "kg").toLocaleString() + " kg" : "Enter a product to check stock"}</p>
-          <button disabled={!canWrite || saving} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50 sm:col-span-3">Record crop sale and stock deduction</button>
+          <button disabled={!canWrite || saving || hasMismatch} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50 sm:col-span-3">Record crop sale and stock deduction</button>
         </form>
       </section>
       <section className="rounded-2xl border bg-card p-4">
