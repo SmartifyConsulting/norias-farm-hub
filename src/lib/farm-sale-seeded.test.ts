@@ -39,7 +39,7 @@ describe("seeded farm-level maize sales", () => {
     commitSalePair(reference, stock, finance);
     expect(balance()).toBe(7);
     expect(get("finance")).toHaveLength(1);
-    expect(get("finance")[0].qty).toBe("150");
+    expect(get("finance").at(0)?.qty).toBe("150");
     expect(get("stock").find(r => r.id === "sale-stock-1")?.animalId).toBeUndefined();
     expect(get("stock").find(r => r.id === "sale-stock-1")?.cropId).toBeUndefined();
     expect(recoverPendingSales()).toBe(0);
