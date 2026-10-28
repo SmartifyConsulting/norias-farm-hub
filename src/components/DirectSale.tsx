@@ -17,7 +17,7 @@ export function DirectSale({ farmId, role, item, onClose }: { farmId: string; ro
   const [saving, setSaving] = useState(false);
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (saving || !permissions(role).canWrite || item.entity === "farm") return;
+    if (saving || !permissions(role).canWrite) return;
     if (!user || !navigator.onLine) { toast.error("Sign in and connect to record a sale."); return; }
     const qty = Number(quantity), total = Number(amount);
     if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(total) || total < 0) {
@@ -35,7 +35,7 @@ export function DirectSale({ farmId, role, item, onClose }: { farmId: string; ro
     try {
       const reference = crypto.randomUUID();
       const base = { date: new Date().toISOString(), sync: "pending" as const, farmId,
-        ...(item.entity === "animal" ? { animalId: item.entityId } : { cropId: item.entityId }) };
+        ...(item.entity === "animal" ? { animalId: item.entityId } : item.entity === "crop" ? { cropId: item.entityId } : {}) };
       const stock: StockMovement = { ...base, id: crypto.randomUUID(), title: "Sale dispatch: " + item.product,
         detail: encodeInventoryDetail("Sale reference: " + reference, item.product, item.unit, "sale", reference),
         qty: String(-qty), productKey: item.product, unit: item.unit, movementType: "sale", referenceId: reference };
