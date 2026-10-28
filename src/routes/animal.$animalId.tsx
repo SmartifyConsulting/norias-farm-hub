@@ -32,6 +32,10 @@ function AnimalDetail() {
   const [outputUnit, setOutputUnit] = useState("litres");
   const [saleQuantity, setSaleQuantity] = useState("");
   const [saleAmount, setSaleAmount] = useState("");
+  const [adjustProduct, setAdjustProduct] = useState("");
+  const [adjustUnit, setAdjustUnit] = useState("litres");
+  const [adjustQty, setAdjustQty] = useState("");
+  const [adjustReason, setAdjustReason] = useState("");
   const animal = animals.find((a) => a.id === animalId);
   const allowed = !!animal && (animal.farmId == null || animal.farmId === current?.id);
   const canWrite = allowed && permissions(current?.role).canWrite;
@@ -104,6 +108,35 @@ function AnimalDetail() {
       toast.success("Sale and stock movement saved; payment not confirmed");
     } finally { setSaving(false); }
   };
+  const recordAdjustment = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!animal || !allowed || !canWrite || saving) return;
+    const quantity = Number(adjustQty);
+    if (!adjustProduct.trim() || !adjustReason.trim() || !Number.isFinite(quantity) || quantity === 0) {
+      toast.error("Enter a product, non-zero adjustment and reason."); return;
+    }
+    setSaving(true);
+    try {
+      const latest = read("stock") as StockMovement[];
+      const balance = inventoryBalance(latest, animal.farmId ?? null, animal.id, adjustProduct, adjustUnit);
+      if (balance + quantity < 0) { toast.error("Adjustment cannot make recorded stock negative."); return; }
+      const id = crypto.randomUUID();
+      const movement: StockMovement = {
+        id, title: "Stock adjustment: " + adjustProduct.trim(),
+        detail: encodeInventoryDetail("Reason: " + adjustReason.trim() + "; reference: " + id, adjustProduct, adjustUnit, "adjustment", id),
+        qty: String(quantity), date: new Date().toISOString(), sync: user ? "pending" : "local",
+        farmId: animal.farmId ?? null, animalId: animal.id,
+        productKey: stockKey(adjustProduct), unit: adjustUnit, movementType: "adjustment", referenceId: id,
+      };
+      stock.save([movement, ...latest]);
+      setAdjustQty(""); setAdjustReason("");
+      if (user && navigator.onLine) {
+        const result = await syncAnimals();
+        if (!result.ok) toast.error("Saved locally; cloud sync is pending.");
+      }
+      toast.success("Stock adjustment recorded with reason and reference");
+    } finally { setSaving(false); }
+  };
   if (loading) return <Screen title="Animal history"><p>Loading farm…</p></Screen>;
   if (!animal || !allowed) return (
     <Screen title="Animal unavailable">
@@ -155,6 +188,17 @@ function AnimalDetail() {
             {saving ? "Saving…" : "Add linked event"}
           </button>
           {!canWrite && <p className="text-xs text-muted-foreground">Your current farm role does not permit changes.</p>}
+        </form>
+      </section>
+      <section className="mb-5 rounded-2xl border bg-card p-4">
+        <h2 className="font-semibold">Adjust recorded stock</h2>
+        <p className="mb-3 text-xs text-muted-foreground">For corrections, losses or stock counts. This creates a permanent adjustment entry without changing earlier transactions. Use a negative quantity to reduce stock.</p>
+        <form onSubmit={recordAdjustment} className="grid gap-3 sm:grid-cols-2">
+          <label className="text-sm">Product<input required className="mt-1 w-full rounded-xl border bg-background p-2" value={adjustProduct} onChange={e => setAdjustProduct(e.target.value)} placeholder="e.g. Milk" /></label>
+          <label className="text-sm">Unit<select className="mt-1 w-full rounded-xl border bg-background p-2" value={adjustUnit} onChange={e => setAdjustUnit(e.target.value)}><option value="litres">Litres</option><option value="kg">Kilograms</option><option value="units">Units</option><option value="dozens">Dozens</option></select></label>
+          <label className="text-sm">Quantity change<input required type="number" step="any" className="mt-1 w-full rounded-xl border bg-background p-2" value={adjustQty} onChange={e => setAdjustQty(e.target.value)} placeholder="e.g. -2 or 5" /></label>
+          <label className="text-sm">Reason<input required className="mt-1 w-full rounded-xl border bg-background p-2" value={adjustReason} onChange={e => setAdjustReason(e.target.value)} placeholder="e.g. Spoilage or stock count" /></label>
+          <button disabled={!canWrite || saving} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50 sm:col-span-2">Record adjustment</button>
         </form>
       </section>
       {hasMismatch && <section role="alert" className="mb-5 rounded-2xl border border-destructive p-4"><h2 className="font-semibold">Sale records need reconciliation</h2><p className="mt-1 text-sm">{reconciliation.missingFinance.length} stock deductions have no matching sale entry; {reconciliation.missingStock.length} sale entries have no matching stock deduction. Check the stock and finance records before recording further sales.</p><ul className="mt-2 space-y-1 text-xs">{reconciliation.missingFinance.map(ref => <li key={"finance-" + ref}>Missing finance entry: <code>{ref}</code></li>)}{reconciliation.missingStock.map(ref => <li key={"stock-" + ref}>Missing stock deduction: <code>{ref}</code></li>)}</ul><p className="mt-2 text-xs">Do not create a duplicate transaction. Check pending cloud sync and existing entries first.</p></section>}
