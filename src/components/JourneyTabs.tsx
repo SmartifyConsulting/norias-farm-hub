@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { EmbeddedScreenContext } from "@/components/Dock";
 import type { ComponentType } from "react";
-type Section = { label: string; description: string; to: string; component?: ComponentType };
+type Section = { label: string; description: string; to: string; component?: ComponentType | undefined };
 export function JourneyTabs({ sections }: { sections: readonly Section[] }) {
   const [active, setActive] = useState(0);
   const selected = sections[active] ?? sections[0];
-  const Content = selected?.component;
+  if (!selected) return null;
+  const Content = selected.component;
   return <section>
     <div role="tablist" aria-label="Journey sections" className="mb-5 flex gap-1 overflow-x-auto border-b pb-0.5">
       {sections.map((section, index) => <button key={section.label} type="button" role="tab" aria-selected={active === index} onClick={() => setActive(index)}
