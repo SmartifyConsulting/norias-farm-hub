@@ -63,6 +63,10 @@ export const Route = createFileRoute("/app/$appId")({
 
 function MiniAppPage() {
   const { appId } = Route.useLoaderData();
+  return <EmbeddedMiniApp appId={appId} />;
+}
+
+export function EmbeddedMiniApp({ appId }: { appId: string }) {
   const app = MINI_APPS.find((a) => a.id === appId)!;
   const { records, save } = useRecords(app.id);
   const online = useOnline();
