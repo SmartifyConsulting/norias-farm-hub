@@ -27,6 +27,15 @@ describe("livestock inventory ledger", () => {
     expect(inventoryBalance(rows, "farm-a", "animal-a", "Milk", "kg")).toBe(20);
     expect(inventoryProducts(rows, "farm-a", "animal-a")).toHaveLength(3);
   });
+  test("adjustments increase or decrease the correct stock balance", () => {
+    const rows = [
+      movement("produced", "Milk", "litres", 10),
+      { ...movement("loss", "Milk", "litres", -2), detail: encodeInventoryDetail("Reason: Spoilage", "Milk", "litres", "adjustment") },
+      { ...movement("count", "Milk", "litres", 1), detail: encodeInventoryDetail("Reason: Count correction", "Milk", "litres", "adjustment") },
+    ];
+    expect(inventoryBalance(rows, "farm-a", "animal-a", "Milk", "litres")).toBe(9);
+    expect(inventoryBalance(rows, "farm-b", "animal-a", "Milk", "litres")).toBe(0);
+  });
   test("excludes unstructured legacy rows from balances", () => {
     const legacy: StockMovement = { ...base, id: "legacy", title: "Milk", detail: "old record", qty: "500" };
     expect(inventoryBalance([legacy], "farm-a", "animal-a", "Milk", "litres")).toBe(0);
