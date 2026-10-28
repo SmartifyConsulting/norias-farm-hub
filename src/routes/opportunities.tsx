@@ -45,7 +45,7 @@ const TYPES: (OppType | "All")[] = [
   "Training",
 ];
 
-function OpportunitiesPage() {
+export function OpportunitiesPage() {
   const [p] = usePassport();
   const [demand, setDemand] = useDemand();
   const { opportunities: SAMPLE_OPPORTUNITIES } = useShared();
