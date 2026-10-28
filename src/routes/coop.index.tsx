@@ -29,7 +29,7 @@ export const Route = createFileRoute("/coop/")({
 const btn =
   "rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50";
 
-function CoopDirectory() {
+export function CoopDirectory() {
   const { user, active, pending, myInvites, loading, reload } = useMyCooperatives();
 
   if (!user)
