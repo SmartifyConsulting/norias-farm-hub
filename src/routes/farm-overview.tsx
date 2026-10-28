@@ -20,19 +20,19 @@ function FarmOverview() {
   const card = "rounded-2xl border bg-card p-4";
   const link = "text-sm font-semibold text-primary underline";
   if (loading) return <Screen title="Farm overview"><p>Loading farms…</p></Screen>;
-  if (!current) return <Screen title="Farm overview"><p>Choose a farm below to view its animals, crops and inventory. <FarmSwitcher compact /></p>{farms.length === 0 && <p className="mt-2 text-sm text-muted-foreground">No farms are available for this account.</p>}</Screen>;
-  const own = (r: { farmId?: string | null | undefined }) => r.farmId === current.id;
+
+  const own = (r: { farmId?: string | null | undefined }) => !!current && r.farmId === current.id;
   const farmAnimals = animals.filter(own);
   const farmCrops = crops.filter(own);
   const farmStock = stock.filter(own);
   const farmFinance = finance.filter(own);
   const orphanStock = farmStock.filter(r => !r.animalId && !r.cropId);
-  return <Screen title={current.name}>
+  return <Screen title="My Business">
     <div role="tablist" aria-label="My Business sections" className="mb-5 flex gap-1 border-b">
       <button type="button" role="tab" aria-selected={tab === "overview"} onClick={() => setTab("overview")} className={tab === "overview" ? "border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary" : "px-4 py-3 text-sm text-muted-foreground"}>Business overview</button>
       <button type="button" role="tab" aria-selected={tab === "performance"} onClick={() => setTab("performance")} className={tab === "performance" ? "border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary" : "px-4 py-3 text-sm text-muted-foreground"}>Performance</button>
     </div>
-    {tab === "performance" ? <EmbeddedScreenContext.Provider value={true}><PerformancePage /></EmbeddedScreenContext.Provider> : <>
+    {tab === "performance" ? <EmbeddedScreenContext.Provider value={true}><PerformancePage /></EmbeddedScreenContext.Provider> : !current ? <p className="py-4 text-sm">Choose a farm to view its business records. <FarmSwitcher compact /></p> : <>
     <p className="mb-5 text-sm text-muted-foreground">Farm → animals and crops → production → inventory → sales. Only records assigned to this farm appear below.</p>
     <div className="mb-5 md:hidden"><FarmSwitcher compact /></div>
     <div className="mb-5 flex flex-wrap gap-3">
