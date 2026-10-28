@@ -1,3 +1,5 @@
+import { LogisticsPage } from "@/routes/logistics";
+import { OutcomesPage } from "@/routes/outcomes";
 import { SalesHub } from "@/routes/sales";
 import { OpportunitiesPage } from "@/routes/opportunities";
 import { JourneyTabs } from "@/components/JourneyTabs";
@@ -10,8 +12,8 @@ export const Route = createFileRoute("/trade-delivery")({ component: TradeDelive
 const sections = [
   { title: "Sell farm products", description: "Choose stock, record a sale and reconcile income.", to: "/sales", component: SalesHub },
   { title: "Find buyers & opportunities", description: "Match your farm's products to buyer demand.", to: "/opportunities", component: OpportunitiesPage },
-  { title: "Arrange transport & storage", description: "Plan collection, storage and delivery.", to: "/logistics" },
-  { title: "Track commitments", description: "Follow deliveries and outcomes through to completion.", to: "/outcomes" },
+  { title: "Arrange transport & storage", description: "Plan collection, storage and delivery.", to: "/logistics", component: LogisticsPage },
+  { title: "Track commitments", description: "Follow deliveries and outcomes through to completion.", to: "/outcomes", component: OutcomesPage },
 ] as const;
 function TradeDelivery() {
   const { current } = useTeam();
