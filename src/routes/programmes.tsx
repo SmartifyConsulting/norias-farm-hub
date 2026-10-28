@@ -28,9 +28,9 @@ function Programmes() {
   return <Screen title="Networks & Programmes">
     <p className="mb-5 text-sm text-muted-foreground">Coordinate programmes, farmers, resources, milestones, deliveries and measurable outcomes. This is a development workspace; tender-specific compliance must be validated against the tender documents.</p>
     <div className="mb-5 grid gap-3 sm:grid-cols-3">
-      <Link to="/app/cooperative" className="rounded-xl border bg-card p-4"><Users className="mb-2 text-primary" />Cooperatives & networks</Link>
-      <Link to="/app/gov-programmes" className="rounded-xl border bg-card p-4"><ClipboardCheck className="mb-2 text-primary" />Support programmes</Link>
-      <Link to="/app/grants" className="rounded-xl border bg-card p-4"><Wallet className="mb-2 text-primary" />Grants & funding</Link>
+      <Link to="/coop" className="rounded-xl border bg-card p-4"><Users className="mb-2 text-primary" />Cooperatives & networks</Link>
+      <Link to="/gov-programmes" className="rounded-xl border bg-card p-4"><ClipboardCheck className="mb-2 text-primary" />Support programmes</Link>
+      <Link to="/app/$appId" params={{ appId: "grants" }} className="rounded-xl border bg-card p-4"><Wallet className="mb-2 text-primary" />Grants & funding</Link>
     </div>
     <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
       <aside className="rounded-2xl border bg-card p-4">
@@ -65,7 +65,7 @@ function Programmes() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border bg-card p-4"><CalendarCheck className="mb-2 text-primary" /><p className="text-2xl font-semibold">{selected.workstreams.filter(w => w.status === "Completed").length}/{selected.workstreams.length}</p><p className="text-xs text-muted-foreground">Milestones completed</p></div>
             <Link to="/trade-delivery" className="rounded-xl border bg-card p-4"><Truck className="mb-2 text-primary" /><p className="font-semibold">Procurement & delivery</p><p className="text-xs text-muted-foreground">Open trade workflows</p></Link>
-            <Link to="/app/outcomes" className="rounded-xl border bg-card p-4"><ChartNoAxesCombined className="mb-2 text-primary" /><p className="font-semibold">Outcome tracking</p><p className="text-xs text-muted-foreground">Review programme results</p></Link>
+            <Link to="/outcomes" className="rounded-xl border bg-card p-4"><ChartNoAxesCombined className="mb-2 text-primary" /><p className="font-semibold">Outcome tracking</p><p className="text-xs text-muted-foreground">Review programme results</p></Link>
           </div>
         </>}
       </div>
