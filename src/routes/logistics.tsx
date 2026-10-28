@@ -40,7 +40,7 @@ export const Route = createFileRoute("/logistics")({
 
 const TABS = ["Book", "My bookings", "My fleet & facilities"] as const;
 
-function LogisticsPage() {
+export function LogisticsPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Book");
   const [v] = useVehicles(); const [fa] = useFacilities(); const [b] = useBookings(); const free = useFree();
   return (
