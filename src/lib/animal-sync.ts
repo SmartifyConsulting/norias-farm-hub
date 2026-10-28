@@ -58,7 +58,13 @@ export function syncAll() {
           if (error) throw error;
           localStorage.setItem(tombKey(app), "[]");
         }
-        const unsynced = read<FarmRecord[]>(key(app), []).filter((r) => r.sync !== "synced");
+        // Sale pairs must be committed by the atomic RPC, never independent upserts.
+        const unsynced = read<FarmRecord[]>(key(app), []).filter((r) => {
+          if (r.sync === "synced") return false;
+          if (app === "stock" && decodeInventoryRecord(r).movementType === "sale") return false;
+          if (app === "finance" && r.title.startsWith("Sale: ") && /Sale reference:\s*[a-f0-9-]{36}/i.test(r.detail)) return false;
+          return true;
+        });
         if (unsynced.length) {
           const { error } = await supabase.from("animal_records").upsert(
             unsynced.map((r) => ({ ...((app === "stock" && decodeInventoryRecord(r).movementType) ? (() => { const stock = decodeInventoryRecord(r); return { product_key: stock.productKey ?? null, unit: stock.unit ?? null, movement_type: stock.movementType ?? null, sale_reference: stock.referenceId || null }; })() : {}), id: r.id, app, title: r.title, detail: r.detail, qty: r.qty ?? "", recorded_at: r.date, updated_at: new Date().toISOString(), farm_id: r.farmId === undefined ? activeFarmId() : r.farmId, field_id: r.fieldId ?? "", crop_id: r.cropId ?? "", due_on: r.due || null, ends_on: r.end || null, animal_id: r.animalId ?? "", repeat_days: r.repeatDays ?? null, completed: (r.completed ?? []) as never })),
