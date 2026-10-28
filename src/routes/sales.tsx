@@ -43,7 +43,7 @@ function SalesHub() {
           const crop = crops.find(c => c.id === item.entityId && c.farmId === current.id);
           return <div key={[item.entity,item.entityId,item.product,item.unit].join("|")} className="flex flex-wrap items-center justify-between gap-3 border-t py-3">
             <div><p className="font-semibold capitalize">{item.product}</p><p className="text-sm text-muted-foreground">{item.quantity} {item.unit} · {animal?.title ?? crop?.title ?? "Farm-level inventory"}</p></div>
-            {item.entity === "animal" && animal ? <Link className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" to="/animal/$animalId" params={{animalId:animal.id}}>Record sale</Link> :
+            {item.entity === "animal" && animal ? <Link className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" to="/animal/$animalId" params={{animalId:animal.id}}>View animal</Link> :
               item.entity === "crop" && crop ? <Link className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" to="/crop-cycle/$cycleId" params={{cycleId:crop.id}}>Record sale</Link> :
               <span className="text-xs text-muted-foreground">Farm-level sales require server support</span>}
           </div>;
