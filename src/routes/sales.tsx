@@ -51,6 +51,7 @@ function SalesHub() {
       </section>
       <section className="rounded-2xl border bg-card p-5">
         <h2 className="mb-3 text-xl font-semibold">Recent sales</h2>
+        {selected && <DirectSale farmId={current.id} role={current.role} item={selected} onClose={() => setSelectedKey("")} />}
         {sales.length === 0 && <p className="text-sm text-muted-foreground">No sales recorded for this farm.</p>}
         {sales.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20).map(s => <div key={s.id} className="flex items-center justify-between gap-2 border-t py-3 text-sm"><div><p className="font-semibold">{s.title}</p><p className="text-xs text-muted-foreground">{s.sync === "synced" ? "Synced" : "Pending cloud confirmation"}</p></div><span>R{s.qty}</span></div>)}
         <Link to="/app/$appId" params={{appId:"finance"}} className="mt-3 inline-block text-sm font-semibold text-primary underline">View finance ledger</Link>
