@@ -9,7 +9,7 @@ import { decodeInventoryRecord, type StockMovement } from "@/lib/inventory-ledge
 
 export const Route = createFileRoute("/sales")({ component: SalesHub });
 
-function SalesHub() {
+export function SalesHub() {
   const { current } = useTeam();
   const [selectedKey, setSelectedKey] = useState("");
   const { records: stock } = useRecords("stock");
