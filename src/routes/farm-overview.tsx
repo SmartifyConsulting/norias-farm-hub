@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
+import { FarmSwitcher } from "@/components/FarmSwitcher";
 import { useRecords } from "@/lib/farm";
 import { useTeam } from "@/lib/team";
 import { decodeInventoryRecord } from "@/lib/inventory-ledger";
@@ -7,7 +8,7 @@ import { decodeInventoryRecord } from "@/lib/inventory-ledger";
 export const Route = createFileRoute("/farm-overview")({ component: FarmOverview });
 
 function FarmOverview() {
-  const { current, farms, active, loading } = useTeam();
+  const { current, farms, loading } = useTeam();
   const { records: animals } = useRecords("animals");
   const { records: crops } = useRecords("crops");
   const { records: stock } = useRecords("stock");
@@ -15,7 +16,7 @@ function FarmOverview() {
   const card = "rounded-2xl border bg-card p-4";
   const link = "text-sm font-semibold text-primary underline";
   if (loading) return <Screen title="Farm overview"><p>Loading farms…</p></Screen>;
-  if (!current) return <Screen title="Farm overview"><p>Select a farm in <Link to="/team" className={link}>Farm Team</Link> first.</p>{farms.length === 0 && <p className="mt-2 text-sm text-muted-foreground">No farms are available for this account.</p>}</Screen>;
+  if (!current) return <Screen title="Farm overview"><p>Choose a farm below to view its animals, crops and inventory. <FarmSwitcher compact /></p>{farms.length === 0 && <p className="mt-2 text-sm text-muted-foreground">No farms are available for this account.</p>}</Screen>;
   const own = (r: { farmId?: string | null }) => r.farmId === current.id;
   const farmAnimals = animals.filter(own);
   const farmCrops = crops.filter(own);
@@ -24,6 +25,7 @@ function FarmOverview() {
   const orphanStock = farmStock.filter(r => !r.animalId && !r.cropId);
   return <Screen title={current.name}>
     <p className="mb-5 text-sm text-muted-foreground">Farm → animals and crops → production → inventory → sales. Only records assigned to this farm appear below.</p>
+    <div className="mb-5 md:hidden"><FarmSwitcher compact /></div>
     <div className="mb-5 flex flex-wrap gap-3">
       <Link to="/team" className={link}>Change farm</Link>
       <Link to="/app/$appId" params={{ appId: "animals" }} className={link}>Add animals</Link>
