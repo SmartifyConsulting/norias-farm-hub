@@ -1,3 +1,4 @@
+import { SalesHub } from "@/routes/sales";
 import { useState } from "react";
 import { EmbeddedScreenContext } from "@/components/Dock";
 import { RisksPage } from "@/routes/risks";
@@ -14,7 +15,7 @@ import { decodeInventoryRecord } from "@/lib/inventory-ledger";
 export const Route = createFileRoute("/farm-overview")({ component: FarmOverview });
 
 function FarmOverview() {
-  const [tab, setTab] = useState<"overview" | "finance" | "outcomes" | "risks" | "simulator">("overview");
+  const [tab, setTab] = useState<"overview" | "sales" | "finance" | "outcomes" | "risks" | "simulator">("overview");
   const { current, farms, loading } = useTeam();
   const { records: animals } = useRecords("animals");
   const { records: crops } = useRecords("crops");
@@ -32,12 +33,12 @@ function FarmOverview() {
   const orphanStock = farmStock.filter(r => !r.animalId && !r.cropId);
   return <Screen title="My Business">
     <div role="tablist" aria-label="My Business sections" className="mb-5 flex gap-1 overflow-x-auto border-b">
-      {([["overview","Business Overview"],["finance","Finance & Profitability"],["outcomes","Outcomes & Results"],["risks","Risk Monitoring"],["simulator","Planning Scenarios"]] as const).map(([id,label]) =>
+      {([["overview","Business Overview"],["sales","Sales"],["finance","Finance & Profitability"],["outcomes","Outcomes & Results"],["risks","Risk Monitoring"],["simulator","Planning Scenarios"]] as const).map(([id,label]) =>
         <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={tab === id ? "shrink-0 border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary" : "shrink-0 px-4 py-3 text-sm text-muted-foreground"}>{label}</button>
       )}
     </div>
     {tab !== "overview" ? <EmbeddedScreenContext.Provider value={true}>
-      {tab === "finance" ? <EmbeddedMiniApp appId="finance" /> : tab === "outcomes" ? <OutcomesPage /> : tab === "risks" ? <RisksPage /> : <SimulatorPage />}
+      {tab === "sales" ? <SalesHub /> : tab === "finance" ? <EmbeddedMiniApp appId="finance" /> : tab === "outcomes" ? <OutcomesPage /> : tab === "risks" ? <RisksPage /> : <SimulatorPage />}
     </EmbeddedScreenContext.Provider> : !current ? <p className="py-4 text-sm">Choose a farm to view its business records. <FarmSwitcher compact /></p> : <>
     <p className="mb-5 text-sm text-muted-foreground">Farm → animals and crops → production → inventory → sales. Only records assigned to this farm appear below.</p>
     <div className="mb-5 md:hidden"><FarmSwitcher compact /></div>
