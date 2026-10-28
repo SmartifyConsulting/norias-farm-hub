@@ -20,6 +20,7 @@ function Programmes() {
   const [programmes, setProgrammes] = useStore<Programme[]>("farmerplus:programme:workspace:v1", []);
   const [selectedId, setSelectedId] = useState("");
   const [name, setName] = useState("");
+  const [tab, setTab] = useState(0);
   const selected = programmes.find(p => p.id === selectedId) ?? programmes[0];
   const update = (next: Programme) => setProgrammes(programmes.map(p => p.id === next.id ? next : p));
   const create = (p: Programme) => { setProgrammes([...programmes, p]); setSelectedId(p.id); };
@@ -27,11 +28,10 @@ function Programmes() {
   const input = "w-full rounded-lg border bg-background p-2 text-sm";
   return <Screen title="Networks & Programmes">
     <p className="mb-5 text-sm text-muted-foreground">Coordinate programmes, farmers, resources, milestones, deliveries and measurable outcomes. This is a development workspace; tender-specific compliance must be validated against the tender documents.</p>
-    <div className="mb-5 grid gap-3 sm:grid-cols-3">
-      <Link to="/coop" className="rounded-xl border bg-card p-4"><Users className="mb-2 text-primary" />Cooperatives & networks</Link>
-      <Link to="/gov-programmes" className="rounded-xl border bg-card p-4"><ClipboardCheck className="mb-2 text-primary" />Support programmes</Link>
-      <Link to="/app/$appId" params={{ appId: "grants" }} className="rounded-xl border bg-card p-4"><Wallet className="mb-2 text-primary" />Grants & funding</Link>
+    <div role="tablist" aria-label="Networks and programmes" className="mb-5 flex gap-1 overflow-x-auto border-b">
+      {(["Programmes", "Cooperatives & networks", "Government support", "Grants & funding"] as const).map((label, index) => <button key={label} role="tab" aria-selected={tab === index} onClick={() => setTab(index)} className={tab === index ? "shrink-0 border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary" : "shrink-0 px-4 py-3 text-sm text-muted-foreground"}>{label}</button>)}
     </div>
+    {tab !== 0 ? <section role="tabpanel" className="min-h-48 py-4"><h2 className="text-xl font-semibold">{["", "Cooperatives & networks", "Government support", "Grants & funding"][tab]}</h2><p className="my-3 text-sm text-muted-foreground">Open the existing workspace to manage this area.</p>{tab === 1 ? <Link className="text-primary underline" to="/coop">Open cooperatives</Link> : tab === 2 ? <Link className="text-primary underline" to="/gov-programmes">Open government support</Link> : <Link className="text-primary underline" to="/app/$appId" params={{appId:"grants"}}>Open grants</Link>}</section> :
     <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
       <aside className="rounded-2xl border bg-card p-4">
         <h2 className="mb-3 text-lg font-semibold">My programmes</h2>
@@ -69,6 +69,6 @@ function Programmes() {
           </div>
         </>}
       </div>
-    </div>
+    </div>}
   </Screen>;
 }
