@@ -20,11 +20,11 @@ import { FarmSwitcher } from "@/components/FarmSwitcher";
 
 const items = [
   { to: "/", label: "Home", icon: Home, params: undefined },
-  { to: "/farm-overview", label: "My Farm", icon: Warehouse, params: undefined },
-  { to: "/sales", label: "Sales", icon: Receipt, params: undefined },
-  { to: "/journey", label: "Journey", icon: JourneyIcon, params: undefined },
-  { to: "/opportunities", label: "Trades", icon: Handshake, params: undefined },
-  { to: "/apps", label: "All Apps", icon: LayoutGrid, params: undefined },
+  { to: "/farm-overview", label: "My Business", icon: Warehouse, params: undefined },
+  { to: "/production", label: "Production", icon: Sprout, params: undefined },
+  { to: "/trade-delivery", label: "Trade & Delivery", icon: Handshake, params: undefined },
+  { to: "/programmes", label: "Networks & Programmes", icon: JourneyIcon, params: undefined },
+  { to: "/performance", label: "Performance", icon: LayoutGrid, params: undefined },
   { to: "/wallet", label: "Wallet", icon: Wallet, params: undefined },
 ] as const;
 
@@ -40,7 +40,7 @@ function useNavHidden() {
 export function Dock() {
   if (useNavHidden()) return null;
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex justify-around border-t border-primary-foreground/10 bg-primary px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 text-primary-foreground md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex justify-around overflow-x-auto border-t border-primary-foreground/10 bg-primary px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 text-primary-foreground md:hidden">
       {items.map(({ to, label, icon: Icon, params }) => (
         <Link
           key={to}
@@ -49,7 +49,7 @@ export function Dock() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           params={(params ?? {}) as any}
           activeOptions={{ exact: to === "/" }}
-          className="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-medium text-primary-foreground/80 transition-colors hover:bg-primary-foreground/10"
+          className="flex min-w-[76px] flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-medium text-primary-foreground/80 transition-colors hover:bg-primary-foreground/10"
           activeProps={{ className: "!bg-card !text-foreground" }}
         >
           <Icon className="h-5 w-5" />
@@ -82,7 +82,7 @@ export function TopNav() {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               params={(params ?? {}) as any}
               activeOptions={{ exact: to === "/" }}
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-primary-foreground/75 hover:!bg-muted hover:!text-foreground"
+              className="flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium text-primary-foreground/75 hover:!bg-muted hover:!text-foreground"
               activeProps={{ className: "!bg-card !text-foreground font-semibold" }}
             >
               <Icon className="h-4 w-4" />
