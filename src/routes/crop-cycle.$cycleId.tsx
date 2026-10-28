@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Screen } from "@/components/Dock";
-import { useRecords, type FarmRecord } from "@/lib/farm";
+import { useRecords, read, type FarmRecord } from "@/lib/farm";
+import { cropInventoryBalance, encodeInventoryDetail, stockKey, type StockMovement } from "@/lib/inventory-ledger";
 import { useTeam, permissions } from "@/lib/team";
 import { useUser } from "@/lib/auth";
 import { syncAnimals } from "@/lib/animal-sync";
@@ -27,6 +28,7 @@ function CropCycleDetail() {
   const tasks = useRecords("tasks");
   const treatments = useRecords("treatments");
   const harvest = useRecords("harvest");
+  const stock = useRecords("stock");
   const finance = useRecords("finance");
   const maintenance = useRecords("maintenance");
   const stores = { tasks, treatments, harvest, finance, maintenance };
@@ -37,6 +39,9 @@ function CropCycleDetail() {
   const [detail, setDetail] = useState("");
   const [qty, setQty] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saleProduct, setSaleProduct] = useState("");
+  const [saleQuantity, setSaleQuantity] = useState("");
+  const [saleAmount, setSaleAmount] = useState("");
   const cycle = cycles.find((r) => r.id === cycleId);
   // An explicitly assigned farm must match the active farm. Legacy unassigned
   // records remain available, but are never automatically claimed by a farm.
@@ -54,6 +59,7 @@ function CropCycleDetail() {
   const add = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!cycle || !allowed || !canWrite || !title.trim() || saving) return;
+    if (kind === "harvest" && (!Number.isFinite(Number(qty)) || Number(qty) <= 0)) { toast.error("Harvest must be a positive quantity in kg."); return; }
     setSaving(true);
     try {
       const record: FarmRecord = {
@@ -66,6 +72,16 @@ function CropCycleDetail() {
       };
       const store = stores[kind];
       store.save([record, ...store.records]);
+      if (kind === "harvest") {
+        const movement: StockMovement = {
+          id: crypto.randomUUID(), title: "Harvest received: " + title.trim(),
+          detail: encodeInventoryDetail("Harvest reference: " + record.id, title, "kg", "production", record.id),
+          qty: qty.trim(), date: record.date, sync: record.sync,
+          farmId: cycle.farmId ?? null, fieldId: cycle.fieldId, cropId: cycle.id,
+          productKey: stockKey(title), unit: "kg", movementType: "production", referenceId: record.id,
+        };
+        stock.save([movement, ...read("stock")]);
+      }
       setTitle(""); setDetail(""); setQty("");
       if (user && navigator.onLine) {
         const result = await syncAnimals();
