@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { EmbeddedScreenContext } from "@/components/Dock";
+import { PerformancePage } from "@/routes/performance";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
 import { FarmSwitcher } from "@/components/FarmSwitcher";
@@ -8,6 +11,7 @@ import { decodeInventoryRecord } from "@/lib/inventory-ledger";
 export const Route = createFileRoute("/farm-overview")({ component: FarmOverview });
 
 function FarmOverview() {
+  const [tab, setTab] = useState<"overview" | "performance">("overview");
   const { current, farms, loading } = useTeam();
   const { records: animals } = useRecords("animals");
   const { records: crops } = useRecords("crops");
@@ -24,6 +28,11 @@ function FarmOverview() {
   const farmFinance = finance.filter(own);
   const orphanStock = farmStock.filter(r => !r.animalId && !r.cropId);
   return <Screen title={current.name}>
+    <div role="tablist" aria-label="My Business sections" className="mb-5 flex gap-1 border-b">
+      <button type="button" role="tab" aria-selected={tab === "overview"} onClick={() => setTab("overview")} className={tab === "overview" ? "border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary" : "px-4 py-3 text-sm text-muted-foreground"}>Business overview</button>
+      <button type="button" role="tab" aria-selected={tab === "performance"} onClick={() => setTab("performance")} className={tab === "performance" ? "border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary" : "px-4 py-3 text-sm text-muted-foreground"}>Performance</button>
+    </div>
+    {tab === "performance" ? <EmbeddedScreenContext.Provider value={true}><PerformancePage /></EmbeddedScreenContext.Provider> : <>
     <p className="mb-5 text-sm text-muted-foreground">Farm → animals and crops → production → inventory → sales. Only records assigned to this farm appear below.</p>
     <div className="mb-5 md:hidden"><FarmSwitcher compact /></div>
     <div className="mb-5 flex flex-wrap gap-3">
@@ -55,5 +64,6 @@ function FarmOverview() {
         <Link to="/app/$appId" params={{ appId: "finance" }} className={link}>Open finance records</Link>
       </section>
     </div>
+    </>}
   </Screen>;
 }
