@@ -31,6 +31,7 @@ function SalesHub() {
   }
   const available = [...balances.values()].filter(r => r.quantity > 0);
   const sales = finance.filter(r => r.farmId === current.id && r.title.startsWith("Sale: "));
+  const selected = available.find(r => [r.entity,r.entityId,r.product,r.unit].join("|") === selectedKey);
   return <Screen title={"Sales · " + current.name}>
     <p className="mb-5 text-sm text-muted-foreground">Choose an available product below. Each sale must be linked to the inventory source so stock and finance can be reconciled.</p>
     <div className="grid gap-5 lg:grid-cols-2">
