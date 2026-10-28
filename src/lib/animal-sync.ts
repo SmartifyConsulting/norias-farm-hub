@@ -73,6 +73,34 @@ export function syncAll() {
         }
       }
 
+      // Commit sale pairs only through the server transaction. Keep local rows pending on failure.
+      const localStock = read<FarmRecord[]>(key("stock"), []);
+      const localFinance = read<FarmRecord[]>(key("finance"), []);
+      const saleRef = (detail: string) => detail.match(/Sale reference:\\s*([a-f0-9-]{36})/i)?.[1];
+      const saleErrors: string[] = [];
+      for (const stockRow of localStock) {
+        const movement = decodeInventoryRecord(stockRow);
+        if (movement.movementType !== "sale" || stockRow.sync === "synced") continue;
+        const reference = movement.referenceId ?? saleRef(stockRow.detail);
+        const financeRow = localFinance.find(r => r.sync !== "synced" && saleRef(r.detail) === reference);
+        if (!reference || !financeRow || !stockRow.farmId) { saleErrors.push("Sale is missing its reference, finance entry, or farm"); continue; }
+        const quantity = -Number(stockRow.qty), amount = Number(financeRow.qty);
+        if (!movement.productKey || !movement.unit || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(amount) || amount < 0) { saleErrors.push("Invalid pending sale"); continue; }
+        const params = {
+          p_sale_reference: reference, p_stock_id: stockRow.id, p_finance_id: financeRow.id,
+          p_farm_id: stockRow.farmId, p_animal_id: stockRow.animalId ?? "",
+          p_crop_id: stockRow.cropId ?? "", p_product: movement.productKey,
+          p_unit: movement.unit, p_quantity: quantity, p_amount: amount,
+        };
+        const rpcClient = supabase as unknown as { rpc: (name: string, args: typeof params) => Promise<{ error: { message: string } | null }> };
+        const { error: saleError } = await rpcClient.rpc("record_atomic_sale", params);
+        if (saleError) { saleErrors.push(saleError.message); continue; }
+        for (const [appName, id] of [["stock", stockRow.id], ["finance", financeRow.id]] as const) {
+          const rows = read<FarmRecord[]>(key(appName), []);
+          localStorage.setItem(key(appName), JSON.stringify(rows.map(r => r.id === id ? { ...r, sync: "synced", syncError: undefined } : r)));
+        }
+      }
+      if (saleErrors.length) throw new Error("Pending sale not confirmed: " + saleErrors[0]);
       const { data, error } = await supabase.from("animal_records").select("*").order("recorded_at", { ascending: false });
       if (error) throw error;
       const now = new Date().toISOString();
