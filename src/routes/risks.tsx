@@ -46,7 +46,7 @@ const STAGE_TONE: Record<RiskStage, string> = {
 const input =
   "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
 
-function RisksPage() {
+export function RisksPage() {
   const [s] = useSettings();
   const [risks, setRisks] = useRisks();
   const [loading, setLoading] = useState(false);
