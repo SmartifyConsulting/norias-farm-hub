@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, cropInventoryBalance, inventoryProducts, saleReconciliation, inventoryDisplayDetail, type StockMovement } from "./inventory-ledger";
+import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, cropInventoryBalance, cropSaleReconciliation, inventoryProducts, saleReconciliation, inventoryDisplayDetail, type StockMovement } from "./inventory-ledger";
 
 const base = { date: "2026-10-28T00:00:00Z", sync: "local" as const, farmId: "farm-a", animalId: "animal-a" };
 const movement = (id: string, product: string, unit: string, qty: number, type: "production" | "sale" = "production"): StockMovement => ({
@@ -26,6 +26,16 @@ describe("livestock inventory ledger", () => {
     expect(inventoryBalance(rows, "farm-a", "animal-a", "milk", "litres")).toBe(8);
     expect(inventoryBalance(rows, "farm-a", "animal-a", "Milk", "kg")).toBe(20);
     expect(inventoryProducts(rows, "farm-a", "animal-a")).toHaveLength(3);
+  });
+  test("reconciles crop sales by transaction reference within each farm and cycle", () => {
+    const first = "11111111-1111-4111-8111-111111111111";
+    const second = "22222222-2222-4222-8222-222222222222";
+    const stock = [{ ...movement("dispatch", "Maize", "kg", -5, "sale"), cropId: "cycle-a", detail: encodeInventoryDetail("Sale reference: " + first, "Maize", "kg", "sale", first) }];
+    const finance = [{ ...base, id: "sale", title: "Sale: Maize", cropId: "cycle-a", detail: "Sale reference: " + second, qty: "100" }];
+    expect(cropSaleReconciliation(stock, finance, "farm-a", "cycle-a")).toEqual({ missingFinance: [first], missingStock: [second] });
+    expect(cropSaleReconciliation(stock, finance, "farm-a", "cycle-b")).toEqual({ missingFinance: [], missingStock: [] });
+    finance[0]!.detail = "Sale reference: " + first;
+    expect(cropSaleReconciliation(stock, finance, "farm-a", "cycle-a")).toEqual({ missingFinance: [], missingStock: [] });
   });
   test("isolates crop harvest and sales by cycle and farm", () => {
     const rows: StockMovement[] = [
