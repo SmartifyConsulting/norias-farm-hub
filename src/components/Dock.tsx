@@ -2,6 +2,7 @@ import logo from "@/assets/farmerplus-logo.png.asset.json";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   Home,
+  Warehouse,
   LayoutGrid,
   Route as JourneyIcon,
   Wallet,
@@ -17,6 +18,7 @@ import { UserMenu } from "@/components/UserMenu";
 
 const items = [
   { to: "/", label: "Home", icon: Home, params: undefined },
+  { to: "/farm-overview", label: "My Farm", icon: Warehouse, params: undefined },
   { to: "/journey", label: "Journey", icon: JourneyIcon, params: undefined },
   { to: "/opportunities", label: "Trades", icon: Handshake, params: undefined },
   { to: "/apps", label: "All Apps", icon: LayoutGrid, params: undefined },
