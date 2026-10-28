@@ -115,6 +115,11 @@ export type Database = {
       }
       animal_records: {
         Row: {
+          product_key: string | null
+          unit: string | null
+          movement_type: string | null
+          sale_reference: string | null
+          payment_status: string | null
           animal_id: string
           app: string
           completed: Json
@@ -133,6 +138,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          product_key?: string | null
+          unit?: string | null
+          movement_type?: string | null
+          sale_reference?: string | null
+          payment_status?: string | null
           animal_id?: string
           app?: string
           completed?: Json
@@ -151,6 +161,11 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          product_key?: string | null
+          unit?: string | null
+          movement_type?: string | null
+          sale_reference?: string | null
+          payment_status?: string | null
           animal_id?: string
           app?: string
           completed?: Json
