@@ -35,7 +35,7 @@ const TYPE_LABEL: Record<GovProgramme["type"], string> = {
   development: "Development",
 };
 
-function GovProgrammesPage() {
+export function GovProgrammesPage() {
   const [s] = useSettings();
   const country = s.country;
   const programmes = programmesFor(country);
