@@ -5,7 +5,6 @@ import {
   Home,
   Warehouse,
   Receipt,
-  LayoutGrid,
   Route as JourneyIcon,
   Wallet,
   Settings,
@@ -25,7 +24,6 @@ const items = [
   { to: "/production", label: "Production", icon: Sprout, params: undefined },
   { to: "/trade-delivery", label: "Trade & Delivery", icon: Handshake, params: undefined },
   { to: "/programmes", label: "Networks & Programmes", icon: JourneyIcon, params: undefined },
-  { to: "/performance", label: "Performance", icon: LayoutGrid, params: undefined },
   { to: "/wallet", label: "Wallet", icon: Wallet, params: undefined },
 ] as const;
 
