@@ -60,3 +60,13 @@ export function saleReconciliation(stock: StockMovement[], finance: FarmRecord[]
     missingStock: [...financeRefs].filter(ref => !stockRefs.has(ref)),
   };
 }
+
+/** Crop stock is isolated by farm, crop cycle, product and unit. Legacy untyped rows are excluded. */
+export function cropInventoryBalance(records: StockMovement[], farmId: string | null, cropId: string, product: string, unit: string) {
+  return records.map(decodeInventoryRecord)
+    .filter(r => r.farmId === farmId && r.cropId === cropId && r.productKey === stockKey(product) && r.unit === unit && !!r.movementType)
+    .reduce((total, r) => {
+      const amount = Number(r.qty);
+      return total + (Number.isFinite(amount) ? amount : 0);
+    }, 0);
+}
