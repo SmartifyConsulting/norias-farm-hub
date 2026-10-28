@@ -90,6 +90,36 @@ function CropCycleDetail() {
       toast.success("Added to this crop cycle");
     } finally { setSaving(false); }
   };
+  const recordSale = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!cycle || !allowed || !canWrite || saving) return;
+    const quantity = Number(saleQuantity), amount = Number(saleAmount);
+    if (!saleProduct.trim() || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(amount) || amount < 0) {
+      toast.error("Enter a product, positive quantity and valid sale amount."); return;
+    }
+    setSaving(true);
+    try {
+      const latest = read("stock") as StockMovement[];
+      if (quantity > cropInventoryBalance(latest, cycle.farmId ?? null, cycle.id, saleProduct, "kg")) {
+        toast.error("Insufficient recorded crop stock."); return;
+      }
+      const reference = crypto.randomUUID(), date = new Date().toISOString();
+      const base = { date, sync: user ? "pending" as const : "local" as const, farmId: cycle.farmId ?? null, fieldId: cycle.fieldId, cropId: cycle.id };
+      const movement: StockMovement = { ...base, id: crypto.randomUUID(), title: "Crop sale dispatch: " + saleProduct.trim(),
+        detail: encodeInventoryDetail("Sale reference: " + reference, saleProduct, "kg", "sale", reference),
+        qty: String(-quantity), productKey: stockKey(saleProduct), unit: "kg", movementType: "sale", referenceId: reference };
+      const entry: FarmRecord = { ...base, id: crypto.randomUUID(), title: "Sale: " + saleProduct.trim(),
+        detail: "Sale reference: " + reference + "; quantity: " + quantity + " kg", qty: String(amount) };
+      stock.save([movement, ...latest]);
+      finance.save([entry, ...read("finance")]);
+      setSaleProduct(""); setSaleQuantity(""); setSaleAmount("");
+      if (user && navigator.onLine) {
+        const result = await syncAnimals();
+        if (!result.ok) toast.error("Saved locally; cloud sync is pending.");
+      }
+      toast.success("Crop sale and stock deduction recorded; payment not confirmed");
+    } finally { setSaving(false); }
+  };
   if (loading) return <Screen title="Crop cycle"><p>Loading farm…</p></Screen>;
   if (!cycle || !allowed) return (
     <Screen title="Crop cycle unavailable">
@@ -139,6 +169,17 @@ function CropCycleDetail() {
             {saving ? "Saving…" : "Add linked activity"}
           </button>
           {!canWrite && <p className="text-xs text-muted-foreground">Your current farm role does not permit changes.</p>}
+        </form>
+      </section>
+      <section className="mb-5 rounded-2xl border bg-card p-4">
+        <h2 className="mb-2 font-semibold">Sell harvested crop stock</h2>
+        <p className="mb-3 text-xs text-muted-foreground">Record harvest first to add stock in kilograms. Sales reduce stock and record revenue, but do not confirm payment. This workflow is not yet database-atomic.</p>
+        <form onSubmit={recordSale} className="grid gap-3 sm:grid-cols-3">
+          <label className="text-sm">Product<input required className="mt-1 w-full rounded-xl border bg-background p-2" value={saleProduct} onChange={e => setSaleProduct(e.target.value)} placeholder="Harvest title" /></label>
+          <label className="text-sm">Quantity (kg)<input required type="number" min="0.001" step="any" className="mt-1 w-full rounded-xl border bg-background p-2" value={saleQuantity} onChange={e => setSaleQuantity(e.target.value)} /></label>
+          <label className="text-sm">Sale amount (R)<input required type="number" min="0" step="0.01" className="mt-1 w-full rounded-xl border bg-background p-2" value={saleAmount} onChange={e => setSaleAmount(e.target.value)} /></label>
+          <p className="text-xs text-muted-foreground sm:col-span-3">Available: {saleProduct.trim() ? cropInventoryBalance(stock.records as StockMovement[], cycle.farmId ?? null, cycle.id, saleProduct, "kg").toLocaleString() + " kg" : "Enter a product to check stock"}</p>
+          <button disabled={!canWrite || saving} className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50 sm:col-span-3">Record crop sale and stock deduction</button>
         </form>
       </section>
       <section className="rounded-2xl border bg-card p-4">
