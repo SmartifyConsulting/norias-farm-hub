@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, inventoryProducts, saleReconciliation, inventoryDisplayDetail, type StockMovement } from "./inventory-ledger";
+import { decodeInventoryRecord, encodeInventoryDetail, inventoryBalance, cropInventoryBalance, inventoryProducts, saleReconciliation, inventoryDisplayDetail, type StockMovement } from "./inventory-ledger";
 
 const base = { date: "2026-10-28T00:00:00Z", sync: "local" as const, farmId: "farm-a", animalId: "animal-a" };
 const movement = (id: string, product: string, unit: string, qty: number, type: "production" | "sale" = "production"): StockMovement => ({
@@ -26,6 +26,16 @@ describe("livestock inventory ledger", () => {
     expect(inventoryBalance(rows, "farm-a", "animal-a", "milk", "litres")).toBe(8);
     expect(inventoryBalance(rows, "farm-a", "animal-a", "Milk", "kg")).toBe(20);
     expect(inventoryProducts(rows, "farm-a", "animal-a")).toHaveLength(3);
+  });
+  test("isolates crop harvest and sales by cycle and farm", () => {
+    const rows: StockMovement[] = [
+      { ...movement("crop-harvest", "Maize", "kg", 120), animalId: undefined, cropId: "cycle-a" },
+      { ...movement("crop-sale", "Maize", "kg", -30, "sale"), animalId: undefined, cropId: "cycle-a" },
+      { ...movement("other-cycle", "Maize", "kg", 50), animalId: undefined, cropId: "cycle-b" },
+    ];
+    expect(cropInventoryBalance(rows, "farm-a", "cycle-a", "Maize", "kg")).toBe(90);
+    expect(cropInventoryBalance(rows, "farm-a", "cycle-b", "Maize", "kg")).toBe(50);
+    expect(cropInventoryBalance(rows, "farm-b", "cycle-a", "Maize", "kg")).toBe(0);
   });
   test("adjustments increase or decrease the correct stock balance", () => {
     const rows = [
