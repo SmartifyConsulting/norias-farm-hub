@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen } from "@/components/Dock";
+import { useState } from "react";
+import { DirectSale } from "@/components/DirectSale";
+import { permissions } from "@/lib/team";
 import { useRecords } from "@/lib/farm";
 import { useTeam } from "@/lib/team";
 import { decodeInventoryRecord, type StockMovement } from "@/lib/inventory-ledger";
@@ -8,6 +11,7 @@ export const Route = createFileRoute("/sales")({ component: SalesHub });
 
 function SalesHub() {
   const { current } = useTeam();
+  const [selectedKey, setSelectedKey] = useState("");
   const { records: stock } = useRecords("stock");
   const { records: animals } = useRecords("animals");
   const { records: crops } = useRecords("crops");
