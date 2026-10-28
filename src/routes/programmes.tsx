@@ -1,3 +1,5 @@
+import { GovProgrammesPage } from "@/routes/gov-programmes";
+import { EmbeddedScreenContext } from "@/components/Dock";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Screen } from "@/components/Dock";
@@ -31,7 +33,7 @@ function Programmes() {
     <div role="tablist" aria-label="Networks and programmes" className="mb-5 flex gap-1 overflow-x-auto border-b">
       {(["Programmes", "Cooperatives & networks", "Government support", "Grants & funding"] as const).map((label, index) => <button key={label} role="tab" aria-selected={tab === index} onClick={() => setTab(index)} className={tab === index ? "shrink-0 border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary" : "shrink-0 px-4 py-3 text-sm text-muted-foreground"}>{label}</button>)}
     </div>
-    {tab !== 0 ? <section role="tabpanel" className="min-h-48 py-4"><h2 className="text-xl font-semibold">{["", "Cooperatives & networks", "Government support", "Grants & funding"][tab]}</h2><p className="my-3 text-sm text-muted-foreground">Open the existing workspace to manage this area.</p>{tab === 1 ? <Link className="text-primary underline" to="/coop">Open cooperatives</Link> : tab === 2 ? <Link className="text-primary underline" to="/gov-programmes">Open government support</Link> : <Link className="text-primary underline" to="/app/$appId" params={{appId:"grants"}}>Open grants</Link>}</section> :
+    {tab !== 0 ? tab === 2 ? <EmbeddedScreenContext.Provider value={true}><GovProgrammesPage /></EmbeddedScreenContext.Provider> : <section role="tabpanel" className="min-h-48 py-4"><h2 className="text-xl font-semibold">{["", "Cooperatives & networks", "Government support", "Grants & funding"][tab]}</h2><p className="my-3 text-sm text-muted-foreground">Open the existing workspace to manage this area.</p>{tab === 1 ? <Link className="text-primary underline" to="/coop">Open cooperatives</Link> : tab === 2 ? <Link className="text-primary underline" to="/gov-programmes">Open government support</Link> : <Link className="text-primary underline" to="/app/$appId" params={{appId:"grants"}}>Open grants</Link>}</section> :
     <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
       <aside className="rounded-2xl border bg-card p-4">
         <h2 className="mb-3 text-lg font-semibold">My programmes</h2>
