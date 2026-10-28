@@ -15,6 +15,7 @@ import { useGuest, useUser } from "@/lib/auth";
 import { useOnline } from "@/lib/farm";
 import { NotificationBell } from "@/components/NotificationBell";
 import { UserMenu } from "@/components/UserMenu";
+import { FarmSwitcher } from "@/components/FarmSwitcher";
 
 const items = [
   { to: "/", label: "Home", icon: Home, params: undefined },
@@ -69,6 +70,7 @@ export function TopNav() {
         <Link to="/" className="flex shrink-0 items-center" aria-label="FarmerPlus home">
           <img src={logo.url} alt="FarmerPlus" className="h-8 w-auto" />
         </Link>
+        <FarmSwitcher />
         <nav className="flex flex-1 items-center justify-center gap-1">
           {items.map(({ to, label, icon: Icon, params }) => (
             <Link
