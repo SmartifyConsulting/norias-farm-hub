@@ -1,3 +1,4 @@
+import { createContext, useContext } from "react";
 import logo from "@/assets/farmerplus-logo.png.asset.json";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
@@ -138,6 +139,8 @@ export function SyncBadge({ status }: { status: "synced" | "pending" | "local" }
   );
 }
 
+export const EmbeddedScreenContext = createContext(false);
+
 export function Screen({
   title,
   children,
@@ -147,6 +150,8 @@ export function Screen({
   children: React.ReactNode;
   wide?: boolean;
 }) {
+  const embedded = useContext(EmbeddedScreenContext);
+  if (embedded) return <section className="w-full min-w-0"><div className="space-y-4">{children}</div></section>;
   return (
     <main
       className={`mx-auto min-h-screen max-w-md px-4 pb-32 pt-8 md:px-6 md:pb-12 md:pt-24 ${wide ? "md:max-w-5xl lg:max-w-7xl" : "md:max-w-2xl"}`}
