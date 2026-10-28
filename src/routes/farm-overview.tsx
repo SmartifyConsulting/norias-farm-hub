@@ -17,7 +17,7 @@ function FarmOverview() {
   const link = "text-sm font-semibold text-primary underline";
   if (loading) return <Screen title="Farm overview"><p>Loading farms…</p></Screen>;
   if (!current) return <Screen title="Farm overview"><p>Choose a farm below to view its animals, crops and inventory. <FarmSwitcher compact /></p>{farms.length === 0 && <p className="mt-2 text-sm text-muted-foreground">No farms are available for this account.</p>}</Screen>;
-  const own = (r: { farmId?: string | null }) => r.farmId === current.id;
+  const own = (r: { farmId?: string | null | undefined }) => r.farmId === current.id;
   const farmAnimals = animals.filter(own);
   const farmCrops = crops.filter(own);
   const farmStock = stock.filter(own);
