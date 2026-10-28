@@ -43,7 +43,7 @@ const NUM_FIELDS: [keyof Scenario, string][] = [
   ["capital", "Available capital (R)"],
 ];
 
-function SimulatorPage() {
+export function SimulatorPage() {
   const [list, setList] = useState<Scenario[]>([DEFAULT_SCENARIO, SOY]);
   const upd = (i: number, patch: Partial<Scenario>) =>
     setList(list.map((s, j) => (j === i ? { ...s, ...patch } : s)));
