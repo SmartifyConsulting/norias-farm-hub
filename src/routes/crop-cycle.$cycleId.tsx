@@ -1,3 +1,4 @@
+import { commitSalePair, recoverPendingSales } from "@/lib/sale-journal";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Screen } from "@/components/Dock";
@@ -102,6 +103,7 @@ function CropCycleDetail() {
     }
     setSaving(true);
     try {
+      recoverPendingSales();
       const latest = read("stock") as StockMovement[];
       const latestMismatch = cropSaleReconciliation(latest, read("finance"), cycle.farmId ?? null, cycle.id);
       if (latestMismatch.missingFinance.length || latestMismatch.missingStock.length) { toast.error("Sale records changed; reconcile them before continuing."); return; }
@@ -115,8 +117,7 @@ function CropCycleDetail() {
         qty: String(-quantity), productKey: stockKey(saleProduct), unit: "kg", movementType: "sale", referenceId: reference };
       const entry: FarmRecord = { ...base, id: crypto.randomUUID(), title: "Sale: " + saleProduct.trim(),
         detail: "Sale reference: " + reference + "; quantity: " + quantity + " kg", qty: String(amount) };
-      stock.save([movement, ...latest]);
-      finance.save([entry, ...read("finance")]);
+      commitSalePair(reference, movement, entry);
       setSaleProduct(""); setSaleQuantity(""); setSaleAmount("");
       if (user && navigator.onLine) {
         const result = await syncAnimals();
