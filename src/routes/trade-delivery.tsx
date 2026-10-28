@@ -7,8 +7,8 @@ export const Route = createFileRoute("/trade-delivery")({ component: TradeDelive
 const sections = [
   { title: "Sell farm products", description: "Choose stock, record a sale and reconcile income.", to: "/sales", icon: ShoppingCart },
   { title: "Find buyers & opportunities", description: "Match your farm's products to buyer demand.", to: "/opportunities", icon: ClipboardList },
-  { title: "Arrange transport & storage", description: "Plan collection, storage and delivery.", to: "/app/logistics", icon: Truck },
-  { title: "Track commitments", description: "Follow deliveries and outcomes through to completion.", to: "/app/outcomes", icon: PackageCheck },
+  { title: "Arrange transport & storage", description: "Plan collection, storage and delivery.", to: "/logistics", icon: Truck },
+  { title: "Track commitments", description: "Follow deliveries and outcomes through to completion.", to: "/outcomes", icon: PackageCheck },
 ] as const;
 function TradeDelivery() {
   const { current } = useTeam();
