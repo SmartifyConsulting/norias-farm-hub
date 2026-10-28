@@ -84,6 +84,13 @@ export function syncAll() {
         const reference = movement.referenceId ?? saleRef(stockRow.detail);
         const financeRow = localFinance.find(r => r.sync !== "synced" && saleRef(r.detail) === reference);
         if (!reference || !financeRow || !stockRow.farmId) { saleErrors.push("Sale is missing its reference, finance entry, or farm"); continue; }
+        // Never pair records across farms or entities, even if their reference matches.
+        if (financeRow.farmId !== stockRow.farmId ||
+            (financeRow.animalId ?? "") !== (stockRow.animalId ?? "") ||
+            (financeRow.cropId ?? "") !== (stockRow.cropId ?? "")) {
+          saleErrors.push("Sale stock and finance records refer to different farm entities");
+          continue;
+        }
         const quantity = -Number(stockRow.qty), amount = Number(financeRow.qty);
         if (!movement.productKey || !movement.unit || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(amount) || amount < 0) { saleErrors.push("Invalid pending sale"); continue; }
         const params = {
