@@ -46,7 +46,7 @@ function SalesHub() {
             {item.entity === "animal" && animal ? <Link className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" to="/animal/$animalId" params={{animalId:animal.id}}>View animal</Link> :
               item.entity === "crop" && crop ? <Link className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" to="/crop-cycle/$cycleId" params={{cycleId:crop.id}}>Record sale</Link> :
               <span className="text-xs text-muted-foreground">Farm-level sales require server support</span>}
-            {((item.entity === "animal" && animal) || (item.entity === "crop" && crop)) && <button type="button" onClick={() => setSelectedKey([item.entity,item.entityId,item.product,item.unit].join("|"))} disabled={!permissions(current.role).canWrite} className="rounded-lg border px-3 py-2 text-sm font-semibold disabled:opacity-50">Sell here</button>}
+            {((item.entity === "animal" && animal) || (item.entity === "crop" && crop) || item.entity === "farm") && <button type="button" onClick={() => setSelectedKey([item.entity,item.entityId,item.product,item.unit].join("|"))} disabled={!permissions(current.role).canWrite} className="rounded-lg border px-3 py-2 text-sm font-semibold disabled:opacity-50">Sell here</button>}
           </div>;
         })}
       </section>
