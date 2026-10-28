@@ -70,3 +70,17 @@ export function cropInventoryBalance(records: StockMovement[], farmId: string | 
       return total + (Number.isFinite(amount) ? amount : 0);
     }, 0);
 }
+
+/** Find crop sales whose stock deduction and finance entry did not both survive sync. */
+export function cropSaleReconciliation(stock: StockMovement[], finance: FarmRecord[], farmId: string | null, cropId: string) {
+  const reference = (detail: string) => detail.match(/Sale reference:\s*([a-f0-9-]{36})/i)?.[1];
+  const stockRefs = new Set(stock.filter(r => r.farmId === farmId && r.cropId === cropId)
+    .map(decodeInventoryRecord).filter(r => r.movementType === "sale")
+    .map(r => r.referenceId ?? reference(r.detail)).filter((r): r is string => !!r));
+  const financeRefs = new Set(finance.filter(r => r.farmId === farmId && r.cropId === cropId && r.title.startsWith("Sale: "))
+    .map(r => reference(r.detail)).filter((r): r is string => !!r));
+  return {
+    missingFinance: [...stockRefs].filter(ref => !financeRefs.has(ref)),
+    missingStock: [...financeRefs].filter(ref => !stockRefs.has(ref)),
+  };
+}
