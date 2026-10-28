@@ -1,3 +1,4 @@
+import { recoverPendingSales } from "./sale-journal";
 import { supabase } from "@/integrations/supabase/client";
 import { MINI_APPS, type FarmRecord } from "./farm";
 import { activeFarmId } from "./team";
@@ -46,6 +47,7 @@ export function syncAll() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return { ok: false, error: "Sign in to sync" };
       if (!navigator.onLine) return { ok: false, error: "Offline" };
+      recoverPendingSales();
       const uidv = u.user.id;
 
       for (const app of APPS) {
